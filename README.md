@@ -1,16 +1,21 @@
-# EBU6304 Software Engineering Group Project
+# TA Recruitment System (Java Prototype)
 
-This repository is for the EBU6304 group project:
-International School Teaching Assistant Recruitment System.
+This branch contains the baseline implementation for the EBU6304 group project.
 
-## Branch strategy
+## Tech stack
+- Java 17
+- Maven
+- JUnit 5
+- Text file persistence (`data/applications.txt`)
 
-- `main`: documentation and README only
-- `project-ta-system`: project source code baseline (branch A)
-- `YuhangFu`: personal development branch for Yuhang Fu
+## Run
+```bash
+mvn test
+mvn exec:java -Dexec.mainClass="cn.ebu6304.tarecruitment.Main"
+```
 
-## Key constraints from handout
-
-- Use Java application (standalone or Servlet/JSP)
-- Data storage must use text-based files (`.txt`, `CSV`, `JSON`, `XML`)
-- Database is not allowed
+## Project structure
+- `src/main/java`: application code
+- `src/test/java`: unit tests
+- `data/`: text-based persistence files
+- `requirements.md`: initial requirements draft
