@@ -1,0 +1,82 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Length 847 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(Brief Report v1 - EBU6304 First Assessment) Tj
+T* () Tj
+T* (1. Fact-finding techniques) Tj
+T* (- Stakeholder interview simulation \(TA, MO, Admin\)) Tj
+T* (- Workflow pain-point mapping from current form/excel process) Tj
+T* (- Rapid feedback cycles from weekly sprint reviews) Tj
+T* () Tj
+T* (2. Prioritization and estimation) Tj
+T* (- MoSCoW prioritization for release planning) Tj
+T* (- Fibonacci story points for uncertainty-aware estimation) Tj
+T* (- Sprint 1 focuses on demonstrable core functions only) Tj
+T* () Tj
+T* (3. Iteration plan) Tj
+T* (- Sprint 1 \(2026-03-12 to 2026-03-22\): profile, job listing, apply, status, post-job, workload summary) Tj
+T* (- Sprint 2: indexing optimization, status transition governance, integration tests) Tj
+T* (- Sprint 3+: UX polish and advanced assistive features) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 7 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 821 >>
+stream
+BT
+/F1 11 Tf
+50 790 Td
+14 TL
+(4. Architecture and quality strategy) Tj
+T* (- Layered architecture: Servlet -> Service -> Repository -> FileStore) Tj
+T* (- Text-only persistence \(JSONL\) to satisfy coursework constraints) Tj
+T* (- Stability via validation, idempotent submission, and atomic file replacement) Tj
+T* (- Memory efficiency via lightweight indexes and paged reads) Tj
+T* () Tj
+T* (5. Evidence and next actions) Tj
+T* (- Product backlog with 20 stories and sprint mapping) Tj
+T* (- High-fidelity prototype narrative aligned with core journeys) Tj
+T* (- Initial automated tests prepared for repository/service behavior) Tj
+T* () Tj
+T* (Conclusion:) Tj
+T* (The team delivers a compliant prototype baseline for Assessment 1 and a practical) Tj
+T* (engineering path toward intermediate and final milestones.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 7 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000001025 00000 n 
+0000001151 00000 n 
+0000002023 00000 n 
+0000002149 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+2219
+%%EOF
