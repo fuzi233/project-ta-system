@@ -1,12 +1,16 @@
-# Initial Functional Requirements (Draft)
+# Requirements Baseline (Iteration 1)
 
-## Core (must implement)
-1. TA can create profile and submit application.
-2. MO can create job posts and view applicants.
-3. Admin can view workload summary.
-4. Data persistence uses text-based files only (no database).
+## Functional
+
+1. TA profile and job application lifecycle.
+2. MO job posting and candidate screening support.
+3. Admin workload visibility per applicant.
+4. API endpoints for job listing, apply, status query, posting, workload summary.
 
 ## Non-functional
-1. Modular package structure.
-2. Testable service layer.
-3. Iterative delivery aligned with Agile sprints.
+
+1. Layered architecture: Servlet -> Service -> Repository -> FileStore.
+2. JSONL text persistence only; no database.
+3. Efficient memory usage via lightweight indexes and paged reading.
+4. Stable writes using append-only and atomic compaction.
+5. Responsive, high-recognition frontend style.

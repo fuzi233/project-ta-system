@@ -1,0 +1,68 @@
+package cn.ebu6304.tarecruitment.bootstrap;
+
+import cn.ebu6304.tarecruitment.model.ApplicationRecord;
+import cn.ebu6304.tarecruitment.model.JobPosting;
+import cn.ebu6304.tarecruitment.model.UserProfile;
+import cn.ebu6304.tarecruitment.repository.ApplicationRepository;
+import cn.ebu6304.tarecruitment.repository.JobRepository;
+import cn.ebu6304.tarecruitment.repository.UserRepository;
+import cn.ebu6304.tarecruitment.service.ApplicationService;
+import cn.ebu6304.tarecruitment.service.JobService;
+import cn.ebu6304.tarecruitment.service.WorkloadService;
+import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.nio.file.Path;
+
+public class AppContext {
+    private static final AppContext INSTANCE = new AppContext();
+
+    private final ObjectMapper objectMapper;
+    private final JobService jobService;
+    private final ApplicationService applicationService;
+    private final WorkloadService workloadService;
+    private final UserRepository userRepository;
+
+    private AppContext() {
+        this.objectMapper = new ObjectMapper();
+
+        String dataDir = System.getProperty("ta.data.dir", "data");
+        Path base = Path.of(dataDir);
+
+        JsonlFileStore<JobPosting> jobStore = new JsonlFileStore<>(base.resolve("jobs.jsonl"), JobPosting.class, objectMapper);
+        JsonlFileStore<ApplicationRecord> applicationStore = new JsonlFileStore<>(base.resolve("applications.jsonl"), ApplicationRecord.class, objectMapper);
+        JsonlFileStore<UserProfile> userStore = new JsonlFileStore<>(base.resolve("users.jsonl"), UserProfile.class, objectMapper);
+
+        JobRepository jobRepository = new JobRepository(jobStore);
+        ApplicationRepository applicationRepository = new ApplicationRepository(applicationStore);
+        this.userRepository = new UserRepository(userStore);
+
+        this.jobService = new JobService(jobRepository);
+        this.applicationService = new ApplicationService(applicationRepository, jobRepository);
+        this.workloadService = new WorkloadService(applicationRepository);
+    }
+
+    public static AppContext getInstance() {
+        return INSTANCE;
+    }
+
+    public ObjectMapper objectMapper() {
+        return objectMapper;
+    }
+
+    public JobService jobService() {
+        return jobService;
+    }
+
+    public ApplicationService applicationService() {
+        return applicationService;
+    }
+
+    public WorkloadService workloadService() {
+        return workloadService;
+    }
+
+    public UserRepository userRepository() {
+        return userRepository;
+    }
+}
