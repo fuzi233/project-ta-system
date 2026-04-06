@@ -4,6 +4,8 @@ import cn.ebu6304.tarecruitment.model.JobPosting;
 import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -57,6 +59,15 @@ public class JobRepository {
         List<JobPosting> all = new ArrayList<>();
         fileStore.forEach(all::add);
         return all;
+    }
+
+    public synchronized void compact() {
+        Map<String, JobPosting> lastById = new LinkedHashMap<>();
+        fileStore.forEach(job -> lastById.put(job.jobId(), job));
+        List<JobPosting> compacted = new ArrayList<>(lastById.values());
+        compacted.sort(Comparator.comparing(JobPosting::jobId));
+        fileStore.replaceAll(compacted);
+        rebuildIndexes();
     }
 
     private synchronized void rebuildIndexes() {
