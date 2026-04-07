@@ -93,6 +93,61 @@ if (moForm) {
     });
 }
 
+// MO Candidate Screening
+const candidateFilterForm = document.getElementById("candidate-filter-form");
+if (candidateFilterForm) {
+    const candidatesOutput = document.getElementById("candidates-output");
+    
+    async function loadCandidates(jobId, status = "", page = 1, size = 20) {
+        try {
+            let url = `/mo/candidates?jobId=${encodeURIComponent(jobId)}&page=${page}&size=${size}`;
+            if (status) {
+                url += `&status=${encodeURIComponent(status)}`;
+            }
+            const data = await api(url);
+            candidatesOutput.textContent = pretty(data);
+        } catch (error) {
+            candidatesOutput.textContent = error.message;
+        }
+    }
+    
+    candidateFilterForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(candidateFilterForm);
+        const jobId = formData.get("jobId");
+        const status = formData.get("status");
+        const page = parseInt(formData.get("page")) || 1;
+        const size = parseInt(formData.get("size")) || 20;
+        
+        await loadCandidates(jobId, status, page, size);
+    });
+}
+
+// MO Status Update
+const statusUpdateForm = document.getElementById("status-update-form");
+if (statusUpdateForm) {
+    const statusOutput = document.getElementById("status-output");
+    
+    statusUpdateForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(statusUpdateForm);
+        const payload = {
+            applicationId: formData.get("applicationId"),
+            status: formData.get("status")
+        };
+        
+        try {
+            const data = await api("/mo/applications", {
+                method: "PUT",
+                body: JSON.stringify(payload)
+            });
+            statusOutput.textContent = pretty(data);
+        } catch (error) {
+            statusOutput.textContent = error.message;
+        }
+    });
+}
+
 const adminForm = document.getElementById("admin-form");
 if (adminForm) {
     const output = document.getElementById("admin-output");
