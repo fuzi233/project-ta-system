@@ -18,6 +18,7 @@
             <a class="btn" href="jobs.jsp">Browse Jobs</a>
             <a class="btn ghost" href="mo.jsp">MO Console</a>
             <a class="btn ghost" href="admin.jsp">Admin Workload</a>
+            <a class="btn ghost" href="ai.jsp">AI Insights</a>
         </div>
     </header>
 
@@ -36,6 +37,11 @@
             <h2>Admin</h2>
             <p>Watch workload distribution and overloaded candidates in real time.</p>
             <a class="link" href="admin.jsp">Open Dashboard</a>
+        </article>
+        <article class="glass card">
+            <h2>AI Innovation</h2>
+            <p>LLM-assisted matching, missing-skill coaching, and workload-aware shortlist.</p>
+            <a class="link" href="ai.jsp">Open AI Lab</a>
         </article>
     </section>
 </main>

@@ -114,3 +114,57 @@ if (adminForm) {
 
     load();
 }
+
+const aiMatchForm = document.getElementById("ai-match-form");
+if (aiMatchForm) {
+    const output = document.getElementById("ai-match-output");
+    aiMatchForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const payload = Object.fromEntries(new FormData(aiMatchForm).entries());
+        try {
+            const data = await api("/ai/match", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            output.textContent = pretty(data);
+        } catch (error) {
+            output.textContent = error.message;
+        }
+    });
+}
+
+const aiMissingForm = document.getElementById("ai-missing-form");
+if (aiMissingForm) {
+    const output = document.getElementById("ai-missing-output");
+    aiMissingForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const payload = Object.fromEntries(new FormData(aiMissingForm).entries());
+        try {
+            const data = await api("/ai/missing-skills", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            output.textContent = pretty(data);
+        } catch (error) {
+            output.textContent = error.message;
+        }
+    });
+}
+
+const aiWorkloadForm = document.getElementById("ai-workload-form");
+if (aiWorkloadForm) {
+    const output = document.getElementById("ai-workload-output");
+    aiWorkloadForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const payload = Object.fromEntries(new FormData(aiWorkloadForm).entries());
+        const limit = payload.limit || "5";
+        try {
+            const data = await api(
+                `/ai/workload-suggestion?jobId=${encodeURIComponent(payload.jobId)}&limit=${encodeURIComponent(limit)}`
+            );
+            output.textContent = pretty(data);
+        } catch (error) {
+            output.textContent = error.message;
+        }
+    });
+}

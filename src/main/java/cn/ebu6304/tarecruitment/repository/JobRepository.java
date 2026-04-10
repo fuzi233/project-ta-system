@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -38,6 +39,14 @@ public class JobRepository {
         return fileStore.readAtLine(line)
                 .map(job -> "OPEN".equalsIgnoreCase(job.status()))
                 .orElse(false);
+    }
+
+    public synchronized Optional<JobPosting> findById(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
     }
 
     public synchronized List<JobPosting> list(String query, String status, int page, int size) {
