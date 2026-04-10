@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 public record AiRuntimeConfig(String apiKey, String model, String endpoint) {
-    private static final String DEFAULT_MODEL = "gpt-5.3";
+    private static final String DEFAULT_MODEL = "gpt-4.1";
     private static final String DEFAULT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
     private static final String DEFAULT_CONFIG_PATH = "config/ai.local.properties";
 

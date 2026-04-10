@@ -1,0 +1,5 @@
+{"jobId": "job-001", "title": "Software Engineering TA", "moduleCode": "EBU6304", "requiredSkills": "Java,OOP,Software Engineering,Testing", "slots": 4, "status": "OPEN", "createdBy": "mo-001", "createdAt": "2026-04-10T12:00:00+00:00"}
+{"jobId": "job-002", "title": "Machine Learning TA", "moduleCode": "EBU6201", "requiredSkills": "Python,Machine Learning,Statistics", "slots": 3, "status": "OPEN", "createdBy": "mo-002", "createdAt": "2026-04-10T09:00:00+00:00"}
+{"jobId": "job-003", "title": "NLP Lab Assistant", "moduleCode": "EBU6402", "requiredSkills": "Natural Language Processing,Python,Prompt Engineering", "slots": 2, "status": "OPEN", "createdBy": "mo-002", "createdAt": "2026-04-10T06:00:00+00:00"}
+{"jobId": "job-004", "title": "Web Development TA", "moduleCode": "EBU6108", "requiredSkills": "JavaScript,Web Development,HTML/CSS,Testing", "slots": 2, "status": "OPEN", "createdBy": "mo-003", "createdAt": "2026-04-10T03:00:00+00:00"}
+{"jobId": "job-005", "title": "Data Analysis TA", "moduleCode": "EBU6005", "requiredSkills": "Data Analysis,Python,Excel,Statistics", "slots": 3, "status": "OPEN", "createdBy": "mo-001", "createdAt": "2026-04-10T00:00:00+00:00"}

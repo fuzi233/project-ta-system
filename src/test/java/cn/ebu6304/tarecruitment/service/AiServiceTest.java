@@ -22,7 +22,17 @@ class AiServiceTest {
     @Test
     void matchShouldReturnMissingSkillsAndScore() throws Exception {
         Fixture fixture = new Fixture();
-        fixture.userRepository.upsert(new UserProfile("ta1", "Alice", "TA", "Java, OOP", "2026-04-10T00:00:00Z"));
+        fixture.userRepository.upsert(new UserProfile(
+                "ta1",
+                "Alice",
+                "TA",
+                "ta001",
+                "ta001@bupt.edu.cn",
+                "hash",
+                "Java, OOP",
+                "Built Java coursework systems and supported lab sessions.",
+                "2026-04-10T00:00:00Z"
+        ));
         fixture.jobRepository.createIfAbsent(new JobPosting("job1", "AI TA", "CS6304", "Java, Machine Learning", 2, "OPEN", "mo1", "2026-04-10T00:00:00Z"));
 
         AiService service = fixture.aiService();
@@ -36,8 +46,16 @@ class AiServiceTest {
     @Test
     void workloadSuggestionShouldPreferLowerWorkloadWhenFitIsSimilar() throws Exception {
         Fixture fixture = new Fixture();
-        fixture.userRepository.upsert(new UserProfile("taLow", "LowLoad", "TA", "Java, Data Analysis", "2026-04-10T00:00:00Z"));
-        fixture.userRepository.upsert(new UserProfile("taHigh", "HighLoad", "TA", "Java, Data Analysis", "2026-04-10T00:00:00Z"));
+        fixture.userRepository.upsert(new UserProfile(
+                "taLow", "LowLoad", "TA", "taLow", "low@bupt.edu.cn", "hash", "Java, Data Analysis",
+                "Practical data analytics assignment and tutoring experience.",
+                "2026-04-10T00:00:00Z"
+        ));
+        fixture.userRepository.upsert(new UserProfile(
+                "taHigh", "HighLoad", "TA", "taHigh", "high@bupt.edu.cn", "hash", "Java, Data Analysis",
+                "Solid profile with multiple coding assignments.",
+                "2026-04-10T00:00:00Z"
+        ));
         fixture.jobRepository.createIfAbsent(new JobPosting("job2", "Data TA", "CS7001", "Java, Data Analysis", 1, "OPEN", "mo2", "2026-04-10T00:00:00Z"));
 
         for (int i = 0; i < 4; i++) {
@@ -55,6 +73,24 @@ class AiServiceTest {
 
         assertEquals(2, suggestion.candidates().size());
         assertEquals("taLow", suggestion.candidates().get(0).applicantId());
+    }
+
+    @Test
+    void hrAssessmentShouldIncludeResumeSummaryAndExplanation() throws Exception {
+        Fixture fixture = new Fixture();
+        fixture.userRepository.upsert(new UserProfile(
+                "ta10", "ResumeUser", "TA", "ta010", "ta010@bupt.edu.cn", "hash",
+                "Java, Software Engineering, Testing",
+                "Served as a peer tutor for software engineering labs, led code review sessions, and delivered a full Java web prototype.",
+                "2026-04-10T00:00:00Z"
+        ));
+        fixture.jobRepository.createIfAbsent(new JobPosting("job10", "SE TA", "EBU6304", "Java, Software Engineering, Testing", 2, "OPEN", "mo1", "2026-04-10T00:00:00Z"));
+
+        AiService.HrCandidateInsight insight = fixture.aiService().hrAssessCandidate("ta10", "job10");
+
+        assertTrue(insight.resumeSummary() != null && !insight.resumeSummary().isBlank());
+        assertTrue(insight.explanation() != null && !insight.explanation().isBlank());
+        assertTrue(insight.score() >= 0 && insight.score() <= 100);
     }
 
     private static final class Fixture {

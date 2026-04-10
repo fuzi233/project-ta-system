@@ -78,6 +78,54 @@ public class AiService {
         );
     }
 
+    public HrCandidateInsight hrAssessCandidate(String candidateUserId, String jobId) {
+        String normalizedUserId = Validators.requireNonBlank(candidateUserId, "candidateUserId");
+        String normalizedJobId = Validators.requireNonBlank(jobId, "jobId");
+
+        UserProfile candidate = userRepository.findById(normalizedUserId)
+                .orElseThrow(() -> new ApiException(404, "Candidate not found: " + normalizedUserId));
+        JobPosting job = jobRepository.findById(normalizedJobId)
+                .orElseThrow(() -> new ApiException(404, "Job not found: " + normalizedJobId));
+
+        MatchInsight matchInsight = calculateInsight(candidate, job);
+        String resumeText = resolvedResume(candidate);
+
+        ProviderReply summaryReply = requestProvider(
+                "You are an HR assistant. Summarize CVs in 3 concise bullet points.",
+                "Candidate profile: name=" + candidate.displayName()
+                        + ", skills=" + candidate.skills()
+                        + ", resume=" + resumeText,
+                "Summarize this candidate's background, practical project evidence, and teaching support potential."
+        );
+
+        ProviderReply explanationReply = requestProvider(
+                "You are an explainable TA recruitment advisor.",
+                "Job=" + job.title() + "(" + job.jobId() + "), requiredSkills=" + job.requiredSkills()
+                        + "; candidate=" + candidate.userId() + ", matched=" + matchInsight.matchedSkills()
+                        + ", missing=" + matchInsight.missingSkills()
+                        + ", workload=" + matchInsight.workload()
+                        + ", score=" + matchInsight.score(),
+                "Explain why this score is reasonable and what HR should verify in interview."
+        );
+
+        return new HrCandidateInsight(
+                candidate.userId(),
+                candidate.displayName(),
+                candidate.role(),
+                candidate.identifier(),
+                candidate.email(),
+                candidate.skills(),
+                resumeText,
+                summaryReply.text(),
+                matchInsight.score(),
+                matchInsight.workload(),
+                matchInsight.matchedSkills(),
+                matchInsight.missingSkills(),
+                explanationReply.text(),
+                explanationReply.provider()
+        );
+    }
+
     public WorkloadSuggestion workloadSuggestion(String jobId, int limit) {
         String normalizedJobId = Validators.requireNonBlank(jobId, "jobId");
         int normalizedLimit = Math.max(1, Math.min(limit, 20));
@@ -177,6 +225,13 @@ public class AiService {
         );
     }
 
+    private String resolvedResume(UserProfile candidate) {
+        if (candidate.resumeText() != null && !candidate.resumeText().isBlank()) {
+            return candidate.resumeText().trim();
+        }
+        return "No full CV text provided. Skills available: " + candidate.skills();
+    }
+
     private ProviderReply requestProvider(String systemInstruction, String userPrompt, String fallbackSuffix) {
         try {
             String text = aiProvider.generate(systemInstruction, userPrompt);
@@ -232,6 +287,24 @@ public class AiService {
             List<String> missingSkills,
             List<String> learningSuggestions,
             String summary,
+            String provider
+    ) {
+    }
+
+    public record HrCandidateInsight(
+            String candidateUserId,
+            String displayName,
+            String role,
+            String identifier,
+            String email,
+            String skills,
+            String resumeText,
+            String resumeSummary,
+            int score,
+            long workload,
+            List<String> matchedSkills,
+            List<String> missingSkills,
+            String explanation,
             String provider
     ) {
     }

@@ -13,6 +13,7 @@ public class AdminWorkloadServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            requireRole(request, AuthSession.ROLE_ADMIN);
             long threshold = 3L;
             String value = request.getParameter("threshold");
             if (value != null && !value.isBlank()) {

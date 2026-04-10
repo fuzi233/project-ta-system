@@ -68,6 +68,18 @@ public class JobRepository {
         return all;
     }
 
+    public synchronized Optional<JobPosting> findByJobId(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
+    }
+
+    public synchronized List<JobPosting> listByCreator(String creatorId, int page, int size) {
+        return fileStore.readPage(page, size, job -> job.createdBy().equals(creatorId));
+    }
+
     private synchronized void rebuildIndexes() {
         idIndex.clear();
         lineCounter.set(0);
