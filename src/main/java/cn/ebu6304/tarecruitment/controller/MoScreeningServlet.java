@@ -1,5 +1,6 @@
 package cn.ebu6304.tarecruitment.controller;
 
+import cn.ebu6304.tarecruitment.common.ApiException;
 import cn.ebu6304.tarecruitment.model.ApplicationRecord;
 import cn.ebu6304.tarecruitment.service.ApplicationService;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +16,7 @@ public class MoScreeningServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            SessionUser current = requireRole(request, AuthSession.ROLE_MO);
             String jobId = request.getParameter("jobId");
             String status = request.getParameter("status");
             int page = readIntParameter(request, "page", 1);
@@ -28,6 +30,12 @@ public class MoScreeningServlet extends BaseServlet {
                 return;
             }
 
+            var ownedJob = appContext.jobService().findByJobId(jobId)
+                    .orElseThrow(() -> new ApiException(404, "jobId not found"));
+            if (!ownedJob.createdBy().equals(current.userId())) {
+                throw new ApiException(403, "MO can only manage jobs created by self");
+            }
+
             if (status != null && !status.isBlank()) {
                 candidates = appService.listCandidatesByJobAndStatus(jobId, status, page, size);
             } else {
@@ -36,6 +44,7 @@ public class MoScreeningServlet extends BaseServlet {
 
             writeJson(response, 200, Map.of(
                     "jobId", jobId,
+                    "owner", current.userId(),
                     "status", status != null ? status : "ALL",
                     "page", page,
                     "size", size,

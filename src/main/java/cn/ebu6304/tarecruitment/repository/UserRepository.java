@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class UserRepository {
     private final JsonlFileStore<UserProfile> fileStore;
@@ -26,5 +27,29 @@ public class UserRepository {
         List<UserProfile> result = new ArrayList<>();
         fileStore.forEach(result::add);
         return result;
+    }
+
+    public synchronized Optional<UserProfile> findByRoleAndIdentifier(String role, String identifier) {
+        return listAll().stream()
+                .filter(item -> item.role() != null && item.role().equalsIgnoreCase(role))
+                .filter(item -> item.identifier() != null && item.identifier().equalsIgnoreCase(identifier))
+                .findFirst();
+    }
+
+        public synchronized Optional<UserProfile> findByRoleAndLoginKey(String role, String loginKey) {
+        return listAll().stream()
+            .filter(item -> item.role() != null && item.role().equalsIgnoreCase(role))
+            .filter(item -> (item.identifier() != null && item.identifier().equalsIgnoreCase(loginKey))
+                || (item.email() != null && item.email().equalsIgnoreCase(loginKey)))
+            .findFirst();
+        }
+
+    public synchronized boolean existsByRoleAndIdentifier(String role, String identifier) {
+        return findByRoleAndIdentifier(role, identifier).isPresent();
+    }
+
+    public synchronized boolean existsByEmail(String email) {
+        return listAll().stream()
+                .anyMatch(item -> item.email() != null && item.email().equalsIgnoreCase(email));
     }
 }

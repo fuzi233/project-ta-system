@@ -15,10 +15,11 @@ public class ApplicationServlet extends BaseServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            SessionUser current = requireRole(request, AuthSession.ROLE_TA);
             SubmitApplicationRequest payload = readJson(request, SubmitApplicationRequest.class);
             ApplicationService.SubmitResponse submitResponse = appContext.applicationService().submitApplication(
                     payload.applicationId(),
-                    payload.applicantId(),
+                    current.userId(),
                     payload.jobId()
             );
             int status = submitResponse.created() ? 201 : 200;
@@ -34,11 +35,12 @@ public class ApplicationServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            String applicantId = request.getParameter("applicantId");
+            SessionUser current = requireRole(request, AuthSession.ROLE_TA);
             int page = readIntParameter(request, "page", 1);
             int size = readIntParameter(request, "size", 10);
-            List<ApplicationRecord> items = appContext.applicationService().queryByApplicant(applicantId, page, size);
+            List<ApplicationRecord> items = appContext.applicationService().queryByApplicant(current.userId(), page, size);
             writeJson(response, 200, Map.of(
+                    "applicantId", current.userId(),
                     "page", page,
                     "size", size,
                     "items", items

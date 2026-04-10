@@ -6,6 +6,7 @@ import cn.ebu6304.tarecruitment.repository.JobRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class JobService {
     private final JobRepository jobRepository;
@@ -47,6 +48,18 @@ public class JobService {
         int normalizedPage = Validators.normalizePage(page);
         int normalizedSize = Validators.normalizeSize(size);
         return jobRepository.list(query, status, normalizedPage, normalizedSize);
+    }
+
+    public Optional<JobPosting> findByJobId(String jobId) {
+        String normalizedJobId = Validators.requireNonBlank(jobId, "jobId");
+        return jobRepository.findByJobId(normalizedJobId);
+    }
+
+    public List<JobPosting> listJobsByCreator(String creatorId, int page, int size) {
+        String normalizedCreator = Validators.requireNonBlank(creatorId, "creatorId");
+        int normalizedPage = Validators.normalizePage(page);
+        int normalizedSize = Validators.normalizeSize(size);
+        return jobRepository.listByCreator(normalizedCreator, normalizedPage, normalizedSize);
     }
 
     public record CreateJobResponse(boolean created, JobPosting record) {

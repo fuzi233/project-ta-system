@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -57,6 +58,18 @@ public class JobRepository {
         List<JobPosting> all = new ArrayList<>();
         fileStore.forEach(all::add);
         return all;
+    }
+
+    public synchronized Optional<JobPosting> findByJobId(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
+    }
+
+    public synchronized List<JobPosting> listByCreator(String creatorId, int page, int size) {
+        return fileStore.readPage(page, size, job -> job.createdBy().equals(creatorId));
     }
 
     private synchronized void rebuildIndexes() {

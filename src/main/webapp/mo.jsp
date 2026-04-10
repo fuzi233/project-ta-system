@@ -1,3 +1,11 @@
+<%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
+<%
+    String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
+    if (role == null || !AuthSession.ROLE_MO.equalsIgnoreCase(role)) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +27,6 @@
             <input type="text" name="moduleCode" placeholder="moduleCode" required/>
             <input type="text" name="requiredSkills" placeholder="requiredSkills" required/>
             <input type="number" name="slots" placeholder="slots" min="1" required/>
-            <input type="text" name="createdBy" placeholder="createdBy" required/>
             <button class="btn" type="submit">Create Job</button>
         </form>
         <pre id="mo-output" class="panel"></pre>

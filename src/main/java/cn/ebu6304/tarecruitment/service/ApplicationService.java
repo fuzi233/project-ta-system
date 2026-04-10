@@ -9,6 +9,7 @@ import cn.ebu6304.tarecruitment.repository.JobRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ApplicationService {
     private final ApplicationRepository applicationRepository;
@@ -86,6 +87,11 @@ public class ApplicationService {
                 .orElseThrow(() -> new ApiException(500, "Failed to retrieve updated application"));
         
         return new UpdateStatusResponse(true, updated_record);
+    }
+
+    public Optional<ApplicationRecord> findByApplicationId(String applicationId) {
+        String normalizedAppId = Validators.requireNonBlank(applicationId, "applicationId");
+        return applicationRepository.findByApplicationId(normalizedAppId);
     }
 
     public Map<String, Long> statusSummary() {
