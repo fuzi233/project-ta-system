@@ -4,6 +4,9 @@ public record UserProfile(
         String userId,
         String displayName,
         String role,
+        String identifier,
+        String email,
+        String passwordHash,
         String skills,
         String updatedAt
 ) {

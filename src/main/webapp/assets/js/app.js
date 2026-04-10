@@ -64,9 +64,8 @@ if (statusForm) {
     const output = document.getElementById("status-output");
     statusForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const payload = Object.fromEntries(new FormData(statusForm).entries());
         try {
-            const data = await api(`/applications?applicantId=${encodeURIComponent(payload.applicantId)}`);
+            const data = await api("/applications");
             output.textContent = pretty(data);
         } catch (error) {
             output.textContent = error.message;
