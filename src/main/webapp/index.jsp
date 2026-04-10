@@ -100,10 +100,12 @@
             z-index: 1;
             min-height: 100vh;
             display: grid;
-            grid-template-columns: 2fr 3fr;
+            grid-template-columns: minmax(340px, 1.05fr) minmax(460px, 1fr);
             align-items: center;
-            gap: 28px;
-            padding: 36px 40px 36px 84px;
+            gap: 36px;
+            width: min(1180px, calc(100% - 2rem));
+            margin: 0 auto;
+            padding: 36px 28px 36px 72px;
         }
 
         .brand {
@@ -112,6 +114,7 @@
             flex-direction: column;
             justify-content: center;
             gap: 16px;
+            max-width: 520px;
         }
 
         .brand h1 {
@@ -160,16 +163,17 @@
         .auth-wrap {
             display: flex;
             justify-content: center;
+            align-items: center;
             width: 100%;
         }
 
         .auth-card {
             width: 100%;
-            max-width: 480px;
+            max-width: 540px;
             background: var(--white);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-card);
-            padding: 48px;
+            padding: 44px;
         }
 
         .switcher {
@@ -235,6 +239,7 @@
             border: 1px solid #D1D5DB;
             border-radius: 14px;
             padding: 10px 8px;
+            min-height: 66px;
             background: #F8FAFC;
             text-align: center;
             font-size: 13px;
@@ -475,6 +480,25 @@
             opacity: 1;
         }
 
+        @media (max-width: 1120px) {
+            .page {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                width: min(860px, calc(100% - 1.5rem));
+                padding: 28px 12px 28px 16px;
+                min-height: auto;
+            }
+
+            .brand,
+            .auth-wrap {
+                max-width: 100%;
+            }
+
+            .auth-card {
+                margin: 0 auto;
+            }
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -493,7 +517,8 @@
             .page {
                 grid-template-columns: 1fr;
                 gap: 18px;
-                padding: 20px 16px 24px;
+                width: calc(100% - 1rem);
+                padding: 16px 8px 20px;
             }
 
             .side-shortcuts {
@@ -522,6 +547,11 @@
             .role-grid-login,
             .role-grid-register {
                 grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .shortcut-btn {
+                width: 36px;
+                height: 36px;
             }
         }
     </style>
