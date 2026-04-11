@@ -508,15 +508,29 @@
 
         try {
             const jobId = await resolveJobId();
-            const payload = {jobId: jobId};
-            const result = await api("/applications", {
+            const formData = new FormData(form);
+            formData.set("jobId", jobId);
+            const response = await fetch("/applications", {
                 method: "POST",
-                body: JSON.stringify(payload)
+                body: formData
             });
+            const text = await response.text();
+            let result = {};
+            try {
+                result = text ? JSON.parse(text) : {};
+            } catch (_) {
+                result = {error: text || ("HTTP " + response.status)};
+            }
+            if (!response.ok) {
+                throw new Error(result.error || ("HTTP " + response.status));
+            }
             if (result.created === false) {
                 successBox.textContent = "Application already exists. Redirecting to My Applications...";
             } else {
-                successBox.textContent = "Application submitted successfully. Redirecting...";
+                const uploaded = Array.isArray(result.attachments) ? result.attachments.length : 0;
+                successBox.textContent = "Application submitted successfully"
+                    + (uploaded > 0 ? (" (" + uploaded + " attachment(s) uploaded)") : "")
+                    + ". Redirecting...";
             }
             successBox.style.display = "block";
             setTimeout(function () {

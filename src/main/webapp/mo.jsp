@@ -171,6 +171,9 @@
                 <button id="reviewClearFilterBtn" class="btn ghost" type="button">Clear Filter</button>
                 <div id="reviewHint" class="hint">Loading jobs and applications...</div>
             </div>
+            <p class="hint" style="margin-top:-.25rem;">
+                Note: each submission creates one application record; use Detail + AI to review the exact candidate snapshot and attachments.
+            </p>
             <div id="reviewList" class="review-grid"></div>
         </div>
 
@@ -188,6 +191,6 @@
         </div>
     </section>
 </main>
-<script src="assets/js/mo-page.js?v=3"></script>
+<script src="assets/js/mo-page.js?v=5"></script>
 </body>
 </html>

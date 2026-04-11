@@ -85,6 +85,31 @@ function buildStatusSelect(currentStatus) {
     return select;
 }
 
+async function updateApplicationStatus(applicationId, status, triggerBtn) {
+    if (!applicationId || !status) {
+        return;
+    }
+    if (triggerBtn) {
+        triggerBtn.disabled = true;
+    }
+    try {
+        await api("mo/applications", {
+            method: "PUT",
+            body: JSON.stringify({
+                applicationId: applicationId,
+                status: status
+            })
+        });
+        await loadReviewData();
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        if (triggerBtn) {
+            triggerBtn.disabled = false;
+        }
+    }
+}
+
 function buildCandidateRow(job, candidate, isLatest) {
     const row = document.createElement("div");
     row.className = "candidate-row";
@@ -92,8 +117,10 @@ function buildCandidateRow(job, candidate, isLatest) {
     const main = document.createElement("div");
     main.className = "candidate-main";
     const displayName = candidate.displayName || candidate.applicantId;
+    const attachmentCount = Array.isArray(candidate.attachments) ? candidate.attachments.length : 0;
     main.innerHTML = "<strong>" + displayName + "</strong><br/>"
-        + "User: " + candidate.applicantId + " | Application: " + candidate.applicationId;
+        + "User: " + candidate.applicantId + " | Application: " + candidate.applicationId
+        + " | Attachments: " + attachmentCount;
     row.appendChild(main);
 
     const statusCell = document.createElement("div");
@@ -122,28 +149,35 @@ function buildCandidateRow(job, candidate, isLatest) {
     updateBtn.className = "btn ghost";
     updateBtn.textContent = "Update";
     updateBtn.addEventListener("click", async () => {
-        updateBtn.disabled = true;
-        try {
-            await api("mo/applications", {
-                method: "PUT",
-                body: JSON.stringify({
-                    applicationId: candidate.applicationId,
-                    status: statusSelect.value
-                })
-            });
-            await loadReviewData();
-        } catch (error) {
-            alert(error.message);
-        } finally {
-            updateBtn.disabled = false;
-        }
+        await updateApplicationStatus(candidate.applicationId, statusSelect.value, updateBtn);
     });
     actions.appendChild(updateBtn);
+
+    const approveBtn = document.createElement("button");
+    approveBtn.type = "button";
+    approveBtn.className = "btn";
+    approveBtn.textContent = "Approve";
+    approveBtn.addEventListener("click", async () => {
+        statusSelect.value = "ACCEPTED";
+        await updateApplicationStatus(candidate.applicationId, "ACCEPTED", approveBtn);
+    });
+    actions.appendChild(approveBtn);
+
+    const rejectBtn = document.createElement("button");
+    rejectBtn.type = "button";
+    rejectBtn.className = "btn ghost";
+    rejectBtn.textContent = "Reject";
+    rejectBtn.addEventListener("click", async () => {
+        statusSelect.value = "REJECTED";
+        await updateApplicationStatus(candidate.applicationId, "REJECTED", rejectBtn);
+    });
+    actions.appendChild(rejectBtn);
 
     const detailLink = document.createElement("a");
     detailLink.className = "btn";
     detailLink.href = "mo-candidate-detail.jsp?jobId=" + encodeURIComponent(job.jobId)
-        + "&candidateUserId=" + encodeURIComponent(candidate.applicantId);
+        + "&candidateUserId=" + encodeURIComponent(candidate.applicantId)
+        + "&applicationId=" + encodeURIComponent(candidate.applicationId || "");
     detailLink.textContent = "Detail + AI";
     actions.appendChild(detailLink);
 

@@ -115,6 +115,10 @@
             <div class="detail-label">Resume Text</div>
             <pre id="detailResume" class="panel">Loading candidate detail...</pre>
         </div>
+        <div style="margin-top:.75rem;">
+            <div class="detail-label">Attachments</div>
+            <div id="detailAttachments" class="panel">No attachment uploaded.</div>
+        </div>
         <div style="margin-top:.8rem; display:flex; gap:.6rem; flex-wrap:wrap;">
             <button id="aiAssessBtn" class="btn" type="button">AI One-click Summary</button>
             <span id="aiHint" class="hint"></span>
@@ -137,6 +141,6 @@
         </div>
     </section>
 </main>
-<script src="assets/js/mo-candidate-detail.js?v=2"></script>
+<script src="assets/js/mo-candidate-detail.js?v=5"></script>
 </body>
 </html>

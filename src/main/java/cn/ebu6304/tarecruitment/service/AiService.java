@@ -25,6 +25,7 @@ public class AiService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
+    private final AttachmentService attachmentService;
     private final AiProvider aiProvider;
     private final AiProvider fallbackProvider;
 
@@ -32,11 +33,13 @@ public class AiService {
             JobRepository jobRepository,
             UserRepository userRepository,
             ApplicationRepository applicationRepository,
+            AttachmentService attachmentService,
             AiProvider aiProvider
     ) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
+        this.attachmentService = attachmentService;
         this.aiProvider = aiProvider;
         this.fallbackProvider = new RuleBasedAiProvider();
     }
@@ -98,7 +101,7 @@ public class AiService {
                 applicationRepository.workloadByApplicant(),
                 true
         );
-        String resumeText = resolvedResume(candidate);
+        String resumeText = resolvedResume(candidate, normalizedJobId);
 
         ProviderReply summaryReply = requestProvider(
                 "You are an HR assistant. Summarize CVs in 3 concise bullet points.",
@@ -251,9 +254,17 @@ public class AiService {
         );
     }
 
-    private String resolvedResume(UserProfile candidate) {
-        if (candidate.resumeText() != null && !candidate.resumeText().isBlank()) {
-            return candidate.resumeText().trim();
+    private String resolvedResume(UserProfile candidate, String jobId) {
+        String profileResume = candidate.resumeText() == null ? "" : candidate.resumeText().trim();
+        String attachmentText = attachmentService.latestCvExtractedText(candidate.userId(), jobId);
+        if (!attachmentText.isBlank()) {
+            if (!profileResume.isBlank()) {
+                return profileResume + "\n\n[Extracted CV Attachment Text]\n" + attachmentText;
+            }
+            return attachmentText;
+        }
+        if (!profileResume.isBlank()) {
+            return profileResume;
         }
         return "No full CV text provided. Skills available: " + candidate.skills();
     }

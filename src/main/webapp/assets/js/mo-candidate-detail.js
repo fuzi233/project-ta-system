@@ -27,6 +27,7 @@ const ui = {
     detailModule: document.getElementById("detailModule"),
     detailSkills: document.getElementById("detailSkills"),
     detailResume: document.getElementById("detailResume"),
+    detailAttachments: document.getElementById("detailAttachments"),
     aiScore: document.getElementById("aiScore"),
     aiReasoning: document.getElementById("aiReasoning"),
     aiMissingSkills: document.getElementById("aiMissingSkills"),
@@ -38,6 +39,7 @@ const ui = {
 const params = new URLSearchParams(window.location.search);
 const candidateUserId = params.get("candidateUserId") || "";
 const jobId = params.get("jobId") || "";
+const applicationId = params.get("applicationId") || "";
 
 let detailState = {
     candidate: null,
@@ -106,6 +108,35 @@ function renderDetail() {
     ui.detailModule.textContent = job.moduleCode || "-";
     renderSkills(candidate.skills || "");
     ui.detailResume.textContent = candidate.resumeText || "No resume text submitted.";
+    renderAttachments(application.attachments || candidate.attachments || []);
+}
+
+function renderAttachments(attachments) {
+    if (!attachments || attachments.length === 0) {
+        ui.detailAttachments.textContent = "No attachment uploaded.";
+        return;
+    }
+    ui.detailAttachments.innerHTML = "";
+    attachments.forEach((item) => {
+        const line = document.createElement("div");
+        const name = item.originalFilename || "Unnamed file";
+        const type = item.attachmentType || "-";
+        const size = item.sizeBytes != null ? (item.sizeBytes + " bytes") : "-";
+        const extracted = item.hasExtractedText ? "text extracted" : "no text extracted";
+        const text = document.createElement("span");
+        text.textContent = "[" + type + "] " + name + " | " + size + " | " + extracted + " | ";
+        line.appendChild(text);
+        if (item.attachmentId) {
+            const link = document.createElement("a");
+            link.href = "attachments/download?attachmentId=" + encodeURIComponent(item.attachmentId);
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "Open";
+            link.className = "link";
+            line.appendChild(link);
+        }
+        ui.detailAttachments.appendChild(line);
+    });
 }
 
 async function loadDetail() {
@@ -116,24 +147,19 @@ async function loadDetail() {
     }
 
     try {
-        const candidatesResp = await api("mo/candidates?jobId=" + encodeURIComponent(jobId) + "&page=1&size=500");
-        const rows = candidatesResp.candidates || [];
-        const candidate = rows.find((item) => item.applicantId === candidateUserId);
-        if (!candidate) {
-            throw new Error("Candidate not found under this job.");
+        let detailPath = "mo/candidate-detail?jobId=" + encodeURIComponent(jobId)
+            + "&candidateUserId=" + encodeURIComponent(candidateUserId);
+        if (applicationId) {
+            detailPath += "&applicationId=" + encodeURIComponent(applicationId);
         }
-
-        const jobsResp = await api("jobs?page=1&size=500");
-        const jobs = jobsResp.items || [];
-        const job = jobs.find((item) => item.jobId === jobId) || {jobId: jobId, title: "-", moduleCode: "-"};
+        const detailResp = await api(detailPath);
+        const candidate = detailResp.candidate || {};
+        const application = detailResp.application || {};
+        const job = detailResp.job || {jobId: jobId, title: "-", moduleCode: "-"};
 
         detailState = {
             candidate: candidate,
-            application: {
-                applicationId: candidate.applicationId,
-                status: candidate.status,
-                submittedAt: candidate.submittedAt
-            },
+            application: application,
             job: job
         };
         renderDetail();
@@ -147,26 +173,25 @@ ui.aiAssessBtn.addEventListener("click", async () => {
     ui.aiAssessBtn.disabled = true;
     ui.aiHint.textContent = "Analyzing...";
     try {
-        const match = await api("ai/match", {
+        const assessment = await api("mo/candidate-assessment", {
             method: "POST",
             body: JSON.stringify({
-                applicantId: candidateUserId,
+                candidateUserId: candidateUserId,
                 jobId: jobId
             })
         });
-        const gaps = await api("ai/missing-skills", {
-            method: "POST",
-            body: JSON.stringify({
-                applicantId: candidateUserId,
-                jobId: jobId
-            })
-        });
-
-        ui.aiScore.textContent = "Score: " + match.score + " | Workload: " + match.workload + " | Provider: " + (match.provider || "-");
-        ui.aiReasoning.textContent = match.reasoning || "-";
-        renderMissingSkills(gaps.missingSkills || []);
-        ui.aiSuggestions.textContent = (gaps.summary || "") + "\n\n" + ((gaps.learningSuggestions || []).join("\n"));
-        ui.aiHint.textContent = "Done";
+        const insight = assessment.insight || {};
+        ui.aiScore.textContent = "Score: " + (insight.score ?? "-")
+            + " | Workload: " + (insight.workload ?? "-")
+            + " | Provider: " + (insight.provider || "-");
+        ui.aiReasoning.textContent = insight.explanation || "-";
+        renderMissingSkills(insight.missingSkills || []);
+        ui.aiSuggestions.textContent = insight.resumeSummary || "-";
+        if ((insight.provider || "").toLowerCase() === "rule-based") {
+            ui.aiHint.textContent = "Done (rule-based fallback, API key not active)";
+        } else {
+            ui.aiHint.textContent = "Done (provider: " + (insight.provider || "-") + ")";
+        }
     } catch (error) {
         ui.aiScore.textContent = error.message;
         ui.aiReasoning.textContent = "";

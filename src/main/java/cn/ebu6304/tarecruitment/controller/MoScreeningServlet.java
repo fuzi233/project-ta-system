@@ -51,6 +51,21 @@ public class MoScreeningServlet extends BaseServlet {
                         row.put("jobId", item.jobId());
                         row.put("status", item.status());
                         row.put("submittedAt", item.submittedAt());
+                        List<Map<String, Object>> attachments = appContext.attachmentService()
+                                .listByApplicationId(item.applicationId())
+                                .stream()
+                                .map(attachment -> {
+                                    Map<String, Object> brief = new LinkedHashMap<>();
+                                    brief.put("attachmentId", attachment.attachmentId());
+                                    brief.put("attachmentType", attachment.attachmentType());
+                                    brief.put("originalFilename", attachment.originalFilename());
+                                    brief.put("sizeBytes", attachment.sizeBytes());
+                                    brief.put("uploadedAt", attachment.uploadedAt());
+                                    brief.put("hasExtractedText", attachment.extractedText() != null && !attachment.extractedText().isBlank());
+                                    return brief;
+                                })
+                                .toList();
+                        row.put("attachments", attachments);
                         appContext.userRepository().findById(item.applicantId()).ifPresent(user -> {
                             row.put("displayName", user.displayName());
                             row.put("identifier", user.identifier());
