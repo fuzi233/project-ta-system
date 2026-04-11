@@ -4,6 +4,8 @@ import cn.ebu6304.tarecruitment.model.JobPosting;
 import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +43,14 @@ public class JobRepository {
                 .orElse(false);
     }
 
+    public synchronized Optional<JobPosting> findById(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
+    }
+
     public synchronized List<JobPosting> list(String query, String status, int page, int size) {
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
         String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
@@ -70,6 +80,15 @@ public class JobRepository {
 
     public synchronized List<JobPosting> listByCreator(String creatorId, int page, int size) {
         return fileStore.readPage(page, size, job -> job.createdBy().equals(creatorId));
+    }
+
+    public synchronized void compact() {
+        Map<String, JobPosting> lastById = new LinkedHashMap<>();
+        fileStore.forEach(job -> lastById.put(job.jobId(), job));
+        List<JobPosting> compacted = new ArrayList<>(lastById.values());
+        compacted.sort(Comparator.comparing(JobPosting::jobId));
+        fileStore.replaceAll(compacted);
+        rebuildIndexes();
     }
 
     private synchronized void rebuildIndexes() {
