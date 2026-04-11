@@ -29,6 +29,30 @@ public class UserRepository {
         return result;
     }
 
+    public synchronized Optional<UserProfile> findById(String userId) {
+        final UserProfile[] found = {null};
+        fileStore.forEach(profile -> {
+            if (found[0] == null && profile.userId().equals(userId)) {
+                found[0] = profile;
+            }
+        });
+        return Optional.ofNullable(found[0]);
+    }
+
+    public synchronized List<UserProfile> listByRole(String role) {
+        List<UserProfile> result = new ArrayList<>();
+        if (role == null || role.isBlank()) {
+            return result;
+        }
+        String normalizedRole = role.trim().toUpperCase();
+        fileStore.forEach(profile -> {
+            if (profile.role() != null && profile.role().trim().toUpperCase().equals(normalizedRole)) {
+                result.add(profile);
+            }
+        });
+        return result;
+    }
+
     public synchronized Optional<UserProfile> findByRoleAndIdentifier(String role, String identifier) {
         return listAll().stream()
                 .filter(item -> item.role() != null && item.role().equalsIgnoreCase(role))
@@ -36,13 +60,13 @@ public class UserRepository {
                 .findFirst();
     }
 
-        public synchronized Optional<UserProfile> findByRoleAndLoginKey(String role, String loginKey) {
+    public synchronized Optional<UserProfile> findByRoleAndLoginKey(String role, String loginKey) {
         return listAll().stream()
-            .filter(item -> item.role() != null && item.role().equalsIgnoreCase(role))
-            .filter(item -> (item.identifier() != null && item.identifier().equalsIgnoreCase(loginKey))
-                || (item.email() != null && item.email().equalsIgnoreCase(loginKey)))
-            .findFirst();
-        }
+                .filter(item -> item.role() != null && item.role().equalsIgnoreCase(role))
+                .filter(item -> (item.identifier() != null && item.identifier().equalsIgnoreCase(loginKey))
+                        || (item.email() != null && item.email().equalsIgnoreCase(loginKey)))
+                .findFirst();
+    }
 
     public synchronized boolean existsByRoleAndIdentifier(String role, String identifier) {
         return findByRoleAndIdentifier(role, identifier).isPresent();

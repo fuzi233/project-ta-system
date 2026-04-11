@@ -41,6 +41,14 @@ public class JobRepository {
                 .orElse(false);
     }
 
+    public synchronized Optional<JobPosting> findById(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
+    }
+
     public synchronized List<JobPosting> list(String query, String status, int page, int size) {
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
         String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);

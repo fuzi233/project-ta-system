@@ -1,114 +1,80 @@
 package cn.ebu6304.tarecruitment.service;
 
 import cn.ebu6304.tarecruitment.model.ApplicationRecord;
+import cn.ebu6304.tarecruitment.model.JobPosting;
 import cn.ebu6304.tarecruitment.repository.ApplicationRepository;
 import cn.ebu6304.tarecruitment.repository.JobRepository;
+import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MoScreeningServiceTest {
     private ApplicationService applicationService;
     private ApplicationRepository applicationRepository;
-    private JobRepository jobRepository;
 
     @BeforeEach
-    void setUp() {
-        applicationRepository = mock(ApplicationRepository.class);
-        jobRepository = mock(JobRepository.class);
+    void setUp() throws Exception {
+        Path tmpDir = Files.createTempDirectory("mo-screening-test");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JobRepository jobRepository = new JobRepository(new JsonlFileStore<>(tmpDir.resolve("jobs.jsonl"), JobPosting.class, mapper));
+        applicationRepository = new ApplicationRepository(new JsonlFileStore<>(tmpDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper));
         applicationService = new ApplicationService(applicationRepository, jobRepository);
+
+        jobRepository.createIfAbsent(new JobPosting("JOB001", "SE TA", "EBU6304", "Java,Testing", 2, "OPEN", "mo-001", "2026-04-10T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("JOB002", "ML TA", "EBU6201", "Python,ML", 2, "OPEN", "mo-002", "2026-04-10T00:00:00Z"));
+
+        applicationRepository.saveIfAbsent(new ApplicationRecord("APP001", "user1", "JOB001", "SUBMITTED", "2026-04-07T00:00:00Z"));
+        applicationRepository.saveIfAbsent(new ApplicationRecord("APP002", "user2", "JOB001", "REVIEWING", "2026-04-07T00:00:00Z"));
+        applicationRepository.saveIfAbsent(new ApplicationRecord("APP003", "user3", "JOB002", "SUBMITTED", "2026-04-07T00:00:00Z"));
     }
 
     @Test
     void testListCandidatesByJob() {
-        String jobId = "JOB001";
-        ApplicationRecord candidate1 = new ApplicationRecord(
-                "APP001", "user1", jobId, "SUBMITTED", "2026-04-07T00:00:00Z"
-        );
-        ApplicationRecord candidate2 = new ApplicationRecord(
-                "APP002", "user2", jobId, "SUBMITTED", "2026-04-07T00:00:00Z"
-        );
-        
-        when(applicationRepository.findByJobId(jobId, 1, 20))
-                .thenReturn(List.of(candidate1, candidate2));
-        
-        List<ApplicationRecord> result = applicationService.listCandidatesByJob(jobId, 1, 20);
-        
+        List<ApplicationRecord> result = applicationService.listCandidatesByJob("JOB001", 1, 20);
         assertEquals(2, result.size());
-        assertEquals("APP001", result.get(0).applicationId());
-        verify(applicationRepository).findByJobId(jobId, 1, 20);
     }
 
     @Test
     void testListCandidatesByJobAndStatus() {
-        String jobId = "JOB001";
-        String status = "INTERVIEWED";
-        ApplicationRecord candidate = new ApplicationRecord(
-                "APP001", "user1", jobId, status, "2026-04-07T00:00:00Z"
-        );
-        
-        when(applicationRepository.findByJobIdAndStatus(jobId, status, 1, 20))
-                .thenReturn(List.of(candidate));
-        
-        List<ApplicationRecord> result = applicationService.listCandidatesByJobAndStatus(jobId, status, 1, 20);
-        
+        List<ApplicationRecord> result = applicationService.listCandidatesByJobAndStatus("JOB001", "REVIEWING", 1, 20);
         assertEquals(1, result.size());
-        assertEquals(status, result.get(0).status());
-        verify(applicationRepository).findByJobIdAndStatus(jobId, status, 1, 20);
+        assertEquals("APP002", result.get(0).applicationId());
     }
 
     @Test
     void testGetJobStats() {
-        Map<String, Long> stats = Map.of("JOB001", 5L, "JOB002", 3L);
-        when(applicationRepository.countByJob()).thenReturn(stats);
-        
         Map<String, Long> result = applicationService.getJobStats();
-        
-        assertEquals(2, result.size());
-        assertEquals(5L, result.get("JOB001"));
-        verify(applicationRepository).countByJob();
+        assertEquals(2L, result.get("JOB001"));
+        assertEquals(1L, result.get("JOB002"));
     }
 
     @Test
     void testGetJobStatusStats() {
-        String jobId = "JOB001";
-        Map<String, Long> stats = Map.of("SUBMITTED", 2L, "INTERVIEWED", 1L);
-        when(applicationRepository.countByJobAndStatus(jobId)).thenReturn(stats);
-        
-        Map<String, Long> result = applicationService.getJobStatusStats(jobId);
-        
-        assertEquals(2, result.size());
-        assertEquals(2L, result.get("SUBMITTED"));
-        verify(applicationRepository).countByJobAndStatus(jobId);
+        Map<String, Long> result = applicationService.getJobStatusStats("JOB001");
+        assertEquals(1L, result.get("SUBMITTED"));
+        assertEquals(1L, result.get("REVIEWING"));
     }
 
     @Test
     void testUpdateStatus() {
-        String appId = "APP001";
-        ApplicationRecord updated = new ApplicationRecord(
-                appId, "user1", "JOB001", "ACCEPTED", "2026-04-07T00:00:00Z"
-        );
-        
-        when(applicationRepository.updateStatus(appId, "ACCEPTED")).thenReturn(true);
-        when(applicationRepository.findByApplicationId(appId)).thenReturn(java.util.Optional.of(updated));
-        
-        ApplicationService.UpdateStatusResponse response = applicationService.updateStatus(appId, "ACCEPTED");
-        
+        ApplicationService.UpdateStatusResponse response = applicationService.updateStatus("APP001", "ACCEPTED");
         assertTrue(response.updated());
         assertEquals("ACCEPTED", response.record().status());
-        verify(applicationRepository).updateStatus(appId, "ACCEPTED");
     }
 
     @Test
     void testUpdateStatusNotFound() {
-        String appId = "NONEXISTENT";
-        when(applicationRepository.updateStatus(appId, "ACCEPTED")).thenReturn(false);
-        
-        assertThrows(Exception.class, () -> applicationService.updateStatus(appId, "ACCEPTED"));
+        assertThrows(Exception.class, () -> applicationService.updateStatus("NONEXISTENT", "ACCEPTED"));
     }
 }

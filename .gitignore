@@ -6,5 +6,8 @@
 target/
 out/
 
+# Local AI config (keep secrets local)
+config/ai.local.properties
+
 # OS
 .DS_Store

@@ -8,6 +8,7 @@ public record UserProfile(
         String email,
         String passwordHash,
         String skills,
+        String resumeText,
         String updatedAt
 ) {
 }

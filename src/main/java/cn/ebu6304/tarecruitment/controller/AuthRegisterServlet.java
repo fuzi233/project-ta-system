@@ -52,6 +52,7 @@ public class AuthRegisterServlet extends BaseServlet {
                     email,
                     Passwords.sha256(password),
                     "",
+                    "",
                     OffsetDateTime.now().toString()
             );
             appContext.userRepository().upsert(profile);

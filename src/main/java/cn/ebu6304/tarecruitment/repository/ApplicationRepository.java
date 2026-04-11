@@ -119,6 +119,8 @@ public class ApplicationRepository {
         );
         
         fileStore.append(updatedRecord);
+        long nextLine = lineCounter.incrementAndGet();
+        idIndex.put(applicationId, nextLine);
         
         // Update status index
         statusIndex.computeIfAbsent(oldRecord.status(), k -> new LongAdder()).decrement();
