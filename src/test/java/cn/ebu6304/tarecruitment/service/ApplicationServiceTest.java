@@ -52,4 +52,20 @@ class ApplicationServiceTest {
 
         assertThrows(ApiException.class, () -> service.submitApplication("app-x", "ta001", "job-x"));
     }
+
+    @Test
+    void compactShouldDeduplicateByApplicationIdKeepingLast() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-compact");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonlFileStore<ApplicationRecord> appStore = new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper);
+        appStore.append(new ApplicationRecord("app-1", "ta001", "job-1", "SUBMITTED", "2026-03-12T00:00:00Z"));
+        appStore.append(new ApplicationRecord("app-1", "ta001", "job-1", "ACCEPTED", "2026-03-13T00:00:00Z"));
+
+        ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
+        applicationRepository.compact();
+
+        assertEquals(1, applicationRepository.totalCount());
+        assertEquals("ACCEPTED", applicationRepository.findByApplicationId("app-1").orElseThrow().status());
+    }
 }

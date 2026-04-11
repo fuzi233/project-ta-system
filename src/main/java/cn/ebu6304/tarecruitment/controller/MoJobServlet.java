@@ -13,6 +13,7 @@ public class MoJobServlet extends BaseServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            SessionUser current = requireRole(request, AuthSession.ROLE_MO);
             CreateJobRequest payload = readJson(request, CreateJobRequest.class);
             JobService.CreateJobResponse createJobResponse = appContext.jobService().createJob(
                     payload.jobId(),
@@ -20,7 +21,7 @@ public class MoJobServlet extends BaseServlet {
                     payload.moduleCode(),
                     payload.requiredSkills(),
                     payload.slots(),
-                    payload.createdBy()
+                    current.userId()
             );
             int status = createJobResponse.created() ? 201 : 200;
             writeJson(response, status, Map.of(

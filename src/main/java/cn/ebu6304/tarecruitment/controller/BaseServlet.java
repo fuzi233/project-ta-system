@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,6 +38,29 @@ public abstract class BaseServlet extends HttpServlet {
         }
     }
 
+    protected SessionUser requireAuthenticated(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            throw new ApiException(401, "Not authenticated");
+        }
+        String userId = (String) session.getAttribute(AuthSession.ATTR_USER_ID);
+        String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
+        String displayName = (String) session.getAttribute(AuthSession.ATTR_DISPLAY_NAME);
+        String identifier = (String) session.getAttribute(AuthSession.ATTR_IDENTIFIER);
+        if (userId == null || role == null) {
+            throw new ApiException(401, "Not authenticated");
+        }
+        return new SessionUser(userId, role, displayName, identifier);
+    }
+
+    protected SessionUser requireRole(HttpServletRequest request, String role) {
+        SessionUser user = requireAuthenticated(request);
+        if (!role.equalsIgnoreCase(user.role())) {
+            throw new ApiException(403, "Insufficient permissions for this operation");
+        }
+        return user;
+    }
+
     protected void handleError(HttpServletResponse response, Exception error) throws IOException {
         if (error instanceof ValidationException validationException) {
             writeJson(response, 400, Map.of("error", validationException.getMessage()));
@@ -47,5 +71,8 @@ public abstract class BaseServlet extends HttpServlet {
             return;
         }
         writeJson(response, 500, Map.of("error", "Internal server error", "detail", error.getMessage()));
+    }
+
+    protected record SessionUser(String userId, String role, String displayName, String identifier) {
     }
 }
