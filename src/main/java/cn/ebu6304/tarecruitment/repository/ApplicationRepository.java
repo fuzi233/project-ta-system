@@ -63,8 +63,20 @@ public class ApplicationRepository {
 
     public synchronized Map<String, Long> workloadByApplicant() {
         Map<String, Long> result = new HashMap<>();
-        fileStore.forEach(record -> result.merge(record.applicantId(), 1L, Long::sum));
+        for (ApplicationRecord record : listLatestApplications()) {
+            result.merge(record.applicantId(), 1L, Long::sum);
+        }
         return result;
+    }
+
+    public synchronized List<ApplicationRecord> listLatestApplications() {
+        List<Map.Entry<String, Long>> indexedLines = new ArrayList<>(idIndex.entrySet());
+        indexedLines.sort(Map.Entry.comparingByValue());
+        List<ApplicationRecord> records = new ArrayList<>(indexedLines.size());
+        for (Map.Entry<String, Long> entry : indexedLines) {
+            fileStore.readAtLine(entry.getValue()).ifPresent(records::add);
+        }
+        return records;
     }
 
     public synchronized Map<String, Long> countByJob() {

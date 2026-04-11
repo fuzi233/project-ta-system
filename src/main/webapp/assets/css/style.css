@@ -101,6 +101,24 @@ h1 {
     flex-direction: column;
 }
 
+.checkbox-line {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .55rem .75rem;
+    border: 1px solid #c2d6ff;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .85);
+    color: #16315b;
+    font-size: .92rem;
+}
+
+.checkbox-line input {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
 input,
 button {
     border: 1px solid #c2d6ff;
@@ -154,6 +172,109 @@ input {
     overflow: auto;
 }
 
+.hint {
+    margin: .1rem 0 .9rem;
+    color: var(--muted);
+    font-size: .92rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card {
+    margin: 0;
+    padding: .9rem 1rem;
+    border-radius: var(--radius-md);
+}
+
+.stat-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.stat-value {
+    margin: .15rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0e3369;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid #d6e4ff;
+    background: rgba(255, 255, 255, 0.74);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+}
+
+.admin-table th,
+.admin-table td {
+    text-align: left;
+    border-bottom: 1px solid #e2ecff;
+    padding: .7rem .75rem;
+    vertical-align: top;
+}
+
+.admin-table th {
+    font-size: .83rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #486287;
+    background: rgba(234, 243, 255, 0.85);
+}
+
+.empty-note {
+    color: var(--muted);
+    text-align: center;
+    padding: 1rem;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: .18rem .55rem;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.pill.ok {
+    color: #11553f;
+    background: #dcfce7;
+}
+
+.pill.warn {
+    color: #8a3000;
+    background: #ffedd5;
+}
+
+.chip-list {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+
+.chip {
+    border-radius: 9999px;
+    padding: .2rem .5rem;
+    font-size: .76rem;
+    color: #1f4a84;
+    background: #e7f0ff;
+}
+
 .bg-orb {
     position: fixed;
     border-radius: 50%;
@@ -185,6 +306,10 @@ input {
 
     .hero {
         padding: 1.6rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
     }
 }
 
