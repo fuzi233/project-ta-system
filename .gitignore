@@ -11,3 +11,7 @@ config/ai.local.properties
 
 # OS
 .DS_Store
+
+# Runtime data artifacts
+data/uploads/
+data/*.lock

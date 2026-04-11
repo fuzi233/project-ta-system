@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,14 +43,49 @@ public class MoScreeningServlet extends BaseServlet {
                 candidates = appService.listCandidatesByJob(jobId, page, size);
             }
 
+            List<Map<String, Object>> detailedCandidates = candidates.stream()
+                    .map(item -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("applicationId", item.applicationId());
+                        row.put("applicantId", item.applicantId());
+                        row.put("jobId", item.jobId());
+                        row.put("status", item.status());
+                        row.put("submittedAt", item.submittedAt());
+                        List<Map<String, Object>> attachments = appContext.attachmentService()
+                                .listByApplicationId(item.applicationId())
+                                .stream()
+                                .map(attachment -> {
+                                    Map<String, Object> brief = new LinkedHashMap<>();
+                                    brief.put("attachmentId", attachment.attachmentId());
+                                    brief.put("attachmentType", attachment.attachmentType());
+                                    brief.put("originalFilename", attachment.originalFilename());
+                                    brief.put("sizeBytes", attachment.sizeBytes());
+                                    brief.put("uploadedAt", attachment.uploadedAt());
+                                    brief.put("hasExtractedText", attachment.extractedText() != null && !attachment.extractedText().isBlank());
+                                    return brief;
+                                })
+                                .toList();
+                        row.put("attachments", attachments);
+                        appContext.userRepository().findById(item.applicantId()).ifPresent(user -> {
+                            row.put("displayName", user.displayName());
+                            row.put("identifier", user.identifier());
+                            row.put("email", user.email());
+                            row.put("skills", user.skills());
+                            row.put("resumeText", user.resumeText());
+                            row.put("profileUpdatedAt", user.updatedAt());
+                        });
+                        return row;
+                    })
+                    .toList();
+
             writeJson(response, 200, Map.of(
                     "jobId", jobId,
                     "owner", current.userId(),
                     "status", status != null ? status : "ALL",
                     "page", page,
                     "size", size,
-                    "count", candidates.size(),
-                    "candidates", candidates
+                    "count", detailedCandidates.size(),
+                    "candidates", detailedCandidates
             ));
         } catch (Exception e) {
             handleError(response, e);

@@ -23,6 +23,7 @@ public class JobServlet extends BaseServlet {
             writeJson(response, 200, Map.of(
                     "page", page,
                     "size", size,
+                    "count", jobs.size(),
                     "items", jobs
             ));
         } catch (Exception e) {

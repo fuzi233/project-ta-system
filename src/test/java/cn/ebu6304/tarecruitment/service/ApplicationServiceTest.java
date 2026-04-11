@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,5 +68,47 @@ class ApplicationServiceTest {
 
         assertEquals(1, applicationRepository.totalCount());
         assertEquals("ACCEPTED", applicationRepository.findByApplicationId("app-1").orElseThrow().status());
+    }
+
+    @Test
+    void submitWithoutExplicitIdShouldCreateDifferentRecords() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-auto-id");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonlFileStore<JobPosting> jobStore = new JsonlFileStore<>(tempDir.resolve("jobs.jsonl"), JobPosting.class, mapper);
+        JsonlFileStore<ApplicationRecord> appStore = new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper);
+
+        JobRepository jobRepository = new JobRepository(jobStore);
+        ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+
+        ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
+        ApplicationService.SubmitResponse first = service.submitApplication(null, "ta001", "job-1");
+        ApplicationService.SubmitResponse second = service.submitApplication("", "ta001", "job-1");
+
+        assertTrue(first.created());
+        assertTrue(second.created());
+        assertTrue(!first.record().applicationId().equals(second.record().applicationId()));
+        assertEquals(2, service.totalApplications());
+    }
+
+    @Test
+    void updateSameStatusShouldNotThrow() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-update-same");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonlFileStore<JobPosting> jobStore = new JsonlFileStore<>(tempDir.resolve("jobs.jsonl"), JobPosting.class, mapper);
+        JsonlFileStore<ApplicationRecord> appStore = new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper);
+
+        JobRepository jobRepository = new JobRepository(jobStore);
+        ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+
+        ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
+        service.submitApplication("app-1", "ta001", "job-1");
+
+        ApplicationService.UpdateStatusResponse response = service.updateStatus("app-1", "SUBMITTED");
+        assertFalse(response.updated());
+        assertEquals("SUBMITTED", response.record().status());
     }
 }
