@@ -13,6 +13,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WorkloadServiceTest {
 
@@ -50,5 +51,25 @@ class WorkloadServiceTest {
         assertEquals(1L, taA.activeApplications());
         assertEquals(1L, taA.statusBreakdown().get("REJECTED"));
         assertEquals(1L, taA.statusBreakdown().get("SUBMITTED"));
+    }
+
+    @Test
+    void snapshotShouldMarkOverloadedWhenThresholdIsZero() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-workload-overload");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JobRepository jobRepository = new JobRepository(new JsonlFileStore<>(tempDir.resolve("jobs.jsonl"), JobPosting.class, mapper));
+        ApplicationRepository applicationRepository = new ApplicationRepository(new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper));
+
+        JobService jobService = new JobService(jobRepository);
+        ApplicationService applicationService = new ApplicationService(applicationRepository, jobRepository);
+        WorkloadService workloadService = new WorkloadService(applicationRepository);
+
+        jobService.createJob("job-1", "Algorithms TA", "CS101", "Java", 2, "mo1");
+        applicationService.submitApplication("app-1", "taA", "job-1");
+
+        WorkloadService.WorkloadSnapshot snapshot = workloadService.snapshot(0);
+        assertTrue(snapshot.overloaded().containsKey("taA"));
+        assertEquals(1L, snapshot.overloaded().get("taA"));
     }
 }

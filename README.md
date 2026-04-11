@@ -11,9 +11,11 @@ EBU6304 group project implementation branch.
 ## API v1
 
 - `GET /jobs` (list + filter)
-- `POST /applications` (idempotent submit)
-- `GET /applications?applicantId=` (status query)
+- `POST /applications` (TA idempotent submit, session-based)
+- `GET /applications` (TA status query, session-based)
 - `POST /mo/jobs` (MO post job)
+- `GET /mo/candidates` (MO screening + filter)
+- `PUT /mo/applications` (MO update application status)
 - `GET /admin/workload` (workload summary)
 - `GET /hr/candidates` (ADMIN candidate list/detail for HR review)
 - `POST /ai/match` (LLM-assisted applicant-job matching)
@@ -72,6 +74,23 @@ export OPENAI_API_ENDPOINT=\"https://api.openai.com/v1/chat/completions\"
 ```
 
 If `OPENAI_API_KEY` is not set, the system automatically falls back to deterministic rule-based reasoning so demos remain stable.
+
+## Testing and Acceptance
+
+```bash
+# all unit/integration tests
+mvn test
+
+# one-click acceptance (after mvn jetty:run)
+bash scripts/acceptance/run_acceptance.sh
+```
+
+Details:
+
+- `docs/TESTING_AND_ACCEPTANCE.md`
+- `docs/USER_MANUAL.md`
+- `docs/screenshots/README.md`
+- `TEST_DOCS_DELIVERY_SUMMARY.md`
 
 ## Branch Workflow
 
