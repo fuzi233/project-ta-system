@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -130,10 +131,11 @@ public class ApplicationRepository {
     }
 
     public synchronized void compact() {
-        List<ApplicationRecord> all = new ArrayList<>();
-        fileStore.forEach(all::add);
-        all.sort(Comparator.comparing(ApplicationRecord::applicationId));
-        fileStore.replaceAll(all);
+        Map<String, ApplicationRecord> lastById = new LinkedHashMap<>();
+        fileStore.forEach(record -> lastById.put(record.applicationId(), record));
+        List<ApplicationRecord> compacted = new ArrayList<>(lastById.values());
+        compacted.sort(Comparator.comparing(ApplicationRecord::applicationId));
+        fileStore.replaceAll(compacted);
         rebuildIndexes();
     }
 

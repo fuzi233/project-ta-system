@@ -4,6 +4,7 @@ import cn.ebu6304.tarecruitment.model.UserProfile;
 import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,9 @@ public class UserRepository {
         Map<String, UserProfile> allById = new HashMap<>();
         fileStore.forEach(item -> allById.put(item.userId(), item));
         allById.put(profile.userId(), profile);
-        fileStore.replaceAll(new ArrayList<>(allById.values()));
+        List<UserProfile> compacted = new ArrayList<>(allById.values());
+        compacted.sort(Comparator.comparing(UserProfile::userId));
+        fileStore.replaceAll(compacted);
     }
 
     public synchronized List<UserProfile> listAll() {
