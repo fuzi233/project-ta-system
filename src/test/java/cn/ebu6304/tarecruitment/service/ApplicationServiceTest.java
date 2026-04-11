@@ -68,4 +68,26 @@ class ApplicationServiceTest {
         assertEquals(1, applicationRepository.totalCount());
         assertEquals("ACCEPTED", applicationRepository.findByApplicationId("app-1").orElseThrow().status());
     }
+
+    @Test
+    void statusUpdateShouldKeepSingleCurrentRecordInQueriesAndCounts() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-status-update");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonlFileStore<JobPosting> jobStore = new JsonlFileStore<>(tempDir.resolve("jobs.jsonl"), JobPosting.class, mapper);
+        JsonlFileStore<ApplicationRecord> appStore = new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper);
+        JobRepository jobRepository = new JobRepository(jobStore);
+        ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
+        ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
+
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        service.submitApplication("app-1", "ta001", "job-1");
+
+        service.updateStatus("app-1", "REVIEWING");
+
+        assertEquals(1, service.totalApplications());
+        assertEquals(0, service.listCandidatesByJobAndStatus("job-1", "SUBMITTED", 1, 10).size());
+        assertEquals(1, service.listCandidatesByJobAndStatus("job-1", "REVIEWING", 1, 10).size());
+        assertEquals(1L, service.statusSummary().getOrDefault("REVIEWING", 0L));
+    }
 }
