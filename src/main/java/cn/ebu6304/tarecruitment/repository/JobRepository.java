@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -42,6 +43,14 @@ public class JobRepository {
                 .orElse(false);
     }
 
+    public synchronized Optional<JobPosting> findById(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
+    }
+
     public synchronized List<JobPosting> list(String query, String status, int page, int size) {
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
         String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
@@ -59,6 +68,18 @@ public class JobRepository {
         List<JobPosting> all = new ArrayList<>();
         fileStore.forEach(all::add);
         return all;
+    }
+
+    public synchronized Optional<JobPosting> findByJobId(String jobId) {
+        Long line = idIndex.get(jobId);
+        if (line == null) {
+            return Optional.empty();
+        }
+        return fileStore.readAtLine(line);
+    }
+
+    public synchronized List<JobPosting> listByCreator(String creatorId, int page, int size) {
+        return fileStore.readPage(page, size, job -> job.createdBy().equals(creatorId));
     }
 
     public synchronized void compact() {

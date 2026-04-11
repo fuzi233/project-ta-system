@@ -1,3 +1,11 @@
+<%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
+<%
+    String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
+    if (role == null || !AuthSession.ROLE_TA.equalsIgnoreCase(role)) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +30,6 @@
         <h2>Apply</h2>
         <form id="apply-form" class="stack-form">
             <input type="text" name="applicationId" placeholder="applicationId (optional)"/>
-            <input type="text" name="applicantId" placeholder="applicantId" required/>
             <input type="text" name="jobId" placeholder="jobId" required/>
             <button class="btn" type="submit">Submit Application</button>
         </form>
@@ -32,7 +39,6 @@
     <section class="glass card">
         <h2>Check Status</h2>
         <form id="status-form" class="inline-form">
-            <input type="text" name="applicantId" placeholder="applicantId" required/>
             <button class="btn" type="submit">Query</button>
         </form>
         <pre id="status-output" class="panel"></pre>
