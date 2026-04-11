@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
 <%
     String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
@@ -16,7 +17,7 @@
 </head>
 <body>
 <main class="shell narrow">
-    <a class="link" href="index.jsp">← Home</a>
+    <a class="link" href="index.jsp">&larr; Home</a>
 
     <section class="glass card">
         <h1>AI Insights Lab</h1>

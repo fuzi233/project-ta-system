@@ -390,6 +390,9 @@
                             <div id="successBox" class="success-box">
                                 Application submitted successfully.
                             </div>
+                            <div id="errorBox" class="success-box" style="display:none;background:#fdecec;border-color:#f2c7c7;color:#8e2d2d;">
+                                Submission failed.
+                            </div>
                         </div>
                     </section>
 
@@ -406,9 +409,66 @@
 </div>
 
 <script>
-    function submitApplication(event) {
+    async function api(url, options = {}) {
+        const response = await fetch(url, {
+            headers: {"Content-Type": "application/json"},
+            ...options
+        });
+        const text = await response.text();
+        let body = {};
+        try {
+            body = text ? JSON.parse(text) : {};
+        } catch (_) {
+            body = {error: text || ("HTTP " + response.status)};
+        }
+        if (!response.ok) {
+            throw new Error(body.error || ("HTTP " + response.status));
+        }
+        return body;
+    }
+
+    function mapLegacyIdToJobId(raw) {
+        if (!raw) {
+            return "";
+        }
+        const trimmed = String(raw).trim();
+        if (/^job-\d+$/i.test(trimmed)) {
+            return trimmed.toLowerCase();
+        }
+        if (/^\d+$/.test(trimmed)) {
+            return "job-" + trimmed.padStart(3, "0");
+        }
+        return "";
+    }
+
+    async function resolveJobId() {
+        const params = new URLSearchParams(window.location.search);
+        const candidate = params.get("jobId") || params.get("id") || "";
+        const mapped = mapLegacyIdToJobId(candidate);
+        const jobsData = await api("/jobs?status=OPEN&page=1&size=200");
+        const jobs = jobsData.items || [];
+        if (jobs.length === 0) {
+            throw new Error("No open jobs available now.");
+        }
+        if (mapped && jobs.some((j) => j.jobId === mapped)) {
+            return mapped;
+        }
+        if (/^\d+$/.test(String(candidate || ""))) {
+            const index = Number(candidate) - 1;
+            if (index >= 0 && index < jobs.length) {
+                return jobs[index].jobId;
+            }
+        }
+        return jobs[0].jobId;
+    }
+
+    async function submitApplication(event) {
         event.preventDefault();
 
+        const form = document.getElementById("applyForm");
+        const submitButtons = form.querySelectorAll("button[type='submit']");
+        const successBox = document.getElementById("successBox");
+        const errorBox = document.getElementById("errorBox");
         const fullName = document.getElementById("fullName").value.trim();
         const studentId = document.getElementById("studentId").value.trim();
         const email = document.getElementById("email").value.trim();
@@ -440,11 +500,36 @@
             return;
         }
 
-        document.getElementById("successBox").style.display = "block";
+        successBox.style.display = "none";
+        errorBox.style.display = "none";
+        submitButtons.forEach((btn) => {
+            btn.disabled = true;
+        });
 
-        setTimeout(function () {
-            window.location.href = "applications.jsp";
-        }, 1200);
+        try {
+            const jobId = await resolveJobId();
+            const payload = {jobId: jobId};
+            const result = await api("/applications", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            if (result.created === false) {
+                successBox.textContent = "Application already exists. Redirecting to My Applications...";
+            } else {
+                successBox.textContent = "Application submitted successfully. Redirecting...";
+            }
+            successBox.style.display = "block";
+            setTimeout(function () {
+                window.location.href = "applications.jsp";
+            }, 900);
+        } catch (error) {
+            errorBox.textContent = error.message;
+            errorBox.style.display = "block";
+        } finally {
+            submitButtons.forEach((btn) => {
+                btn.disabled = false;
+            });
+        }
     }
 </script>
 </body>

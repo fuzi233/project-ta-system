@@ -427,139 +427,263 @@
 
             <div class="toolbar">
                 <div class="filter-group">
-                    <button class="filter-btn active" onclick="filterStatus('all', this)">
-                        All <span class="badge-count">4</span>
+                    <button id="filterAll" class="filter-btn active" type="button">
+                        All <span id="countAll" class="badge-count">0</span>
                     </button>
-                    <button class="filter-btn" onclick="filterStatus('pending', this)">
-                        Pending <span class="badge-count">1</span>
+                    <button id="filterPending" class="filter-btn" type="button">
+                        Pending <span id="countPending" class="badge-count">0</span>
                     </button>
-                    <button class="filter-btn" onclick="filterStatus('accepted', this)">
-                        Accepted <span class="badge-count">2</span>
+                    <button id="filterAccepted" class="filter-btn" type="button">
+                        Accepted <span id="countAccepted" class="badge-count">0</span>
                     </button>
-                    <button class="filter-btn" onclick="filterStatus('rejected', this)">
-                        Rejected <span class="badge-count">1</span>
+                    <button id="filterRejected" class="filter-btn" type="button">
+                        Rejected <span id="countRejected" class="badge-count">0</span>
                     </button>
                 </div>
 
                 <div class="sort-box">
                     <span>Sort by:</span>
-                    <select class="sort-select">
-                        <option>Most Recent</option>
-                        <option>Oldest First</option>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="recent">Most Recent</option>
+                        <option value="oldest">Oldest First</option>
                     </select>
                 </div>
             </div>
 
-            <section id="applicationList" class="application-list">
-                <article class="application-card" data-status="pending">
-                    <div class="application-main">
-                        <h2>Programming TA</h2>
-                        <div class="application-meta">
-                            <div>Course: Java Programming</div>
-                        </div>
-                        <div class="status-row">
-                            <span class="status-tag pending">Pending</span>
-                            <span class="application-meta">Applied: Jan 20, 2024</span>
-                        </div>
-                    </div>
-                    <div class="application-actions">
-                        <a class="action-btn" href="application-detail.jsp?id=1">View Details</a>
-                        <button class="action-btn withdraw" onclick="withdrawApplication('Programming TA')">Withdraw</button>
-                    </div>
-                </article>
-
-                <article class="application-card" data-status="accepted">
-                    <div class="application-main">
-                        <h2>Database TA</h2>
-                        <div class="application-meta">
-                            <div>Course: Database Systems</div>
-                        </div>
-                        <div class="status-row">
-                            <span class="status-tag accepted">Accepted</span>
-                            <span class="application-meta">Applied: Jan 15, 2024</span>
-                        </div>
-                    </div>
-                    <div class="application-actions">
-                        <a class="action-btn" href="application-detail.jsp?id=2">View Details</a>
-                    </div>
-                </article>
-
-                <article class="application-card" data-status="accepted">
-                    <div class="application-main">
-                        <h2>Web Development TA</h2>
-                        <div class="application-meta">
-                            <div>Course: Web Technologies</div>
-                        </div>
-                        <div class="status-row">
-                            <span class="status-tag accepted">Accepted</span>
-                            <span class="application-meta">Applied: Jan 14, 2024</span>
-                        </div>
-                    </div>
-                    <div class="application-actions">
-                        <a class="action-btn" href="application-detail.jsp?id=3">View Details</a>
-                    </div>
-                </article>
-
-                <article class="application-card" data-status="rejected">
-                    <div class="application-main">
-                        <h2>Networking TA</h2>
-                        <div class="application-meta">
-                            <div>Course: Networking Fundamentals</div>
-                        </div>
-                        <div class="status-row">
-                            <span class="status-tag rejected">Rejected</span>
-                            <span class="application-meta">Applied: Jan 10, 2024</span>
-                        </div>
-                    </div>
-                    <div class="application-actions">
-                        <a class="action-btn" href="#">View Details</a>
-                    </div>
-                </article>
-            </section>
+            <section id="applicationList" class="application-list"></section>
 
             <div id="emptyBox" class="empty-box">No applications found for this status.</div>
-
-            <div class="pagination">
-                <a class="page-btn active" href="#">1</a>
-                <a class="page-btn" href="#">2</a>
-                <a class="page-btn" href="#">3</a>
-                <a class="page-btn" href="#">›</a>
-            </div>
         </main>
     </div>
 </div>
 
 <script>
-    function filterStatus(status, button) {
-        const cards = document.querySelectorAll(".application-card");
-        const emptyBox = document.getElementById("emptyBox");
-        const buttons = document.querySelectorAll(".filter-btn");
-
-        buttons.forEach(btn => btn.classList.remove("active"));
-        button.classList.add("active");
-
-        let visibleCount = 0;
-
-        cards.forEach(card => {
-            const cardStatus = card.getAttribute("data-status");
-
-            if (status === "all" || cardStatus === status) {
-                card.style.display = "flex";
-                visibleCount++;
-            } else {
-                card.style.display = "none";
-            }
+    async function api(url, options = {}) {
+        const response = await fetch(url, {
+            headers: {"Content-Type": "application/json"},
+            ...options
         });
-
-        emptyBox.style.display = visibleCount === 0 ? "block" : "none";
+        const text = await response.text();
+        const body = text ? JSON.parse(text) : {};
+        if (!response.ok) {
+            throw new Error(body.error || ("HTTP " + response.status));
+        }
+        return body;
     }
 
-    function withdrawApplication(jobTitle) {
-        const confirmed = confirm("Are you sure you want to withdraw your application for " + jobTitle + "?");
-        if (confirmed) {
-            alert("Application withdrawn successfully.");
+    const pendingStatuses = new Set(["SUBMITTED", "INTERVIEWED"]);
+    const statusClassMap = {
+        SUBMITTED: "pending",
+        INTERVIEWED: "pending",
+        ACCEPTED: "accepted",
+        REJECTED: "rejected"
+    };
+    const statusLabelMap = {
+        SUBMITTED: "Pending",
+        INTERVIEWED: "Interviewed",
+        ACCEPTED: "Accepted",
+        REJECTED: "Rejected"
+    };
+
+    const applicationListEl = document.getElementById("applicationList");
+    const emptyBoxEl = document.getElementById("emptyBox");
+    const sortSelectEl = document.getElementById("sortSelect");
+    const countEls = {
+        all: document.getElementById("countAll"),
+        pending: document.getElementById("countPending"),
+        accepted: document.getElementById("countAccepted"),
+        rejected: document.getElementById("countRejected")
+    };
+    const filterButtons = {
+        all: document.getElementById("filterAll"),
+        pending: document.getElementById("filterPending"),
+        accepted: document.getElementById("filterAccepted"),
+        rejected: document.getElementById("filterRejected")
+    };
+
+    let applications = [];
+    let jobsById = {};
+    let currentFilter = "all";
+
+    function parseTime(value) {
+        const t = Date.parse(value || "");
+        return Number.isNaN(t) ? 0 : t;
+    }
+
+    function formatDate(value) {
+        const t = parseTime(value);
+        if (!t) {
+            return "-";
+        }
+        return new Date(t).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        });
+    }
+
+    function normalizeStatus(status) {
+        const upper = (status || "").toUpperCase();
+        return statusLabelMap[upper] ? upper : "SUBMITTED";
+    }
+
+    function toFilterBucket(status) {
+        if (pendingStatuses.has(status)) {
+            return "pending";
+        }
+        if (status === "ACCEPTED") {
+            return "accepted";
+        }
+        if (status === "REJECTED") {
+            return "rejected";
+        }
+        return "pending";
+    }
+
+    function updateCounts() {
+        let pending = 0;
+        let accepted = 0;
+        let rejected = 0;
+        for (const item of applications) {
+            const status = normalizeStatus(item.status);
+            const bucket = toFilterBucket(status);
+            if (bucket === "pending") {
+                pending++;
+            } else if (bucket === "accepted") {
+                accepted++;
+            } else if (bucket === "rejected") {
+                rejected++;
+            }
+        }
+        countEls.all.textContent = String(applications.length);
+        countEls.pending.textContent = String(pending);
+        countEls.accepted.textContent = String(accepted);
+        countEls.rejected.textContent = String(rejected);
+    }
+
+    function getVisibleApplications() {
+        const filtered = applications.filter((item) => {
+            if (currentFilter === "all") {
+                return true;
+            }
+            return toFilterBucket(normalizeStatus(item.status)) === currentFilter;
+        });
+        filtered.sort((a, b) => {
+            const diff = parseTime(b.submittedAt) - parseTime(a.submittedAt);
+            if (sortSelectEl.value === "oldest") {
+                return -diff;
+            }
+            return diff;
+        });
+        return filtered;
+    }
+
+    function renderApplications() {
+        const visible = getVisibleApplications();
+        applicationListEl.innerHTML = "";
+        if (visible.length === 0) {
+            emptyBoxEl.style.display = "block";
+            return;
+        }
+        emptyBoxEl.style.display = "none";
+
+        for (const item of visible) {
+            const status = normalizeStatus(item.status);
+            const cssClass = statusClassMap[status] || "pending";
+            const statusLabel = statusLabelMap[status] || status;
+            const job = jobsById[item.jobId] || {};
+
+            const card = document.createElement("article");
+            card.className = "application-card";
+
+            const main = document.createElement("div");
+            main.className = "application-main";
+
+            const title = document.createElement("h2");
+            title.textContent = job.title || item.jobId;
+            main.appendChild(title);
+
+            const meta = document.createElement("div");
+            meta.className = "application-meta";
+            const course = document.createElement("div");
+            const moduleCode = job.moduleCode || "-";
+            course.textContent = "Course: " + moduleCode;
+            meta.appendChild(course);
+            main.appendChild(meta);
+
+            const statusRow = document.createElement("div");
+            statusRow.className = "status-row";
+            const statusTag = document.createElement("span");
+            statusTag.className = "status-tag " + cssClass;
+            statusTag.textContent = statusLabel;
+            const applied = document.createElement("span");
+            applied.className = "application-meta";
+            applied.textContent = "Applied: " + formatDate(item.submittedAt);
+            statusRow.appendChild(statusTag);
+            statusRow.appendChild(applied);
+            main.appendChild(statusRow);
+
+            const actions = document.createElement("div");
+            actions.className = "application-actions";
+            const viewBtn = document.createElement("a");
+            viewBtn.className = "action-btn";
+            viewBtn.href = "jobs.jsp";
+            viewBtn.textContent = "View Jobs";
+            actions.appendChild(viewBtn);
+
+            card.appendChild(main);
+            card.appendChild(actions);
+            applicationListEl.appendChild(card);
         }
     }
+
+    function setActiveFilter(nextFilter) {
+        currentFilter = nextFilter;
+        Object.entries(filterButtons).forEach(([key, btn]) => {
+            if (!btn) {
+                return;
+            }
+            if (key === nextFilter) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+        renderApplications();
+    }
+
+    async function loadJobs() {
+        const data = await api("/jobs?page=1&size=200");
+        jobsById = {};
+        for (const item of (data.items || [])) {
+            jobsById[item.jobId] = item;
+        }
+    }
+
+    async function loadApplications() {
+        const data = await api("/applications?page=1&size=200");
+        applications = data.items || [];
+    }
+
+    async function boot() {
+        try {
+            await Promise.all([loadJobs(), loadApplications()]);
+            updateCounts();
+            setActiveFilter("all");
+        } catch (error) {
+            applicationListEl.innerHTML = "";
+            emptyBoxEl.style.display = "block";
+            emptyBoxEl.textContent = error.message;
+        }
+    }
+
+    filterButtons.all.addEventListener("click", () => setActiveFilter("all"));
+    filterButtons.pending.addEventListener("click", () => setActiveFilter("pending"));
+    filterButtons.accepted.addEventListener("click", () => setActiveFilter("accepted"));
+    filterButtons.rejected.addEventListener("click", () => setActiveFilter("rejected"));
+    sortSelectEl.addEventListener("change", renderApplications);
+
+    boot();
 </script>
 </body>
 </html>
