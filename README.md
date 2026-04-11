@@ -1,5 +1,4 @@
 # TA Recruitment System (Servlet/JSP Prototype)
-
 EBU6304 group project implementation branch.
 
 ## Architecture
