@@ -1,10 +1,19 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
+<%
+    String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
+    if (role == null || !AuthSession.ROLE_TA.equalsIgnoreCase(role)) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Applications - TA Recruitment System</title>
+    <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
             --bg: #eef2f6;

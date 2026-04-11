@@ -1,3 +1,11 @@
+<%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
+<%
+    String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
+    if (role == null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>

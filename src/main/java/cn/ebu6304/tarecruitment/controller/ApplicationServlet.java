@@ -43,6 +43,7 @@ public class ApplicationServlet extends BaseServlet {
                     "applicantId", current.userId(),
                     "page", page,
                     "size", size,
+                    "count", items.size(),
                     "items", items
             ));
         } catch (Exception e) {

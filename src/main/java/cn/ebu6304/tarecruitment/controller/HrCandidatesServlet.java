@@ -19,6 +19,7 @@ public class HrCandidatesServlet extends BaseServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             requireRole(request, AuthSession.ROLE_ADMIN);
+            Map<String, Long> workloadByApplicant = appContext.workloadService().snapshot(999).byApplicant();
 
             String candidateUserId = request.getParameter("candidateUserId");
             if (candidateUserId != null && !candidateUserId.isBlank()) {
@@ -26,7 +27,7 @@ public class HrCandidatesServlet extends BaseServlet {
                 UserProfile user = appContext.userRepository().findById(normalizedUserId)
                         .orElseThrow(() -> new ApiException(404, "Candidate not found: " + normalizedUserId));
 
-                long workload = appContext.workloadService().snapshot(999).byApplicant().getOrDefault(user.userId(), 0L);
+                long workload = workloadByApplicant.getOrDefault(user.userId(), 0L);
                 writeJson(response, 200, Map.of(
                         "candidate", toCandidateDetail(user, workload)
                 ));
@@ -35,7 +36,7 @@ public class HrCandidatesServlet extends BaseServlet {
 
             List<Map<String, Object>> items = appContext.userRepository().listByRole("TA").stream()
                     .map(user -> {
-                        long workload = appContext.workloadService().snapshot(999).byApplicant().getOrDefault(user.userId(), 0L);
+                        long workload = workloadByApplicant.getOrDefault(user.userId(), 0L);
                         return toCandidateSummary(user, workload);
                     })
                     .collect(Collectors.toList());

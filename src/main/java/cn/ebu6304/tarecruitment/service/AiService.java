@@ -50,7 +50,12 @@ public class AiService {
         JobPosting job = jobRepository.findById(normalizedJobId)
                 .orElseThrow(() -> new ApiException(404, "Job not found: " + normalizedJobId));
 
-        return calculateInsight(applicant, job);
+        return calculateInsight(
+                applicant,
+                job,
+                applicationRepository.workloadByApplicant(),
+                true
+        );
     }
 
     public MissingSkillsInsight missingSkills(String applicantId, String jobId) {
@@ -87,7 +92,12 @@ public class AiService {
         JobPosting job = jobRepository.findById(normalizedJobId)
                 .orElseThrow(() -> new ApiException(404, "Job not found: " + normalizedJobId));
 
-        MatchInsight matchInsight = calculateInsight(candidate, job);
+        MatchInsight matchInsight = calculateInsight(
+                candidate,
+                job,
+                applicationRepository.workloadByApplicant(),
+                true
+        );
         String resumeText = resolvedResume(candidate);
 
         ProviderReply summaryReply = requestProvider(
@@ -139,8 +149,9 @@ public class AiService {
         }
 
         List<CandidateSuggestion> candidates = new ArrayList<>();
+        Map<String, Long> workloadMap = applicationRepository.workloadByApplicant();
         for (UserProfile candidate : allTaCandidates) {
-            MatchInsight insight = calculateInsight(candidate, job);
+            MatchInsight insight = calculateInsight(candidate, job, workloadMap, false);
             candidates.add(new CandidateSuggestion(
                     candidate.userId(),
                     candidate.displayName(),
@@ -177,7 +188,12 @@ public class AiService {
         );
     }
 
-    private MatchInsight calculateInsight(UserProfile applicant, JobPosting job) {
+    private MatchInsight calculateInsight(
+            UserProfile applicant,
+            JobPosting job,
+            Map<String, Long> workloadMap,
+            boolean enrichReasoning
+    ) {
         List<String> applicantSkills = SkillNormalizer.normalizeList(applicant.skills());
         List<String> requiredSkills = SkillNormalizer.normalizeList(job.requiredSkills());
 
@@ -192,26 +208,36 @@ public class AiService {
                 .filter(skill -> !applicantSet.contains(skill))
                 .collect(Collectors.toList());
 
-        Map<String, Long> workloadMap = applicationRepository.workloadByApplicant();
         long workload = workloadMap.getOrDefault(applicant.userId(), 0L);
 
         int fitScore = requiredSet.isEmpty() ? 100 : (matched.size() * 100 / requiredSet.size());
         int workloadPenalty = (int) Math.min(25, workload * 4);
         int finalScore = Math.max(0, Math.min(100, fitScore - workloadPenalty));
 
-        String prompt = "Applicant=" + applicant.userId()
-                + ", job=" + job.jobId()
-                + ", matchedSkills=" + matched
-                + ", missingSkills=" + missing
-                + ", workload=" + workload
-                + ", score=" + finalScore + "."
-                + " Return one concise recommendation sentence.";
+        String reasoningText;
+        String providerName;
+        if (enrichReasoning) {
+            String prompt = "Applicant=" + applicant.userId()
+                    + ", job=" + job.jobId()
+                    + ", matchedSkills=" + matched
+                    + ", missingSkills=" + missing
+                    + ", workload=" + workload
+                    + ", score=" + finalScore + "."
+                    + " Return one concise recommendation sentence.";
 
-        ProviderReply providerReply = requestProvider(
-                "You are an explainable matching assistant for TA recruitment.",
-                prompt,
-                "Emphasize concrete evidence (skills + workload) and keep it concise."
-        );
+            ProviderReply providerReply = requestProvider(
+                    "You are an explainable matching assistant for TA recruitment.",
+                    prompt,
+                    "Emphasize concrete evidence (skills + workload) and keep it concise."
+            );
+            reasoningText = providerReply.text();
+            providerName = providerReply.provider();
+        } else {
+            reasoningText = "Rule-based shortlist candidate: matched="
+                    + matched.size() + ", missing=" + missing.size()
+                    + ", workload=" + workload + ", score=" + finalScore + ".";
+            providerName = "rule-based";
+        }
 
         return new MatchInsight(
                 applicant.userId(),
@@ -220,8 +246,8 @@ public class AiService {
                 workload,
                 matched,
                 missing,
-                providerReply.text(),
-                providerReply.provider()
+                reasoningText,
+                providerName
         );
     }
 
