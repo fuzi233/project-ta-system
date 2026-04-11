@@ -188,7 +188,7 @@ ui.aiAssessBtn.addEventListener("click", async () => {
         renderMissingSkills(insight.missingSkills || []);
         ui.aiSuggestions.textContent = insight.resumeSummary || "-";
         if ((insight.provider || "").toLowerCase() === "rule-based") {
-            ui.aiHint.textContent = "Done (rule-based fallback, API key not active)";
+            ui.aiHint.textContent = "Done (rule-based fallback: AI provider unavailable or misconfigured)";
         } else {
             ui.aiHint.textContent = "Done (provider: " + (insight.provider || "-") + ")";
         }
