@@ -7,51 +7,6 @@
         return;
     }
 %>
-<%
-    String id = request.getParameter("id");
-
-    String jobTitle = "Programming TA";
-    String course = "Java Programming";
-    String teacher = "Prof. Smith";
-    String deadline = "Jan 25, 2024";
-    String responsibilities = "<li>Assist in grading assignments</li>"
-            + "<li>Hold weekly office hours</li>"
-            + "<li>Support class activities</li>";
-    String requiredSkills = "<li>Basic Java knowledge</li>"
-            + "<li>Git version control</li>";
-    String preferredExperience = "<li>Tutoring or TA experience</li>"
-            + "<li>Familiarity with Eclipse IDE</li>";
-    String workload = "8 - 10 hours per week";
-
-    if ("2".equals(id)) {
-        jobTitle = "Database TA";
-        course = "Database Systems";
-        teacher = "Prof. Zhang";
-        deadline = "Jan 30, 2024";
-        responsibilities = "<li>Support SQL lab sessions</li>"
-                + "<li>Answer student questions in tutorials</li>"
-                + "<li>Help mark database assignments</li>";
-        requiredSkills = "<li>SQL and relational database basics</li>"
-                + "<li>Knowledge of MySQL</li>";
-        preferredExperience = "<li>Experience in database coursework</li>"
-                + "<li>Good communication skills</li>";
-        workload = "6 - 8 hours per week";
-    } else if ("3".equals(id)) {
-        jobTitle = "Web Development TA";
-        course = "Web Technologies";
-        teacher = "Prof. Lee";
-        deadline = "Feb 5, 2024";
-        responsibilities = "<li>Assist students with HTML/CSS/JavaScript</li>"
-                + "<li>Support lab demonstrations</li>"
-                + "<li>Help review web project submissions</li>";
-        requiredSkills = "<li>HTML, CSS, JavaScript basics</li>"
-                + "<li>Frontend debugging ability</li>";
-        preferredExperience = "<li>Experience building web pages</li>"
-                + "<li>Knowledge of responsive design</li>";
-        workload = "7 - 9 hours per week";
-    }
-%>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -325,43 +280,49 @@
 
             <div class="layout">
                 <section class="panel">
-                    <div class="panel-header">Job Info</div>
-                    <div class="panel-body">
-                        <h2 class="job-name"><%= jobTitle %></h2>
-                        <div class="info-item">Course: <%= course %></div>
-                        <div class="info-item">Teacher: <%= teacher %></div>
-                        <div class="info-item">Deadline: <%= deadline %></div>
-                    </div>
-                </section>
+                        <div class="panel-header">Job Info</div>
+                        <div class="panel-body">
+                            <h2 id="jobName" class="job-name">Loading...</h2>
+                            <div id="jobModule" class="info-item">Module: -</div>
+                            <div id="jobStatus" class="info-item">Status: -</div>
+                            <div id="jobCreatedAt" class="info-item">Posted At: -</div>
+                        </div>
+                    </section>
 
-                <section class="panel">
-                    <div class="panel-header">Job Detail</div>
-                    <div class="panel-body">
-                        <div class="detail-section">
-                            <h3 class="section-title">Responsibilities:</h3>
-                            <ul><%= responsibilities %></ul>
+                    <section class="panel">
+                        <div class="panel-header">Job Detail</div>
+                        <div class="panel-body">
+                            <div class="detail-section">
+                            <h3 class="section-title">Summary</h3>
+                            <ul id="jobSummaryList">
+                                <li>Loading job details...</li>
+                            </ul>
                         </div>
 
                         <div class="detail-section">
                             <h3 class="section-title">Required Skills:</h3>
-                            <ul><%= requiredSkills %></ul>
+                            <ul id="requiredSkillsList">
+                                <li>-</li>
+                            </ul>
                         </div>
 
                         <div class="detail-section">
-                            <h3 class="section-title">Preferred Experience:</h3>
-                            <ul><%= preferredExperience %></ul>
+                            <h3 class="section-title">Application Notes:</h3>
+                            <ul id="applicationNotesList">
+                                <li>Check role fit, skill evidence and schedule before applying.</li>
+                            </ul>
                         </div>
 
                         <div class="detail-section">
-                            <h3 class="section-title">Weekly Workload</h3>
-                            <div class="workload"><%= workload %></div>
+                            <h3 class="section-title">Slots</h3>
+                            <div id="jobSlots" class="workload">-</div>
                         </div>
                     </div>
                 </section>
 
                 <section class="panel">
                     <div class="action-col">
-                        <a class="action-btn primary" href="apply.jsp?id=<%= id == null ? "1" : id %>">Apply Now</a>
+                        <a id="applyNowBtn" class="action-btn primary" href="apply.jsp">Apply Now</a>
                         <a class="action-btn" href="#">Save</a>
                         <a class="action-btn" href="jobs.jsp">Back</a>
                     </div>
@@ -370,5 +331,120 @@
         </main>
     </div>
 </div>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("jobId") || "";
+
+    const ui = {
+        jobName: document.getElementById("jobName"),
+        jobModule: document.getElementById("jobModule"),
+        jobStatus: document.getElementById("jobStatus"),
+        jobCreatedAt: document.getElementById("jobCreatedAt"),
+        jobSummaryList: document.getElementById("jobSummaryList"),
+        requiredSkillsList: document.getElementById("requiredSkillsList"),
+        applicationNotesList: document.getElementById("applicationNotesList"),
+        jobSlots: document.getElementById("jobSlots"),
+        applyNowBtn: document.getElementById("applyNowBtn")
+    };
+
+    async function api(url) {
+        const response = await fetch(url, {
+            headers: {"Content-Type": "application/json"}
+        });
+        const text = await response.text();
+        let body = {};
+        try {
+            body = text ? JSON.parse(text) : {};
+        } catch (_) {
+            body = {error: text || ("HTTP " + response.status)};
+        }
+        if (!response.ok) {
+            throw new Error(body.error || ("HTTP " + response.status));
+        }
+        return body;
+    }
+
+    function fmtDate(value) {
+        const timestamp = Date.parse(value || "");
+        if (Number.isNaN(timestamp)) {
+            return "-";
+        }
+        return new Date(timestamp).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function renderList(target, values, fallbackText) {
+        target.innerHTML = "";
+        const list = values.filter(Boolean);
+        if (!list.length) {
+            const item = document.createElement("li");
+            item.textContent = fallbackText;
+            target.appendChild(item);
+            return;
+        }
+        list.forEach((value) => {
+            const item = document.createElement("li");
+            item.textContent = value;
+            target.appendChild(item);
+        });
+    }
+
+    async function loadJobDetail() {
+        if (!jobId) {
+            ui.jobName.textContent = "Missing jobId";
+            return;
+        }
+        const data = await api("/jobs?status=OPEN&page=1&size=500&q=" + encodeURIComponent(jobId));
+        const job = (data.items || []).find((item) => item.jobId === jobId);
+        if (!job) {
+            throw new Error("Job not found: " + jobId);
+        }
+
+        document.title = job.title + " - Job Detail";
+        ui.jobName.textContent = job.title + " (" + job.jobId + ")";
+        ui.jobModule.textContent = "Module: " + (job.moduleCode || "-");
+        ui.jobStatus.textContent = "Status: " + (job.status || "-");
+        ui.jobCreatedAt.textContent = "Posted At: " + fmtDate(job.createdAt);
+        ui.jobSlots.textContent = String(job.slots ?? "-");
+        ui.applyNowBtn.href = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+
+        renderList(
+            ui.jobSummaryList,
+            [
+                "Support module " + (job.moduleCode || "-") + " as a teaching assistant.",
+                "Coordinate with the module owner and help maintain a stable course workflow.",
+                "Prepare concrete evidence for required skills before applying."
+            ],
+            "No summary available."
+        );
+        renderList(
+            ui.requiredSkillsList,
+            String(job.requiredSkills || "").split(",").map((item) => item.trim()),
+            "No required skills provided."
+        );
+        renderList(
+            ui.applicationNotesList,
+            [
+                "Review the required skills carefully.",
+                "Check your current workload before applying.",
+                "Upload CV/transcript in the application form if available."
+            ],
+            "No notes available."
+        );
+    }
+
+    loadJobDetail().catch((error) => {
+        ui.jobName.textContent = error.message;
+        ui.jobSummaryList.innerHTML = "<li>Unable to load this job.</li>";
+        ui.requiredSkillsList.innerHTML = "<li>-</li>";
+        ui.applicationNotesList.innerHTML = "<li>-</li>";
+        ui.jobSlots.textContent = "-";
+    });
+</script>
 </body>
 </html>

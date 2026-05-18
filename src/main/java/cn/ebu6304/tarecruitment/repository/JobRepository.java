@@ -54,14 +54,13 @@ public class JobRepository {
     public synchronized List<JobPosting> list(String query, String status, int page, int size) {
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
         String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
-        return fileStore.readPage(page, size, job -> {
-            boolean queryMatch = normalizedQuery.isEmpty()
-                    || job.title().toLowerCase(Locale.ROOT).contains(normalizedQuery)
-                    || job.moduleCode().toLowerCase(Locale.ROOT).contains(normalizedQuery)
-                    || job.requiredSkills().toLowerCase(Locale.ROOT).contains(normalizedQuery);
-            boolean statusMatch = normalizedStatus.isEmpty() || normalizedStatus.equals(job.status().toUpperCase(Locale.ROOT));
-            return queryMatch && statusMatch;
-        });
+        return fileStore.readPage(page, size, job -> matches(job, normalizedQuery, normalizedStatus));
+    }
+
+    public synchronized long count(String query, String status) {
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
+        return fileStore.count(job -> matches(job, normalizedQuery, normalizedStatus));
     }
 
     public synchronized List<JobPosting> listAll() {
@@ -98,5 +97,16 @@ public class JobRepository {
             long line = lineCounter.incrementAndGet();
             idIndex.put(job.jobId(), line);
         });
+    }
+
+    private static boolean matches(JobPosting job, String normalizedQuery, String normalizedStatus) {
+        boolean queryMatch = normalizedQuery.isEmpty()
+                || job.jobId().toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                || job.title().toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                || job.moduleCode().toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                || job.requiredSkills().toLowerCase(Locale.ROOT).contains(normalizedQuery);
+        boolean statusMatch = normalizedStatus.isEmpty()
+                || normalizedStatus.equals(job.status().toUpperCase(Locale.ROOT));
+        return queryMatch && statusMatch;
     }
 }

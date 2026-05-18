@@ -141,10 +141,57 @@
             color: #334155;
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
+            color: #fff;
+            border: none;
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
         .divider {
             height: 1px;
             background: #dbe3ec;
             margin: 8px 0 28px;
+        }
+
+        .selection-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 18px 20px;
+            border: 1px solid #d9e2ec;
+            border-radius: 16px;
+            background: #f8fbfe;
+        }
+
+        .selection-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .selection-count {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .selection-message {
+            min-height: 20px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .selection-message.error {
+            color: #b42318;
         }
 
         .job-list {
@@ -163,6 +210,27 @@
             border-radius: 16px;
             padding: 28px 28px;
             box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .job-select {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 110px;
+            color: #475569;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .job-select input {
+            width: 18px;
+            height: 18px;
+            accent-color: #86a8c5;
+            cursor: pointer;
+        }
+
+        .job-main {
+            flex: 1;
         }
 
         .job-main h2 {
@@ -259,6 +327,11 @@
                 grid-template-columns: 1fr 1fr;
             }
 
+            .selection-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
             .job-card {
                 flex-direction: column;
                 align-items: flex-start;
@@ -300,6 +373,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .selection-toolbar {
+                padding: 16px;
+            }
+
             .job-actions {
                 flex-direction: column;
             }
@@ -329,128 +406,273 @@
             <div class="toolbar">
                 <input id="searchInput" class="input" type="text" placeholder="Search jobs...">
                 <select id="typeFilter" class="select">
-                    <option value="">All</option>
+                    <option value="">All Modules</option>
                     <option value="programming">Programming</option>
                     <option value="database">Database</option>
                     <option value="web">Web</option>
                 </select>
                 <select id="skillFilter" class="select">
-                    <option value="">Skills</option>
+                    <option value="">All Skills</option>
                     <option value="java">Java</option>
                     <option value="sql">SQL</option>
                     <option value="html">HTML/CSS</option>
                 </select>
-                <select id="semesterFilter" class="select">
-                    <option value="">Semester</option>
-                    <option value="spring">Spring</option>
-                    <option value="autumn">Autumn</option>
+                <select id="pageSizeSelect" class="select">
+                    <option value="5">5 / page</option>
+                    <option value="10" selected>10 / page</option>
+                    <option value="20">20 / page</option>
                 </select>
-                <button class="btn btn-filter" onclick="filterJobs()">Filter</button>
+                <button id="filterBtn" class="btn btn-filter" type="button">Filter</button>
             </div>
 
             <div class="divider"></div>
 
-            <section id="jobList" class="job-list">
-                <article class="job-card"
-                         data-title="programming ta"
-                         data-type="programming"
-                         data-skill="java"
-                         data-semester="spring">
-                    <div class="job-main">
-                        <h2>Programming TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Java Programming</div>
-                            <div>Deadline: Jan 25, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=1">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=1">Apply</a>
-                    </div>
-                </article>
+            <div class="selection-toolbar">
+                <div class="selection-status">
+                    <div id="selectionCount" class="selection-count">0 jobs selected</div>
+                    <div id="selectionMessage" class="selection-message" aria-live="polite"></div>
+                </div>
+                <button id="applySelectedBtn" class="btn btn-primary" type="button">Apply to Selected Jobs</button>
+            </div>
 
-                <article class="job-card"
-                         data-title="database ta"
-                         data-type="database"
-                         data-skill="sql"
-                         data-semester="spring">
-                    <div class="job-main">
-                        <h2>Database TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Database Systems</div>
-                            <div>Deadline: Jan 30, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=2">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=2">Apply</a>
-                    </div>
-                </article>
-
-                <article class="job-card"
-                         data-title="web development ta"
-                         data-type="web"
-                         data-skill="html"
-                         data-semester="spring">
-                    <div class="job-main">
-                        <h2>Web Development TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Web Technologies</div>
-                            <div>Deadline: Feb 5, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=3">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=3">Apply</a>
-                    </div>
-                </article>
-            </section>
+            <section id="jobList" class="job-list"></section>
 
             <div id="emptyTip" class="empty-tip">No jobs match your current filters.</div>
 
-            <div class="pagination">
-                <a class="page-btn active" href="#">1</a>
-                <a class="page-btn" href="#">2</a>
-                <a class="page-btn" href="#">3</a>
-                <a class="page-btn" href="#">›</a>
-            </div>
+            <div id="pagination" class="pagination"></div>
         </main>
     </div>
 </div>
 
 <script>
-    function filterJobs() {
-        const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-        const type = document.getElementById("typeFilter").value;
-        const skill = document.getElementById("skillFilter").value;
-        const semester = document.getElementById("semesterFilter").value;
+    const state = {
+        page: 1,
+        size: 10,
+        total: 0,
+        items: []
+    };
 
-        const cards = document.querySelectorAll(".job-card");
-        const emptyTip = document.getElementById("emptyTip");
+    const jobListEl = document.getElementById("jobList");
+    const emptyTipEl = document.getElementById("emptyTip");
+    const paginationEl = document.getElementById("pagination");
+    const searchInputEl = document.getElementById("searchInput");
+    const typeFilterEl = document.getElementById("typeFilter");
+    const skillFilterEl = document.getElementById("skillFilter");
+    const pageSizeSelectEl = document.getElementById("pageSizeSelect");
+    const filterBtnEl = document.getElementById("filterBtn");
+    const selectionCountEl = document.getElementById("selectionCount");
+    const selectionMessageEl = document.getElementById("selectionMessage");
+    const applySelectedBtnEl = document.getElementById("applySelectedBtn");
+    const selectedJobIds = new Set();
 
-        let visibleCount = 0;
-
-        cards.forEach(card => {
-            const title = card.dataset.title;
-            const cardType = card.dataset.type;
-            const cardSkill = card.dataset.skill;
-            const cardSemester = card.dataset.semester;
-
-            const matchKeyword = !keyword || title.includes(keyword);
-            const matchType = !type || cardType === type;
-            const matchSkill = !skill || cardSkill === skill;
-            const matchSemester = !semester || cardSemester === semester;
-
-            if (matchKeyword && matchType && matchSkill && matchSemester) {
-                card.style.display = "flex";
-                visibleCount++;
-            } else {
-                card.style.display = "none";
-            }
+    async function api(url) {
+        const response = await fetch(url, {
+            headers: {"Content-Type": "application/json"}
         });
-
-        emptyTip.style.display = visibleCount === 0 ? "block" : "none";
+        const text = await response.text();
+        let body = {};
+        try {
+            body = text ? JSON.parse(text) : {};
+        } catch (_) {
+            body = {error: text || ("HTTP " + response.status)};
+        }
+        if (!response.ok) {
+            throw new Error(body.error || ("HTTP " + response.status));
+        }
+        return body;
     }
+
+    function buildQuery() {
+        return [
+            searchInputEl.value.trim(),
+            typeFilterEl.value,
+            skillFilterEl.value
+        ].filter(Boolean).join(" ");
+    }
+
+    function fmtDate(value) {
+        const timestamp = Date.parse(value || "");
+        if (Number.isNaN(timestamp)) {
+            return "-";
+        }
+        return new Date(timestamp).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function renderSelectionSummary() {
+        const count = selectedJobIds.size;
+        selectionCountEl.textContent = count + (count === 1 ? " job selected" : " jobs selected");
+        applySelectedBtnEl.style.opacity = count === 0 ? "0.85" : "1";
+    }
+
+    function setSelectionMessage(message, isError) {
+        selectionMessageEl.textContent = message || "";
+        selectionMessageEl.className = "selection-message" + (message && isError ? " error" : "");
+    }
+
+    function renderJobs() {
+        jobListEl.innerHTML = "";
+        if (!state.items.length) {
+            emptyTipEl.style.display = "block";
+            return;
+        }
+        emptyTipEl.style.display = "none";
+
+        state.items.forEach((job) => {
+            const card = document.createElement("article");
+            card.className = "job-card";
+
+            const selector = document.createElement("label");
+            selector.className = "job-select";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = selectedJobIds.has(job.jobId);
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked) {
+                    selectedJobIds.add(job.jobId);
+                } else {
+                    selectedJobIds.delete(job.jobId);
+                }
+                setSelectionMessage("", false);
+                renderSelectionSummary();
+            });
+            selector.appendChild(checkbox);
+
+            const selectorText = document.createElement("span");
+            selectorText.textContent = "Select";
+            selector.appendChild(selectorText);
+
+            const main = document.createElement("div");
+            main.className = "job-main";
+
+            const title = document.createElement("h2");
+            title.textContent = job.title + " (" + job.jobId + ")";
+            main.appendChild(title);
+
+            const meta = document.createElement("div");
+            meta.className = "job-meta";
+            meta.innerHTML = ""
+                + "<div>Module: " + (job.moduleCode || "-") + "</div>"
+                + "<div>Required Skills: " + (job.requiredSkills || "-") + "</div>"
+                + "<div>Slots: " + String(job.slots ?? "-") + " | Status: " + (job.status || "-") + "</div>"
+                + "<div>Posted At: " + fmtDate(job.createdAt) + "</div>";
+            main.appendChild(meta);
+
+            const actions = document.createElement("div");
+            actions.className = "job-actions";
+
+            const detailLink = document.createElement("a");
+            detailLink.className = "action-btn";
+            detailLink.href = "job-detail.jsp?jobId=" + encodeURIComponent(job.jobId);
+            detailLink.textContent = "View Details";
+            actions.appendChild(detailLink);
+
+            const applyLink = document.createElement("a");
+            applyLink.className = "action-btn primary";
+            applyLink.href = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+            applyLink.textContent = "Apply";
+            actions.appendChild(applyLink);
+
+            card.appendChild(selector);
+            card.appendChild(main);
+            card.appendChild(actions);
+            jobListEl.appendChild(card);
+        });
+    }
+
+    function renderPagination() {
+        paginationEl.innerHTML = "";
+        const totalPages = Math.max(1, Math.ceil(state.total / state.size));
+        if (totalPages <= 1) {
+            return;
+        }
+
+        const addButton = (label, targetPage, isActive, disabled) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "page-btn" + (isActive ? " active" : "");
+            btn.textContent = label;
+            btn.disabled = disabled;
+            btn.style.cursor = disabled ? "not-allowed" : "pointer";
+            btn.addEventListener("click", async () => {
+                if (disabled || targetPage === state.page) {
+                    return;
+                }
+                state.page = targetPage;
+                await loadJobs();
+            });
+            paginationEl.appendChild(btn);
+        };
+
+        addButton("‹", state.page - 1, false, state.page <= 1);
+
+        const start = Math.max(1, state.page - 1);
+        const end = Math.min(totalPages, start + 2);
+        for (let page = start; page <= end; page++) {
+            addButton(String(page), page, page === state.page, false);
+        }
+
+        addButton("›", state.page + 1, false, state.page >= totalPages);
+    }
+
+    async function loadJobs() {
+        const query = buildQuery();
+        state.size = Math.max(1, Number(pageSizeSelectEl.value) || 10);
+        const url = "/jobs?status=OPEN&page=" + encodeURIComponent(state.page)
+            + "&size=" + encodeURIComponent(state.size)
+            + "&q=" + encodeURIComponent(query);
+        const data = await api(url);
+        state.total = Number(data.total || 0);
+        state.items = data.items || [];
+
+        const totalPages = Math.max(1, Math.ceil(state.total / state.size));
+        if (state.page > totalPages) {
+            state.page = totalPages;
+            return loadJobs();
+        }
+
+        renderJobs();
+        renderPagination();
+    }
+
+    async function applyFilters() {
+        state.page = 1;
+        await loadJobs();
+    }
+
+    applySelectedBtnEl.addEventListener("click", () => {
+        if (selectedJobIds.size === 0) {
+            setSelectionMessage("Please select at least one job before applying.", true);
+            renderSelectionSummary();
+            return;
+        }
+
+        setSelectionMessage("", false);
+        const ids = Array.from(selectedJobIds);
+        window.location.href = "apply.jsp?jobIds=" + encodeURIComponent(ids.join(","));
+    });
+    filterBtnEl.addEventListener("click", applyFilters);
+    pageSizeSelectEl.addEventListener("change", applyFilters);
+    searchInputEl.addEventListener("keydown", async (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            await applyFilters();
+        }
+    });
+
+    loadJobs().catch((error) => {
+        jobListEl.innerHTML = "";
+        emptyTipEl.textContent = error.message;
+        emptyTipEl.style.display = "block";
+        paginationEl.innerHTML = "";
+    });
+    renderSelectionSummary();
 </script>
 </body>
 </html>

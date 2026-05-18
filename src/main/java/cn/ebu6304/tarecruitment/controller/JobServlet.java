@@ -20,9 +20,11 @@ public class JobServlet extends BaseServlet {
             int size = readIntParameter(request, "size", 10);
 
             List<JobPosting> jobs = appContext.jobService().listJobs(q, status, page, size);
+            long total = appContext.jobService().countJobs(q, status);
             writeJson(response, 200, Map.of(
                     "page", page,
                     "size", size,
+                    "total", total,
                     "count", jobs.size(),
                     "items", jobs
             ));

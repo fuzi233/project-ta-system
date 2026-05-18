@@ -8,13 +8,14 @@
     }
 %>
 <%
-    String id = request.getParameter("id");
-
-    String jobTitle = "Programming TA";
-    if ("2".equals(id)) {
-        jobTitle = "Database TA";
-    } else if ("3".equals(id)) {
-        jobTitle = "Web Development TA";
+    String selectedJobIds = request.getParameter("jobIds");
+    String selectedJobId = request.getParameter("jobId");
+    String pageLabel = "Selected Job";
+    if (selectedJobIds != null && !selectedJobIds.isBlank()) {
+        int selectedCount = selectedJobIds.split(",").length;
+        pageLabel = selectedCount > 1 ? (selectedCount + " Selected Jobs") : "Selected Job";
+    } else if (selectedJobId != null && !selectedJobId.isBlank()) {
+        pageLabel = selectedJobId.trim();
     }
 %>
 
@@ -23,7 +24,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply - <%= jobTitle %></title>
+    <title>Apply - <%= pageLabel %></title>
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
@@ -242,6 +243,17 @@
             border: none;
         }
 
+        .selection-summary {
+            margin-bottom: 22px;
+            padding: 16px 18px;
+            border-radius: 14px;
+            border: 1px solid #d9e2ec;
+            background: #f8fbfe;
+            color: #475569;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
         .success-box {
             display: none;
             margin-top: 22px;
@@ -322,11 +334,12 @@
             <div class="breadcrumb">
                 <a href="index.jsp">Home</a> &nbsp;›&nbsp;
                 <a href="jobs.jsp">Job List</a> &nbsp;›&nbsp;
-                Apply for <%= jobTitle %>
+                <span id="applyTargetLabel"><%= pageLabel %></span>
             </div>
 
-            <h1 class="title"><%= jobTitle %> Application Form</h1>
+            <h1 id="applyTitle" class="title"><%= pageLabel %> Application Form</h1>
             <div class="divider"></div>
+            <div id="selectionSummary" class="selection-summary">Loading selected jobs...</div>
 
             <form id="applyForm" onsubmit="submitApplication(event)">
                 <div class="form-layout">
@@ -383,7 +396,7 @@
                             </div>
 
                             <div class="footer-actions">
-                                <button class="footer-btn primary" type="submit">Submit Application</button>
+                                <button id="submitApplicationBtn" class="footer-btn primary" type="submit">Submit Application</button>
                                 <button class="footer-btn" type="reset">Cancel</button>
                             </div>
 
@@ -398,7 +411,7 @@
 
                     <section class="panel">
                         <div class="action-col">
-                            <button class="action-btn primary" type="submit">Apply Now</button>
+                            <button id="applyNowBtn" class="action-btn primary" type="submit">Apply Now</button>
                             <a class="action-btn" href="jobs.jsp">Back</a>
                         </div>
                     </section>
@@ -427,6 +440,17 @@
         return body;
     }
 
+    const applyState = {
+        jobs: [],
+        unresolvedCandidates: []
+    };
+
+    const applyTitleEl = document.getElementById("applyTitle");
+    const applyTargetLabelEl = document.getElementById("applyTargetLabel");
+    const selectionSummaryEl = document.getElementById("selectionSummary");
+    const submitApplicationBtnEl = document.getElementById("submitApplicationBtn");
+    const applyNowBtnEl = document.getElementById("applyNowBtn");
+
     function mapLegacyIdToJobId(raw) {
         if (!raw) {
             return "";
@@ -441,25 +465,133 @@
         return "";
     }
 
-    async function resolveJobId() {
+    function parseRequestedJobCandidates() {
         const params = new URLSearchParams(window.location.search);
-        const candidate = params.get("jobId") || params.get("id") || "";
-        const mapped = mapLegacyIdToJobId(candidate);
+        const multiCandidates = (params.get("jobIds") || "")
+            .split(",")
+            .map((value) => value.trim())
+            .filter(Boolean);
+        if (multiCandidates.length) {
+            return multiCandidates;
+        }
+        const candidate = (params.get("jobId") || params.get("id") || "").trim();
+        return candidate ? [candidate] : [];
+    }
+
+    async function resolveSelectedJobs() {
+        const candidates = parseRequestedJobCandidates();
         const jobsData = await api("/jobs?status=OPEN&page=1&size=200");
         const jobs = jobsData.items || [];
         if (jobs.length === 0) {
             throw new Error("No open jobs available now.");
         }
-        if (mapped && jobs.some((j) => j.jobId === mapped)) {
-            return mapped;
+
+        if (!candidates.length) {
+            return {
+                jobs: [jobs[0]],
+                unresolvedCandidates: []
+            };
         }
-        if (/^\d+$/.test(String(candidate || ""))) {
-            const index = Number(candidate) - 1;
-            if (index >= 0 && index < jobs.length) {
-                return jobs[index].jobId;
+
+        const resolvedJobs = [];
+        const unresolvedCandidates = [];
+        const seenJobIds = new Set();
+
+        candidates.forEach((candidate) => {
+            const directMatch = jobs.find((job) => String(job.jobId || "").toLowerCase() === candidate.toLowerCase());
+            if (directMatch) {
+                if (!seenJobIds.has(directMatch.jobId)) {
+                    resolvedJobs.push(directMatch);
+                    seenJobIds.add(directMatch.jobId);
+                }
+                return;
             }
+
+            const mapped = mapLegacyIdToJobId(candidate);
+            if (mapped) {
+                const mappedJob = jobs.find((job) => job.jobId === mapped);
+                if (mappedJob) {
+                    if (!seenJobIds.has(mappedJob.jobId)) {
+                        resolvedJobs.push(mappedJob);
+                        seenJobIds.add(mappedJob.jobId);
+                    }
+                    return;
+                }
+            }
+
+            if (/^\d+$/.test(candidate)) {
+                const index = Number(candidate) - 1;
+                if (index >= 0 && index < jobs.length) {
+                    const indexedJob = jobs[index];
+                    if (!seenJobIds.has(indexedJob.jobId)) {
+                        resolvedJobs.push(indexedJob);
+                        seenJobIds.add(indexedJob.jobId);
+                    }
+                    return;
+                }
+            }
+
+            unresolvedCandidates.push(candidate);
+        });
+
+        if (!resolvedJobs.length) {
+            throw new Error("No selected jobs are available for application.");
         }
-        return jobs[0].jobId;
+
+        return {
+            jobs: resolvedJobs,
+            unresolvedCandidates: unresolvedCandidates
+        };
+    }
+
+    function updateApplyHeading() {
+        const count = applyState.jobs.length;
+        const label = count === 1
+            ? ("Apply for " + applyState.jobs[0].title + " (" + applyState.jobs[0].jobId + ")")
+            : ("Apply for " + count + " Selected Jobs");
+        const submitLabel = count > 1 ? "Submit Applications" : "Submit Application";
+        const sideActionLabel = count > 1 ? "Apply to Selected Jobs" : "Apply Now";
+
+        applyTargetLabelEl.textContent = label;
+        applyTitleEl.textContent = label + " Application Form";
+        document.title = label + " - Application";
+        submitApplicationBtnEl.textContent = submitLabel;
+        applyNowBtnEl.textContent = sideActionLabel;
+    }
+
+    function renderSelectionSummary() {
+        const selectedList = applyState.jobs
+            .map((job) => job.title + " (" + job.jobId + ")")
+            .join(", ");
+        let summaryText = "You are applying for " + applyState.jobs.length
+            + (applyState.jobs.length === 1 ? " job: " : " jobs: ")
+            + selectedList + ".";
+
+        if (applyState.unresolvedCandidates.length) {
+            summaryText += " Ignored unavailable selections: " + applyState.unresolvedCandidates.join(", ") + ".";
+        }
+
+        selectionSummaryEl.textContent = summaryText;
+    }
+
+    async function submitSingleApplication(form, jobId) {
+        const formData = new FormData(form);
+        formData.set("jobId", jobId);
+        const response = await fetch("/applications", {
+            method: "POST",
+            body: formData
+        });
+        const text = await response.text();
+        let result = {};
+        try {
+            result = text ? JSON.parse(text) : {};
+        } catch (_) {
+            result = {error: text || ("HTTP " + response.status)};
+        }
+        if (!response.ok) {
+            throw new Error(result.error || ("HTTP " + response.status));
+        }
+        return result;
     }
 
     async function submitApplication(event) {
@@ -507,35 +639,46 @@
         });
 
         try {
-            const jobId = await resolveJobId();
-            const formData = new FormData(form);
-            formData.set("jobId", jobId);
-            const response = await fetch("/applications", {
-                method: "POST",
-                body: formData
-            });
-            const text = await response.text();
-            let result = {};
-            try {
-                result = text ? JSON.parse(text) : {};
-            } catch (_) {
-                result = {error: text || ("HTTP " + response.status)};
+            if (!applyState.jobs.length) {
+                throw new Error("Please select at least one job from the job list before applying.");
             }
-            if (!response.ok) {
-                throw new Error(result.error || ("HTTP " + response.status));
+
+            let createdCount = 0;
+            let duplicateCount = 0;
+            let uploadedAttachments = 0;
+            const failedJobs = [];
+
+            for (const job of applyState.jobs) {
+                try {
+                    const result = await submitSingleApplication(form, job.jobId);
+                    if (result.created === false) {
+                        duplicateCount++;
+                    } else {
+                        createdCount++;
+                    }
+                    uploadedAttachments += Array.isArray(result.attachments) ? result.attachments.length : 0;
+                } catch (error) {
+                    failedJobs.push(job.jobId + ": " + error.message);
+                }
             }
-            if (result.created === false) {
-                successBox.textContent = "Application already exists. Redirecting to My Applications...";
-            } else {
-                const uploaded = Array.isArray(result.attachments) ? result.attachments.length : 0;
-                successBox.textContent = "Application submitted successfully"
-                    + (uploaded > 0 ? (" (" + uploaded + " attachment(s) uploaded)") : "")
-                    + ". Redirecting...";
+
+            if (failedJobs.length) {
+                throw new Error("Some applications could not be submitted: " + failedJobs.join(" | "));
             }
+
+            successBox.textContent = createdCount + (createdCount === 1 ? " application submitted" : " applications submitted");
+            if (duplicateCount > 0) {
+                successBox.textContent += ", " + duplicateCount
+                    + (duplicateCount === 1 ? " already existed" : " already existed");
+            }
+            if (uploadedAttachments > 0) {
+                successBox.textContent += " (" + uploadedAttachments + " attachment(s) uploaded)";
+            }
+            successBox.textContent += ". Redirecting...";
             successBox.style.display = "block";
             setTimeout(function () {
                 window.location.href = "applications.jsp";
-            }, 900);
+            }, 1100);
         } catch (error) {
             errorBox.textContent = error.message;
             errorBox.style.display = "block";
@@ -545,6 +688,17 @@
             });
         }
     }
+
+    resolveSelectedJobs()
+        .then((selection) => {
+            applyState.jobs = selection.jobs;
+            applyState.unresolvedCandidates = selection.unresolvedCandidates;
+            updateApplyHeading();
+            renderSelectionSummary();
+        })
+        .catch((error) => {
+            selectionSummaryEl.textContent = error.message;
+        });
 </script>
 </body>
 </html>

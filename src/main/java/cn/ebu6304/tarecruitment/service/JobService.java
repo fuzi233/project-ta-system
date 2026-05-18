@@ -50,6 +50,10 @@ public class JobService {
         return jobRepository.list(query, status, normalizedPage, normalizedSize);
     }
 
+    public long countJobs(String query, String status) {
+        return jobRepository.count(query, status);
+    }
+
     public Optional<JobPosting> findByJobId(String jobId) {
         String normalizedJobId = Validators.requireNonBlank(jobId, "jobId");
         return jobRepository.findByJobId(normalizedJobId);

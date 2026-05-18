@@ -93,6 +93,30 @@ class ApplicationServiceTest {
     }
 
     @Test
+    void submitDifferentJobsForSameApplicantShouldCreateSeparateApplications() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-multi-job");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonlFileStore<JobPosting> jobStore = new JsonlFileStore<>(tempDir.resolve("jobs.jsonl"), JobPosting.class, mapper);
+        JsonlFileStore<ApplicationRecord> appStore = new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper);
+
+        JobRepository jobRepository = new JobRepository(jobStore);
+        ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-2", "Database TA", "CS102", "SQL", 1, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+
+        ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
+        ApplicationService.SubmitResponse first = service.submitApplication(null, "ta001", "job-1");
+        ApplicationService.SubmitResponse second = service.submitApplication(null, "ta001", "job-2");
+
+        assertTrue(first.created());
+        assertTrue(second.created());
+        assertEquals("job-1", first.record().jobId());
+        assertEquals("job-2", second.record().jobId());
+        assertEquals(2, service.totalApplications());
+    }
+
+    @Test
     void updateSameStatusShouldNotThrow() throws Exception {
         Path tempDir = Files.createTempDirectory("ta-system-update-same");
         ObjectMapper mapper = new ObjectMapper();
