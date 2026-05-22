@@ -3,3 +3,5 @@
 {"jobId": "job-003", "title": "NLP Lab Assistant", "moduleCode": "EBU6402", "requiredSkills": "Natural Language Processing,Python,Prompt Engineering", "slots": 2, "status": "OPEN", "createdBy": "mo-002", "createdAt": "2026-04-10T06:00:00+00:00"}
 {"jobId": "job-004", "title": "Web Development TA", "moduleCode": "EBU6108", "requiredSkills": "JavaScript,Web Development,HTML/CSS,Testing", "slots": 2, "status": "OPEN", "createdBy": "mo-003", "createdAt": "2026-04-10T03:00:00+00:00"}
 {"jobId": "job-005", "title": "Data Analysis TA", "moduleCode": "EBU6005", "requiredSkills": "Data Analysis,Python,Excel,Statistics", "slots": 3, "status": "OPEN", "createdBy": "mo-001", "createdAt": "2026-04-10T00:00:00+00:00"}
+{"jobId":"11","title":"11","moduleCode":"111","requiredSkills":"111","slots":1111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:17.119025500+08:00"}
+{"jobId":"1","title":"11","moduleCode":"111","requiredSkills":"1111","slots":11111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:34.234573+08:00"}

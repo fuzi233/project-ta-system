@@ -19,8 +19,52 @@ async function api(path, options = {}) {
 const state = {
     moUserId: document.body.dataset.moUserId || "",
     jobs: [],
-    applicationsByJob: {}
+    applicationsByJob: {},
+    collapsedJobs: {}
 };
+
+const createJobState = {
+    selectedSkills: []
+};
+
+const COMMON_SKILL_CANONICAL_ZH = {
+    "C": "C",
+    "C++": "C++",
+    "Java": "Java",
+    "Python": "Python",
+    "JavaScript": "JavaScript",
+    "SQL": "SQL",
+    "HTML": "HTML",
+    "CSS": "CSS",
+    "Data Structures": "\u6570\u636e\u7ed3\u6784",
+    "Algorithms": "\u7b97\u6cd5",
+    "Machine Learning": "\u673a\u5668\u5b66\u4e60",
+    "Deep Learning": "\u6df1\u5ea6\u5b66\u4e60",
+    "Artificial Intelligence": "\u4eba\u5de5\u667a\u80fd",
+    "Operating Systems": "\u64cd\u4f5c\u7cfb\u7edf",
+    "Computer Networks": "\u8ba1\u7b97\u673a\u7f51\u7edc",
+    "Database Systems": "\u6570\u636e\u5e93\u7cfb\u7edf",
+    "Linux": "Linux",
+    "Git": "Git",
+    "MATLAB": "MATLAB",
+    "Excel": "Excel",
+    "Communication": "\u6c9f\u901a\u80fd\u529b",
+    "Teaching": "\u6559\u5b66",
+    "Lab Tutoring": "\u5b9e\u9a8c\u8f85\u5bfc",
+    "Report Writing": "\u62a5\u544a\u5199\u4f5c"
+};
+
+const COMMON_SKILL_CANONICAL_EN = Object.fromEntries(
+    Object.entries(COMMON_SKILL_CANONICAL_ZH).map(([en, zh]) => [zh, en])
+);
+
+const COMMON_SKILL_LOOKUP = {};
+Object.keys(COMMON_SKILL_CANONICAL_ZH).forEach((skill) => {
+    COMMON_SKILL_LOOKUP[skill.toLowerCase()] = skill;
+});
+Object.entries(COMMON_SKILL_CANONICAL_EN).forEach(([localizedLabel, canonicalLabel]) => {
+    COMMON_SKILL_LOOKUP[localizedLabel.toLowerCase()] = canonicalLabel;
+});
 
 const tabReviewEl = document.getElementById("tabReview");
 const tabCreateEl = document.getElementById("tabCreate");
@@ -35,6 +79,11 @@ const reviewJobOptionsEl = document.getElementById("reviewJobOptions");
 const reviewClearFilterBtnEl = document.getElementById("reviewClearFilterBtn");
 const moJobFormEl = document.getElementById("mo-job-form");
 const moOutputEl = document.getElementById("mo-output");
+const commonSkillSelectEl = document.getElementById("commonSkillSelect");
+const customSkillInputEl = document.getElementById("customSkillInput");
+const addSkillBtnEl = document.getElementById("addSkillBtn");
+const requiredSkillsInputEl = document.getElementById("requiredSkillsInput");
+const selectedSkillsEl = document.getElementById("selectedSkills");
 
 function switchTab(tabName) {
     const isReview = tabName === "review";
@@ -65,8 +114,251 @@ function fmtDate(value) {
     });
 }
 
-function pretty(value) {
-    return JSON.stringify(value, null, 2);
+function fmtDateOnly(value) {
+    const t = Date.parse(value || "");
+    if (Number.isNaN(t)) {
+        return "-";
+    }
+    return new Date(t).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+    });
+}
+
+function normalizeDeadlineInput(value) {
+    const trimmed = (value || "").trim();
+    const matched = trimmed.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+    if (!matched) {
+        return "";
+    }
+    const year = Number(matched[1]);
+    const month = Number(matched[2]);
+    const day = Number(matched[3]);
+    const parsed = new Date(year, month - 1, day);
+    if (
+        parsed.getFullYear() !== year
+        || parsed.getMonth() !== month - 1
+        || parsed.getDate() !== day
+    ) {
+        return "";
+    }
+    return year + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+}
+
+function setMoOutput(message, tone) {
+    moOutputEl.textContent = message || "";
+    moOutputEl.classList.remove("show", "success", "error");
+    if (!message) {
+        return;
+    }
+    moOutputEl.classList.add("show");
+    if (tone) {
+        moOutputEl.classList.add(tone);
+    }
+}
+
+function syncRequiredSkillsInput() {
+    requiredSkillsInputEl.value = createJobState.selectedSkills.join(",");
+}
+
+function normalizeSkill(rawSkill) {
+    const trimmed = (rawSkill || "").trim();
+    if (!trimmed) {
+        return "";
+    }
+    return COMMON_SKILL_LOOKUP[trimmed.toLowerCase()] || trimmed;
+}
+
+function renderSelectedSkills() {
+    selectedSkillsEl.innerHTML = "";
+    if (!createJobState.selectedSkills.length) {
+        const empty = document.createElement("span");
+        empty.className = "empty-inline";
+        empty.textContent = "No required skills selected yet.";
+        selectedSkillsEl.appendChild(empty);
+        syncRequiredSkillsInput();
+        return;
+    }
+
+    createJobState.selectedSkills.forEach((skill) => {
+        const chip = document.createElement("span");
+        chip.className = "skill-chip";
+        chip.textContent = skill;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "skill-chip-remove";
+        removeBtn.setAttribute("aria-label", "Remove " + skill);
+        removeBtn.textContent = "x";
+        removeBtn.addEventListener("click", () => {
+            createJobState.selectedSkills = createJobState.selectedSkills.filter((item) => item !== skill);
+            renderSelectedSkills();
+        });
+        chip.appendChild(removeBtn);
+        selectedSkillsEl.appendChild(chip);
+    });
+    syncRequiredSkillsInput();
+}
+
+function addRequiredSkill(rawSkill) {
+    const normalizedSkill = normalizeSkill(rawSkill);
+    if (!normalizedSkill) {
+        return false;
+    }
+    const exists = createJobState.selectedSkills.some((skill) => skill.toLowerCase() === normalizedSkill.toLowerCase());
+    if (!exists) {
+        createJobState.selectedSkills.push(normalizedSkill);
+    }
+    renderSelectedSkills();
+    return true;
+}
+
+function clearSkillBuilder() {
+    createJobState.selectedSkills = [];
+    if (commonSkillSelectEl) {
+        commonSkillSelectEl.value = "";
+    }
+    if (customSkillInputEl) {
+        customSkillInputEl.value = "";
+    }
+    renderSelectedSkills();
+}
+
+function populateCommonSkillOptions() {
+    if (!commonSkillSelectEl) {
+        return;
+    }
+    commonSkillSelectEl.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select a common skill";
+    commonSkillSelectEl.appendChild(placeholder);
+
+    Object.entries(COMMON_SKILL_CANONICAL_ZH).forEach(([canonicalSkill, localizedSkill]) => {
+        const option = document.createElement("option");
+        option.value = canonicalSkill;
+        option.textContent = canonicalSkill;
+        commonSkillSelectEl.appendChild(option);
+    });
+}
+
+function normalizeStatus(status) {
+    return (status || "").trim().toUpperCase();
+}
+
+function isPendingStatus(status) {
+    const normalized = normalizeStatus(status);
+    return normalized !== "ACCEPTED" && normalized !== "REJECTED";
+}
+
+function getSortedApplications(jobId) {
+    return [...(state.applicationsByJob[jobId] || [])].sort((a, b) => {
+        const ta = Date.parse(a.submittedAt || "");
+        const tb = Date.parse(b.submittedAt || "");
+        const va = Number.isNaN(ta) ? 0 : ta;
+        const vb = Number.isNaN(tb) ? 0 : tb;
+        return vb - va;
+    });
+}
+
+function summarizeApplications(applications) {
+    const summary = {
+        total: applications.length,
+        pending: 0,
+        accepted: 0,
+        rejected: 0
+    };
+    applications.forEach((application) => {
+        const normalized = normalizeStatus(application.status);
+        if (normalized === "ACCEPTED") {
+            summary.accepted += 1;
+            return;
+        }
+        if (normalized === "REJECTED") {
+            summary.rejected += 1;
+            return;
+        }
+        if (isPendingStatus(application.status)) {
+            summary.pending += 1;
+        }
+    });
+    return summary;
+}
+
+function buildJobSearchBlob(job) {
+    return [
+        job.jobId,
+        job.title,
+        job.moduleCode,
+        job.requiredSkills
+    ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function buildCandidateSearchBlob(job, candidate) {
+    return [
+        job.jobId,
+        job.title,
+        job.moduleCode,
+        candidate.displayName,
+        candidate.applicantId,
+        candidate.applicationId
+    ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function ensureCollapsedState(jobId, collapsed) {
+    if (!Object.prototype.hasOwnProperty.call(state.collapsedJobs, jobId)) {
+        state.collapsedJobs[jobId] = collapsed;
+    }
+}
+
+function buildJobStat(label, value, tone) {
+    const stat = document.createElement("span");
+    stat.className = "job-stat" + (tone ? " " + tone : "");
+    stat.textContent = label + " " + value;
+    return stat;
+}
+
+function buildVisibleJobs() {
+    const selectedJobId = (reviewJobSelectEl.value || "").trim();
+    const keyword = (reviewJobSearchEl.value || "").trim().toLowerCase();
+
+    return state.jobs
+        .map((job) => {
+            const allApplications = getSortedApplications(job.jobId);
+            const stats = summarizeApplications(allApplications);
+            const jobMatchesKeyword = !keyword || buildJobSearchBlob(job).includes(keyword);
+            const matchedApplications = !keyword
+                ? allApplications
+                : allApplications.filter((candidate) => buildCandidateSearchBlob(job, candidate).includes(keyword));
+            const applications = keyword && !jobMatchesKeyword ? matchedApplications : allApplications;
+            return {
+                job: job,
+                stats: stats,
+                jobMatchesKeyword: jobMatchesKeyword,
+                allApplications: allApplications,
+                applications: applications,
+                matchedCount: matchedApplications.length
+            };
+        })
+        .filter((entry) => {
+            if (selectedJobId && entry.job.jobId !== selectedJobId) {
+                return false;
+            }
+            if (!keyword) {
+                return true;
+            }
+            return entry.jobMatchesKeyword || entry.matchedCount > 0;
+        })
+        .sort((a, b) => {
+            if (b.stats.pending !== a.stats.pending) {
+                return b.stats.pending - a.stats.pending;
+            }
+            if (b.stats.total !== a.stats.total) {
+                return b.stats.total - a.stats.total;
+            }
+            return (a.job.title || a.job.jobId || "").localeCompare(b.job.title || b.job.jobId || "");
+        });
 }
 
 function buildStatusSelect(currentStatus) {
@@ -197,6 +489,7 @@ function buildCandidateRow(job, candidate, isLatest) {
 function renderReview() {
     reviewListEl.innerHTML = "";
     if (!state.jobs.length) {
+        reviewHintEl.textContent = "No jobs created by current MO yet.";
         const empty = document.createElement("div");
         empty.className = "panel empty-note";
         empty.textContent = "No jobs created by current MO yet. Please create a job first.";
@@ -204,20 +497,11 @@ function renderReview() {
         return;
     }
 
-    const selectedJobId = (reviewJobSelectEl.value || "").trim();
     const keyword = (reviewJobSearchEl.value || "").trim().toLowerCase();
-    const visibleJobs = state.jobs.filter((job) => {
-        if (selectedJobId && job.jobId !== selectedJobId) {
-            return false;
-        }
-        if (!keyword) {
-            return true;
-        }
-        const blob = (job.jobId + " " + job.title + " " + job.moduleCode).toLowerCase();
-        return blob.includes(keyword);
-    });
+    const visibleJobs = buildVisibleJobs();
 
     if (!visibleJobs.length) {
+        reviewHintEl.textContent = "No jobs match current filter.";
         const empty = document.createElement("div");
         empty.className = "panel empty-note";
         empty.textContent = "No jobs match current filter.";
@@ -225,47 +509,116 @@ function renderReview() {
         return;
     }
 
-    for (const job of visibleJobs) {
+    let visibleApplicationCount = 0;
+
+    for (const entry of visibleJobs) {
+        const job = entry.job;
+        const stats = entry.stats;
+        const applications = entry.applications;
+        visibleApplicationCount += applications.length;
+        ensureCollapsedState(job.jobId, stats.pending === 0);
+
         const block = document.createElement("section");
         block.className = "job-block";
+        if (state.collapsedJobs[job.jobId]) {
+            block.classList.add("collapsed");
+        }
 
         const head = document.createElement("div");
         head.className = "job-head";
+
         const left = document.createElement("div");
+        left.className = "job-head-main";
         const title = document.createElement("h3");
         title.className = "job-title";
         title.textContent = job.title + " (" + job.jobId + ")";
+
         const sub = document.createElement("p");
         sub.className = "job-sub";
-        sub.textContent = "Module " + job.moduleCode + " | Slots " + job.slots + " | Status " + job.status;
+        const subParts = [
+            "Module " + (job.moduleCode || "-"),
+            "Slots " + (job.slots || 0),
+            "Status " + (job.status || "-")
+        ];
+        if (job.hoursPerWeek) {
+            subParts.push("Hours/week " + job.hoursPerWeek);
+        }
+        if (job.applicationDeadline) {
+            subParts.push("Deadline " + fmtDateOnly(job.applicationDeadline));
+        }
+        if (job.monthlyStipend) {
+            subParts.push("Stipend " + job.monthlyStipend + " Yuan");
+        }
+        if (keyword && !entry.jobMatchesKeyword && entry.matchedCount > 0) {
+            subParts.push(entry.matchedCount + " candidate match" + (entry.matchedCount === 1 ? "" : "es"));
+        }
+        sub.textContent = subParts.join(" | ");
+
+        const summary = document.createElement("div");
+        summary.className = "job-head-summary";
+        summary.appendChild(buildJobStat("Total", stats.total, ""));
+        summary.appendChild(buildJobStat("Pending", stats.pending, "pending"));
+        summary.appendChild(buildJobStat("Accepted", stats.accepted, "accepted"));
+        summary.appendChild(buildJobStat("Rejected", stats.rejected, "rejected"));
+
         left.appendChild(title);
         left.appendChild(sub);
+        left.appendChild(summary);
         head.appendChild(left);
+
+        const actions = document.createElement("div");
+        actions.className = "job-head-actions";
+
+        if (stats.pending > 0) {
+            const focus = document.createElement("span");
+            focus.className = "job-focus";
+            focus.textContent = "Priority job";
+            actions.appendChild(focus);
+        }
+
+        if (keyword && !entry.jobMatchesKeyword && entry.matchedCount > 0) {
+            const note = document.createElement("span");
+            note.className = "match-note";
+            note.textContent = "Showing matched candidates";
+            actions.appendChild(note);
+        }
+
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "btn ghost job-toggle";
+        toggleBtn.setAttribute("aria-expanded", state.collapsedJobs[job.jobId] ? "false" : "true");
+        toggleBtn.textContent = state.collapsedJobs[job.jobId] ? "Expand" : "Collapse";
+        toggleBtn.addEventListener("click", () => {
+            state.collapsedJobs[job.jobId] = !state.collapsedJobs[job.jobId];
+            renderReview();
+        });
+        actions.appendChild(toggleBtn);
+        head.appendChild(actions);
         block.appendChild(head);
 
         const list = document.createElement("div");
         list.className = "candidate-list";
-        const applications = [...(state.applicationsByJob[job.jobId] || [])]
-            .sort((a, b) => {
-                const ta = Date.parse(a.submittedAt || "");
-                const tb = Date.parse(b.submittedAt || "");
-                const va = Number.isNaN(ta) ? 0 : ta;
-                const vb = Number.isNaN(tb) ? 0 : tb;
-                return vb - va;
-            });
         if (!applications.length) {
             const emptyLine = document.createElement("div");
             emptyLine.className = "empty-inline";
-            emptyLine.textContent = "No applications for this job yet.";
+            emptyLine.textContent = keyword
+                ? "No candidates in this job match the current search."
+                : "No applications for this job yet.";
             list.appendChild(emptyLine);
         } else {
-            applications.forEach((candidate, index) => {
-                list.appendChild(buildCandidateRow(job, candidate, index === 0));
+            const latestApplicationId = entry.allApplications[0] ? entry.allApplications[0].applicationId : "";
+            applications.forEach((candidate) => {
+                const isLatest = Boolean(latestApplicationId) && candidate.applicationId === latestApplicationId;
+                list.appendChild(buildCandidateRow(job, candidate, isLatest));
             });
         }
         block.appendChild(list);
         reviewListEl.appendChild(block);
     }
+
+    reviewHintEl.textContent = keyword
+        ? "Showing " + visibleJobs.length + " jobs / " + visibleApplicationCount + " filtered applications."
+        : "Showing " + visibleJobs.length + " jobs / " + visibleApplicationCount + " applications.";
 }
 
 async function loadReviewData() {
@@ -276,6 +629,9 @@ async function loadReviewData() {
         const jobs = (jobsResp.items || []).filter((item) => item.createdBy === state.moUserId);
         state.jobs = jobs;
         state.applicationsByJob = {};
+        state.collapsedJobs = Object.fromEntries(
+            Object.entries(state.collapsedJobs).filter(([jobId]) => jobs.some((job) => job.jobId === jobId))
+        );
 
         await Promise.all(jobs.map(async (job) => {
             const resp = await api("mo/candidates?jobId=" + encodeURIComponent(job.jobId) + "&page=1&size=500");
@@ -284,7 +640,6 @@ async function loadReviewData() {
 
         populateJobOptions();
         renderReview();
-        reviewHintEl.textContent = "Loaded " + jobs.length + " jobs.";
     } catch (error) {
         reviewHintEl.textContent = error.message;
         reviewListEl.innerHTML = "";
@@ -298,6 +653,7 @@ async function loadReviewData() {
 }
 
 function populateJobOptions() {
+    const previousValue = reviewJobSelectEl.value;
     reviewJobOptionsEl.innerHTML = "";
     reviewJobSelectEl.innerHTML = "";
 
@@ -319,6 +675,14 @@ function populateJobOptions() {
         const titleOpt = document.createElement("option");
         titleOpt.value = job.title;
         reviewJobOptionsEl.appendChild(titleOpt);
+
+        const moduleOpt = document.createElement("option");
+        moduleOpt.value = job.moduleCode;
+        reviewJobOptionsEl.appendChild(moduleOpt);
+    }
+
+    if (previousValue && state.jobs.some((job) => job.jobId === previousValue)) {
+        reviewJobSelectEl.value = previousValue;
     }
 }
 
@@ -327,42 +691,70 @@ tabCreateEl.addEventListener("click", () => switchTab("create"));
 reviewRefreshBtnEl.addEventListener("click", async () => {
     await loadReviewData();
 });
-reviewJobSelectEl.addEventListener("change", () => {
-    if (reviewJobSelectEl.value) {
-        const selected = state.jobs.find((job) => job.jobId === reviewJobSelectEl.value);
-        reviewJobSearchEl.value = selected ? selected.jobId : "";
-    }
-    renderReview();
-});
-reviewJobSearchEl.addEventListener("input", () => {
-    const kw = (reviewJobSearchEl.value || "").trim().toLowerCase();
-    const matched = state.jobs.find((job) => {
-        const blob = (job.jobId + " " + job.title + " " + job.moduleCode).toLowerCase();
-        return blob === kw || job.jobId.toLowerCase() === kw;
-    });
-    reviewJobSelectEl.value = matched ? matched.jobId : "";
-    renderReview();
-});
+reviewJobSelectEl.addEventListener("change", renderReview);
+reviewJobSearchEl.addEventListener("input", renderReview);
 reviewClearFilterBtnEl.addEventListener("click", () => {
     reviewJobSelectEl.value = "";
     reviewJobSearchEl.value = "";
     renderReview();
 });
 
+populateCommonSkillOptions();
+renderSelectedSkills();
+
+addSkillBtnEl.addEventListener("click", () => {
+    const candidateSkill = (customSkillInputEl.value || "").trim() || (commonSkillSelectEl.value || "").trim();
+    if (!addRequiredSkill(candidateSkill)) {
+        setMoOutput("Please choose or enter a required skill before adding.", "error");
+        return;
+    }
+    customSkillInputEl.value = "";
+    commonSkillSelectEl.value = "";
+    setMoOutput("", "");
+});
+
+customSkillInputEl.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") {
+        return;
+    }
+    event.preventDefault();
+    addSkillBtnEl.click();
+});
+
 moJobFormEl.addEventListener("submit", async (event) => {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(moJobFormEl).entries());
+    if (!requiredSkillsInputEl.value) {
+        setMoOutput("Please add at least one required skill.", "error");
+        return;
+    }
+    const normalizedDeadline = normalizeDeadlineInput(payload.applicationDeadline);
+    if (!normalizedDeadline) {
+        setMoOutput("Application Deadline must use yyyy/m/d or yyyy/mm/dd, for example 2026/5/24.", "error");
+        return;
+    }
+    payload.applicationDeadline = normalizedDeadline;
     payload.slots = Number(payload.slots);
+    payload.hoursPerWeek = Number(payload.hoursPerWeek);
+    payload.monthlyStipend = Number(payload.monthlyStipend);
+    setMoOutput("", "");
     try {
         const data = await api("mo/jobs", {
             method: "POST",
             body: JSON.stringify(payload)
         });
-        moOutputEl.textContent = pretty(data);
+        const createdJob = data.record || {};
+        setMoOutput(
+            "Job created successfully: " + (createdJob.title || payload.title)
+            + " (" + (createdJob.jobId || payload.jobId) + ").",
+            "success"
+        );
+        moJobFormEl.reset();
+        clearSkillBuilder();
         await loadReviewData();
-        switchTab("review");
+        reviewHintEl.textContent = "Job " + (createdJob.jobId || payload.jobId) + " created successfully.";
     } catch (error) {
-        moOutputEl.textContent = error.message;
+        setMoOutput(error.message, "error");
     }
 });
 

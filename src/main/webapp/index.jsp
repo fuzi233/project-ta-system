@@ -1452,6 +1452,10 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
+        function isBuptEmail(email) {
+            return isEmailValid(email) && /@bupt\.edu\.cn$/i.test(email);
+        }
+
         function updateLoginIdentifierUi(role) {
             var input = document.getElementById("loginIdentifier");
             var hint = document.getElementById("loginCredentialHint");
@@ -1475,15 +1479,19 @@
         function updateRegisterIdentifierUi(role) {
             var input = document.getElementById("registerIdentifier");
             var hint = document.getElementById("registerIdentifierHint");
+            var emailHint = document.getElementById("registerEmailHint");
             if (role === "TA") {
                 input.placeholder = "Student ID or email";
                 hint.textContent = "Example: ta001 or ta001@bupt.edu.cn";
+                emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
             } else if (role === "MO") {
                 input.placeholder = "Staff ID or email";
                 hint.textContent = "Example: TCH1001 or mo001@bupt.edu.cn";
+                emailHint.textContent = "MO registration email must end with @bupt.edu.cn";
             } else {
                 input.placeholder = "Admin username";
                 hint.textContent = "Example: hradmin";
+                emailHint.textContent = "Use a valid email format, e.g. name@example.com";
             }
         }
 
@@ -1589,6 +1597,9 @@
 
             if (!isEmailValid(email)) {
                 setFieldError("registerEmailField", "registerEmailError", "Please enter a valid email address.");
+                ok = false;
+            } else if ((role === "TA" || role === "MO") && !isBuptEmail(email)) {
+                setFieldError("registerEmailField", "registerEmailError", "TA/MO registration email must end with @bupt.edu.cn.");
                 ok = false;
             } else {
                 setFieldError("registerEmailField", "registerEmailError", "");
@@ -1714,7 +1725,12 @@
                 });
                 var registerResult = await registerResponse.json();
                 if (!registerResponse.ok) {
-                    setFieldError("registerIdentifierField", "registerIdentifierError", registerResult.error || "Registration failed.");
+                    var errorMessage = registerResult.error || "Registration failed.";
+                    if (/email/i.test(errorMessage)) {
+                        setFieldError("registerEmailField", "registerEmailError", errorMessage);
+                    } else {
+                        setFieldError("registerIdentifierField", "registerIdentifierError", errorMessage);
+                    }
                     return;
                 }
                 showToast("Account created.");
