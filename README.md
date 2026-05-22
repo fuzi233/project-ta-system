@@ -43,7 +43,7 @@ mvn jetty:run
 ```
 
 Then open:
-- `http://localhost:8080/`
+- `http://localhost:8080/
 - `http://localhost:8080/jobs.jsp`
 - `http://localhost:8080/mo.jsp`
 - `http://localhost:8080/admin.jsp`
@@ -93,6 +93,6 @@ Details:
 - `TEST_DOCS_DELIVERY_SUMMARY.md`
 
 ## Branch Workflow
-
+`
 - personal branch -> PR -> `project-ta-system`
 - no direct push to `main` for code
