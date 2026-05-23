@@ -1,11 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
 <%
-    String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
-    if (role == null || !AuthSession.ROLE_TA.equalsIgnoreCase(role)) {
-        response.sendRedirect("index.jsp");
-        return;
-    }
+    String role = (String) session.getAttribute("role");
 %>
 <!DOCTYPE html>
 <html lang="en">
