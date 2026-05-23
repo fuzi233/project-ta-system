@@ -1,5 +1,17 @@
-.DS_Store
-target/
-out/
+# IntelliJ
 .idea/
 *.iml
+
+# Build outputs
+target/
+out/
+
+# Local AI config (keep secrets local)
+config/ai.local.properties
+
+# OS
+.DS_Store
+
+# Runtime data artifacts
+data/uploads/
+data/*.lock

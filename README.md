@@ -1,8 +1,6 @@
-# EBU6304 TA Recruitment System
+# TA Recruitment System (Servlet/JSP Prototype)
 
-BUPT International School Teaching Assistant Recruitment System.
-
-This repository follows the EBU6304 group-project workflow and assessment schedule.
+EBU6304 group project implementation branch.
 
 ## Project Goal
 
@@ -24,38 +22,97 @@ Build a Java Servlet/JSP web prototype that supports TA recruitment with:
 - MO: post jobs, shortlist candidates
 - Admin: monitor workload distribution
 
-## Engineering Standards
+## Architecture
 
-### Backend quality bar
+- `Servlet (Controller) -> Service -> Repository -> FileStore`
+- Text-only persistence with JSON Lines (`data/*.jsonl`)
+- No database, compliant with handout constraints
 
-- Layering: `Servlet (Controller) -> Service -> Repository -> FileStore`
-- Storage: text files only (`JSON Lines`), no database
-- Stability:
-  - idempotent application submission by `applicationId`
-  - input validation and explicit exception boundaries
-  - append-only writes and atomic compaction
-- Memory efficiency:
-  - lightweight startup indexes (`id/status`)
-  - on-demand detail loading
-  - paged reads, no unbounded cache
+## API v1
 
-### Frontend quality bar
+- `GET /jobs` (list + filter)
+- `POST /applications` (TA idempotent submit, session-based)
+- `GET /applications` (TA status query, session-based)
+- `POST /mo/jobs` (MO post job)
+- `GET /mo/candidates` (MO screening + filter)
+- `PUT /mo/applications` (MO update application status)
+- `GET /admin/workload` (workload summary)
+- `GET /hr/candidates` (ADMIN candidate list/detail for HR review)
+- `POST /ai/match` (LLM-assisted applicant-job matching)
+- `POST /ai/missing-skills` (missing skill diagnosis + suggestions)
+- `GET /ai/workload-suggestion` (workload-aware shortlist recommendation)
+- `POST /ai/hr-assessment` (one-click resume summary + match score + explanation)
 
-- iPhone-inspired visual language:
-  - bright minimal base
-  - glass cards
-  - layered rounded geometry
-  - coherent motion rhythm (`120ms` and `240ms`)
-- Mobile-first responsive layout with distinct visual identity
+## Quality Targets
+
+- Memory: lightweight `id/status` indexes, paged reads, no unbounded cache
+- Stability: input validation, explicit error response, append-only writes, atomic compaction
+- Frontend: iPhone-inspired glass style, mobile-first layout, distinct visual hierarchy
 
 ## Data Files (No Database)
+
+Each line is one JSON object for append-friendly persistence and deterministic parsing.
 
 Expected runtime files:
 - `data/jobs.jsonl`
 - `data/applications.jsonl`
 - `data/users.jsonl`
 
-Each line is one JSON object for append-friendly persistence and deterministic parsing.
+## Local Run
+
+```bash
+mvn test
+mvn jetty:run
+```
+
+Then open:
+- `http://localhost:8080/`
+- `http://localhost:8080/jobs.jsp`
+- `http://localhost:8080/mo.jsp`
+- `http://localhost:8080/admin.jsp`
+- `http://localhost:8080/ai.jsp`
+
+Demo credentials after data seeding:
+- ADMIN (HR): role `ADMIN`, identifier `hradmin`, password `HrDemo@123`
+- TA sample: role `TA`, identifier `ta001`, password `TaDemo@123`
+
+## Optional LLM Configuration
+
+Default local config file:
+
+`config/ai.local.properties` (ignored by git)
+
+```properties
+openai.api.key=<your_api_key>
+openai.model=gpt-4.1
+openai.api.endpoint=https://api.openai.com/v1/chat/completions
+```
+
+You can also override by environment variables:
+
+```bash
+export OPENAI_API_KEY="<your_api_key>"
+export OPENAI_MODEL="gpt-4.1"
+export OPENAI_API_ENDPOINT="https://api.openai.com/v1/chat/completions"
+```
+
+If `OPENAI_API_KEY` is not set, the system automatically falls back to deterministic rule-based reasoning so demos remain stable.
+
+## Testing and Acceptance
+
+```bash
+# all unit/integration tests
+mvn test
+
+# one-click acceptance (after mvn jetty:run)
+bash scripts/acceptance/run_acceptance.sh
+```
+
+Details:
+- `docs/TESTING_AND_ACCEPTANCE.md`
+- `docs/USER_MANUAL.md`
+- `docs/screenshots/README.md`
+- `TEST_DOCS_DELIVERY_SUMMARY.md`
 
 ## First Assessment Mapping (Due: 22 March 2026)
 
