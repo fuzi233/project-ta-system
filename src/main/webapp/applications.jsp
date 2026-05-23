@@ -224,7 +224,7 @@
         }
 
         .application-meta {
-            font-size: 17px;
+            font-size: 16px;
             color: #64748b;
             line-height: 1.8;
         }
@@ -235,6 +235,11 @@
             gap: 10px;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .status-note {
+            font-size: 14px;
+            color: #64748b;
         }
 
         .status-tag {
@@ -268,8 +273,8 @@
         }
 
         .action-btn {
-            min-width: 130px;
-            height: 50px;
+            min-width: 132px;
+            height: 52px;
             border-radius: 12px;
             border: 1px solid #ccd6e2;
             background: #fff;
@@ -471,7 +476,7 @@
         return body;
     }
 
-    const pendingStatuses = new Set(["SUBMITTED", "INTERVIEWED"]);
+    const pendingStatuses = new Set(["SUBMITTED"]);
     const statusClassMap = {
         SUBMITTED: "pending",
         INTERVIEWED: "pending",
@@ -483,6 +488,10 @@
         INTERVIEWED: "Interviewed",
         ACCEPTED: "Accepted",
         REJECTED: "Rejected"
+    };
+    const statusNoteMap = {
+        SUBMITTED: "Waiting for review",
+        INTERVIEWED: "Interview completed"
     };
 
     const applicationListEl = document.getElementById("applicationList");
@@ -530,6 +539,9 @@
     function toFilterBucket(status) {
         if (pendingStatuses.has(status)) {
             return "pending";
+        }
+        if (status === "INTERVIEWED") {
+            return "interviewed";
         }
         if (status === "ACCEPTED") {
             return "accepted";
@@ -616,10 +628,17 @@
             const statusTag = document.createElement("span");
             statusTag.className = "status-tag " + cssClass;
             statusTag.textContent = statusLabel;
+            statusRow.appendChild(statusTag);
+            const statusNoteText = statusNoteMap[status];
+            if (statusNoteText) {
+                const statusNote = document.createElement("span");
+                statusNote.className = "status-note";
+                statusNote.textContent = statusNoteText;
+                statusRow.appendChild(statusNote);
+            }
             const applied = document.createElement("span");
             applied.className = "application-meta";
             applied.textContent = "Applied: " + formatDate(item.submittedAt);
-            statusRow.appendChild(statusTag);
             statusRow.appendChild(applied);
             main.appendChild(statusRow);
 
