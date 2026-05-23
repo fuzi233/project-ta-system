@@ -10,7 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseServlet extends HttpServlet {
     protected final AppContext appContext = AppContext.getInstance();
@@ -56,6 +59,21 @@ public abstract class BaseServlet extends HttpServlet {
     protected SessionUser requireRole(HttpServletRequest request, String role) {
         SessionUser user = requireAuthenticated(request);
         if (!role.equalsIgnoreCase(user.role())) {
+            throw new ApiException(403, "Insufficient permissions for this operation");
+        }
+        return user;
+    }
+
+    protected SessionUser requireAnyRole(HttpServletRequest request, String... roles) {
+        SessionUser user = requireAuthenticated(request);
+        if (roles == null || roles.length == 0) {
+            return user;
+        }
+        Set<String> allowed = new HashSet<>();
+        Arrays.stream(roles)
+                .filter(item -> item != null && !item.isBlank())
+                .forEach(item -> allowed.add(item.trim().toUpperCase()));
+        if (!allowed.contains(user.role().toUpperCase())) {
             throw new ApiException(403, "Insufficient permissions for this operation");
         }
         return user;

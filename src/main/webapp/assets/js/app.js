@@ -75,6 +75,7 @@ if (statusForm) {
 }
 
 const moForm = document.getElementById("mo-job-form");
+let moRefreshJobs = null;
 if (moForm) {
     const output = document.getElementById("mo-output");
     moForm.addEventListener("submit", async (event) => {
@@ -87,11 +88,16 @@ if (moForm) {
                 body: JSON.stringify(payload)
             });
             output.textContent = pretty(data);
+            if (moRefreshJobs) {
+                await moRefreshJobs();
+            }
         } catch (error) {
             output.textContent = error.message;
         }
     });
 }
+
+let moLoadCandidates = null;
 
 // MO Candidate Screening
 const candidateFilterForm = document.getElementById("candidate-filter-form");
@@ -121,6 +127,109 @@ if (candidateFilterForm) {
         
         await loadCandidates(jobId, status, page, size);
     });
+
+    moLoadCandidates = async (jobId) => {
+        const formData = new FormData(candidateFilterForm);
+        const status = formData.get("status") || "";
+        const page = parseInt(formData.get("page")) || 1;
+        const size = parseInt(formData.get("size")) || 20;
+        await loadCandidates(jobId, status, page, size);
+    };
+}
+
+// MO Open Job List
+const moJobsTableBody = document.getElementById("mo-jobs-table-body");
+if (moJobsTableBody) {
+    const refreshBtn = document.getElementById("mo-jobs-refresh");
+    const candidateJobIdInput = document.getElementById("candidateJobId");
+
+    function renderJobRows(jobs) {
+        moJobsTableBody.innerHTML = "";
+        if (!jobs || jobs.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 5;
+            cell.className = "empty-note";
+            cell.textContent = "No open jobs.";
+            row.appendChild(cell);
+            moJobsTableBody.appendChild(row);
+            return;
+        }
+
+        for (const job of jobs) {
+            const row = document.createElement("tr");
+
+            const idCell = document.createElement("td");
+            idCell.textContent = job.jobId;
+            row.appendChild(idCell);
+
+            const titleCell = document.createElement("td");
+            titleCell.textContent = job.title;
+            row.appendChild(titleCell);
+
+            const moduleCell = document.createElement("td");
+            moduleCell.textContent = job.moduleCode;
+            row.appendChild(moduleCell);
+
+            const slotsCell = document.createElement("td");
+            slotsCell.textContent = String(job.slots);
+            row.appendChild(slotsCell);
+
+            const actionCell = document.createElement("td");
+            const useBtn = document.createElement("button");
+            useBtn.type = "button";
+            useBtn.className = "btn ghost";
+            useBtn.textContent = "Use";
+            useBtn.addEventListener("click", async () => {
+                if (candidateJobIdInput) {
+                    candidateJobIdInput.value = job.jobId;
+                }
+                if (moLoadCandidates) {
+                    try {
+                        await moLoadCandidates(job.jobId);
+                    } catch (_) {
+                    }
+                }
+            });
+            actionCell.appendChild(useBtn);
+            row.appendChild(actionCell);
+
+            moJobsTableBody.appendChild(row);
+        }
+    }
+
+    async function loadMoJobs() {
+        try {
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+            }
+            const data = await api("/jobs?status=OPEN&page=1&size=200");
+            renderJobRows(data.items || []);
+        } catch (error) {
+            moJobsTableBody.innerHTML = "";
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 5;
+            cell.className = "empty-note";
+            cell.textContent = error.message;
+            row.appendChild(cell);
+            moJobsTableBody.appendChild(row);
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+            }
+        }
+    }
+
+    moRefreshJobs = loadMoJobs;
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", async () => {
+            await loadMoJobs();
+        });
+    }
+
+    loadMoJobs();
 }
 
 // MO Status Update

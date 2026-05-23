@@ -25,6 +25,7 @@ public class AiService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final ApplicationRepository applicationRepository;
+    private final AttachmentService attachmentService;
     private final AiProvider aiProvider;
     private final AiProvider fallbackProvider;
 
@@ -32,11 +33,13 @@ public class AiService {
             JobRepository jobRepository,
             UserRepository userRepository,
             ApplicationRepository applicationRepository,
+            AttachmentService attachmentService,
             AiProvider aiProvider
     ) {
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.applicationRepository = applicationRepository;
+        this.attachmentService = attachmentService;
         this.aiProvider = aiProvider;
         this.fallbackProvider = new RuleBasedAiProvider();
     }
@@ -50,7 +53,12 @@ public class AiService {
         JobPosting job = jobRepository.findById(normalizedJobId)
                 .orElseThrow(() -> new ApiException(404, "Job not found: " + normalizedJobId));
 
-        return calculateInsight(applicant, job);
+        return calculateInsight(
+                applicant,
+                job,
+                applicationRepository.workloadByApplicant(),
+                true
+        );
     }
 
     public MissingSkillsInsight missingSkills(String applicantId, String jobId) {
@@ -87,8 +95,13 @@ public class AiService {
         JobPosting job = jobRepository.findById(normalizedJobId)
                 .orElseThrow(() -> new ApiException(404, "Job not found: " + normalizedJobId));
 
-        MatchInsight matchInsight = calculateInsight(candidate, job);
-        String resumeText = resolvedResume(candidate);
+        MatchInsight matchInsight = calculateInsight(
+                candidate,
+                job,
+                applicationRepository.workloadByApplicant(),
+                true
+        );
+        String resumeText = resolvedResume(candidate, normalizedJobId);
 
         ProviderReply summaryReply = requestProvider(
                 "You are an HR assistant. Summarize CVs in 3 concise bullet points.",
@@ -139,8 +152,9 @@ public class AiService {
         }
 
         List<CandidateSuggestion> candidates = new ArrayList<>();
+        Map<String, Long> workloadMap = applicationRepository.workloadByApplicant();
         for (UserProfile candidate : allTaCandidates) {
-            MatchInsight insight = calculateInsight(candidate, job);
+            MatchInsight insight = calculateInsight(candidate, job, workloadMap, false);
             candidates.add(new CandidateSuggestion(
                     candidate.userId(),
                     candidate.displayName(),
@@ -177,7 +191,12 @@ public class AiService {
         );
     }
 
-    private MatchInsight calculateInsight(UserProfile applicant, JobPosting job) {
+    private MatchInsight calculateInsight(
+            UserProfile applicant,
+            JobPosting job,
+            Map<String, Long> workloadMap,
+            boolean enrichReasoning
+    ) {
         List<String> applicantSkills = SkillNormalizer.normalizeList(applicant.skills());
         List<String> requiredSkills = SkillNormalizer.normalizeList(job.requiredSkills());
 
@@ -192,26 +211,36 @@ public class AiService {
                 .filter(skill -> !applicantSet.contains(skill))
                 .collect(Collectors.toList());
 
-        Map<String, Long> workloadMap = applicationRepository.workloadByApplicant();
         long workload = workloadMap.getOrDefault(applicant.userId(), 0L);
 
         int fitScore = requiredSet.isEmpty() ? 100 : (matched.size() * 100 / requiredSet.size());
         int workloadPenalty = (int) Math.min(25, workload * 4);
         int finalScore = Math.max(0, Math.min(100, fitScore - workloadPenalty));
 
-        String prompt = "Applicant=" + applicant.userId()
-                + ", job=" + job.jobId()
-                + ", matchedSkills=" + matched
-                + ", missingSkills=" + missing
-                + ", workload=" + workload
-                + ", score=" + finalScore + "."
-                + " Return one concise recommendation sentence.";
+        String reasoningText;
+        String providerName;
+        if (enrichReasoning) {
+            String prompt = "Applicant=" + applicant.userId()
+                    + ", job=" + job.jobId()
+                    + ", matchedSkills=" + matched
+                    + ", missingSkills=" + missing
+                    + ", workload=" + workload
+                    + ", score=" + finalScore + "."
+                    + " Return one concise recommendation sentence.";
 
-        ProviderReply providerReply = requestProvider(
-                "You are an explainable matching assistant for TA recruitment.",
-                prompt,
-                "Emphasize concrete evidence (skills + workload) and keep it concise."
-        );
+            ProviderReply providerReply = requestProvider(
+                    "You are an explainable matching assistant for TA recruitment.",
+                    prompt,
+                    "Emphasize concrete evidence (skills + workload) and keep it concise."
+            );
+            reasoningText = providerReply.text();
+            providerName = providerReply.provider();
+        } else {
+            reasoningText = "Rule-based shortlist candidate: matched="
+                    + matched.size() + ", missing=" + missing.size()
+                    + ", workload=" + workload + ", score=" + finalScore + ".";
+            providerName = "rule-based";
+        }
 
         return new MatchInsight(
                 applicant.userId(),
@@ -220,14 +249,22 @@ public class AiService {
                 workload,
                 matched,
                 missing,
-                providerReply.text(),
-                providerReply.provider()
+                reasoningText,
+                providerName
         );
     }
 
-    private String resolvedResume(UserProfile candidate) {
-        if (candidate.resumeText() != null && !candidate.resumeText().isBlank()) {
-            return candidate.resumeText().trim();
+    private String resolvedResume(UserProfile candidate, String jobId) {
+        String profileResume = candidate.resumeText() == null ? "" : candidate.resumeText().trim();
+        String attachmentText = attachmentService.latestCvExtractedText(candidate.userId(), jobId);
+        if (!attachmentText.isBlank()) {
+            if (!profileResume.isBlank()) {
+                return profileResume + "\n\n[Extracted CV Attachment Text]\n" + attachmentText;
+            }
+            return attachmentText;
+        }
+        if (!profileResume.isBlank()) {
+            return profileResume;
         }
         return "No full CV text provided. Skills available: " + candidate.skills();
     }
