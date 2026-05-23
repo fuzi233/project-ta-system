@@ -27,398 +27,182 @@
     <title>Apply - <%= pageLabel %></title>
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
-        :root {
-            --bg: #eef2f6;
-            --panel: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #d7dee8;
-            --primary: #9cb8d3;
-            --primary-dark: #7f9fbe;
-            --shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(180deg, #edf2f7 0%, #e9eef5 100%);
-            color: var(--text);
-        }
-
-        .page {
-            max-width: 1280px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
-
-        .shell {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .topbar {
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-            border-bottom: 1px solid var(--line);
-            background: rgba(255,255,255,0.96);
-        }
-
-        .brand {
-            font-size: 18px;
-            font-weight: 700;
-            color: #334155;
-        }
-
-        .nav {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: #475569;
-            font-size: 16px;
-            font-weight: 500;
-            padding: 24px 0 20px;
-            border-bottom: 3px solid transparent;
-        }
-
-        .nav a.active {
-            color: #0f172a;
-            border-bottom-color: #718096;
-        }
-
-        .content {
-            padding: 30px 34px 40px;
-        }
-
-        .breadcrumb {
-            font-size: 15px;
-            color: #64748b;
-            margin-bottom: 22px;
-        }
-
-        .breadcrumb a {
-            color: #64748b;
-            text-decoration: none;
-        }
-
-        .title {
-            margin: 0 0 22px;
-            font-size: 44px;
-            font-weight: 800;
-            color: #10213f;
-        }
-
-        .divider {
-            height: 1px;
-            background: #dbe3ec;
-            margin-bottom: 26px;
-        }
-
-        .form-layout {
+        .apply-grid {
             display: grid;
-            grid-template-columns: 1fr 1.8fr 0.75fr;
-            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
 
-        .panel {
-            background: #fff;
-            border: 1px solid #d9e2ec;
-            border-radius: 16px;
-            overflow: hidden;
-            min-height: 520px;
+        .apply-full {
+            grid-column: 1 / -1;
         }
 
-        .panel-header {
-            padding: 18px 20px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #334155;
-            border-bottom: 1px solid #e5ebf2;
-            background: #f8fafc;
-        }
-
-        .panel-body {
-            padding: 20px;
+        .apply-actions {
+            display: flex;
+            gap: .8rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: .5rem;
         }
 
         .field {
-            margin-bottom: 22px;
+            margin-bottom: 1.1rem;
         }
 
         .field label {
             display: block;
-            font-size: 16px;
+            font-size: .9rem;
             font-weight: 600;
-            color: #334155;
-            margin-bottom: 8px;
+            color: var(--text);
+            margin-bottom: .35rem;
         }
 
-        .input,
-        .textarea,
-        .select,
-        .file-input {
-            width: 100%;
-            border: 1px solid #ced8e3;
-            border-radius: 10px;
-            padding: 12px 14px;
-            font-size: 16px;
-            color: #334155;
-            background: #fff;
-        }
-
-        .textarea {
-            min-height: 120px;
+        textarea {
+            min-height: 110px;
             resize: vertical;
             font-family: inherit;
         }
 
         .hint {
-            margin-top: 8px;
-            font-size: 14px;
-            color: #6b7280;
+            margin-top: .3rem;
+            font-size: .82rem;
+            color: var(--muted);
         }
 
-        .action-col {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            padding: 18px 16px;
-        }
-
-        .action-btn {
-            height: 52px;
-            border-radius: 12px;
-            border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
-            color: #fff;
-            border: none;
-        }
-
-        .footer-actions {
-            display: flex;
-            gap: 14px;
-            margin-top: 18px;
-        }
-
-        .footer-btn {
-            min-width: 170px;
-            height: 52px;
-            border-radius: 12px;
-            border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .footer-btn.primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
-            color: #fff;
-            border: none;
-        }
-
-        .selection-summary {
-            margin-bottom: 22px;
-            padding: 16px 18px;
-            border-radius: 14px;
-            border: 1px solid #d9e2ec;
-            background: #f8fbfe;
-            color: #475569;
-            font-size: 16px;
-            line-height: 1.6;
+        .error-msg {
+            min-height: 18px;
+            margin-top: 4px;
+            color: #EF4444;
+            font-size: .8rem;
         }
 
         .success-box {
             display: none;
-            margin-top: 22px;
-            padding: 16px 18px;
+            margin-top: 1rem;
+            padding: .9rem 1rem;
             border-radius: 12px;
-            background: #edf6ee;
             border: 1px solid #cfe4d1;
+            background: #edf6ee;
             color: #2f5d34;
-            font-size: 16px;
+            font-size: .92rem;
             font-weight: 600;
         }
 
-        @media (max-width: 1100px) {
-            .form-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .panel {
-                min-height: auto;
-            }
-
-            .action-col {
-                padding: 0;
-            }
+        .error-box {
+            display: none;
+            margin-top: .6rem;
+            padding: .9rem 1rem;
+            border-radius: 12px;
+            border: 1px solid #f2c7c7;
+            background: #fdecec;
+            color: #8e2d2d;
+            font-size: .92rem;
+            font-weight: 600;
         }
 
-        @media (max-width: 720px) {
-            .page {
-                padding: 0 14px;
-                margin: 20px auto;
-            }
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
 
-            .topbar {
-                flex-direction: column;
-                height: auto;
-                gap: 10px;
-                padding: 18px;
-            }
+        .skill-chip {
+            border: 1px solid #c2d6ff;
+            border-radius: 9999px;
+            padding: .5rem .9rem;
+            font-size: .85rem;
+            background: rgba(255,255,255,.85);
+            color: #16315b;
+            cursor: pointer;
+            transition: all 120ms ease;
+            user-select: none;
+        }
 
-            .nav {
-                gap: 16px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
+        .skill-chip.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #1575ff, #0094ff);
+            color: #fff;
+            font-weight: 700;
+        }
 
-            .content {
-                padding: 24px 18px 30px;
-            }
-
-            .title {
-                font-size: 34px;
-            }
-
-            .footer-actions {
-                flex-direction: column;
-            }
-
-            .footer-btn {
-                width: 100%;
+        @media (max-width: 860px) {
+            .apply-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-<div class="page">
-    <div class="shell">
-        <header class="topbar">
-            <div class="brand">TA Recruitment System</div>
-            <nav class="nav">
-                <a href="index.jsp">Home</a>
-                <a href="jobs.jsp" class="active">Job List</a>
-                <a href="applications.jsp">My Applications</a>
-                <a href="profile.jsp">Profile</a>
-            </nav>
-        </header>
+<div class="shell">
+    <a class="link" href="jobs.jsp">&larr; Back to Job List</a>
 
-        <main class="content">
-            <div class="breadcrumb">
-                <a href="index.jsp">Home</a> &nbsp;›&nbsp;
-                <a href="jobs.jsp">Job List</a> &nbsp;›&nbsp;
-                <span id="applyTargetLabel"><%= pageLabel %></span>
+    <section class="glass card">
+        <h1 id="applyTitle"><%= pageLabel %> Application Form</h1>
+        <p id="selectionSummary" class="subtitle">Loading selected jobs...</p>
+    </section>
+
+    <form id="applyForm" novalidate>
+        <section class="apply-grid">
+            <div class="glass card">
+                <h2>Personal Information</h2>
+                <div class="field">
+                    <label for="fullName">Full Name</label>
+                    <input id="fullName" name="fullName" type="text" placeholder="Enter your full name" required/>
+                    <div class="error-msg" id="fullNameError"></div>
+                </div>
+                <div class="field">
+                    <label for="studentId">Student ID</label>
+                    <input id="studentId" name="studentId" type="text" placeholder="e.g. 2023213149" required/>
+                    <div class="error-msg" id="studentIdError"></div>
+                </div>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" placeholder="example@student.com" required/>
+                    <div class="error-msg" id="emailError"></div>
+                </div>
             </div>
 
-            <h1 id="applyTitle" class="title"><%= pageLabel %> Application Form</h1>
-            <div class="divider"></div>
-            <div id="selectionSummary" class="selection-summary">Loading selected jobs...</div>
-
-            <form id="applyForm" onsubmit="submitApplication(event)">
-                <div class="form-layout">
-                    <section class="panel">
-                        <div class="panel-header">Personal Information</div>
-                        <div class="panel-body">
-                            <div class="field">
-                                <label for="fullName">Full Name</label>
-                                <input class="input" type="text" id="fullName" name="fullName">
-                            </div>
-
-                            <div class="field">
-                                <label for="studentId">Student ID</label>
-                                <input class="input" type="text" id="studentId" name="studentId">
-                            </div>
-
-                            <div class="field">
-                                <label for="email">Email</label>
-                                <input class="input" type="email" id="email" name="email" placeholder="example@student.com">
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="panel-header">Skills and Experience</div>
-                        <div class="panel-body">
-                            <div class="field">
-                                <label for="skills">Skills</label>
-                                <select class="select" id="skills" name="skills">
-                                    <option value="">Select skills...</option>
-                                    <option>Java</option>
-                                    <option>SQL</option>
-                                    <option>HTML/CSS</option>
-                                    <option>JavaScript</option>
-                                    <option>Git</option>
-                                </select>
-                            </div>
-
-                            <div class="field">
-                                <label for="experience">Experience</label>
-                                <textarea class="textarea" id="experience" name="experience"
-                                          placeholder="Describe your relevant experience..."></textarea>
-                            </div>
-
-                            <div class="field">
-                                <label for="cvFile">Upload CV</label>
-                                <input class="file-input" type="file" id="cvFile" name="cvFile">
-                            </div>
-
-                            <div class="field">
-                                <label for="transcriptFile">Upload Transcript</label>
-                                <input class="file-input" type="file" id="transcriptFile" name="transcriptFile">
-                                <div class="hint">Accepted formats: PDF, DOC, DOCX</div>
-                            </div>
-
-                            <div class="footer-actions">
-                                <button id="submitApplicationBtn" class="footer-btn primary" type="submit">Submit Application</button>
-                                <button class="footer-btn" type="reset">Cancel</button>
-                            </div>
-
-                            <div id="successBox" class="success-box">
-                                Application submitted successfully.
-                            </div>
-                            <div id="errorBox" class="success-box" style="display:none;background:#fdecec;border-color:#f2c7c7;color:#8e2d2d;">
-                                Submission failed.
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="action-col">
-                            <button id="applyNowBtn" class="action-btn primary" type="submit">Apply Now</button>
-                            <a class="action-btn" href="jobs.jsp">Back</a>
-                        </div>
-                    </section>
+            <div class="glass card">
+                <h2>Skills & Experience</h2>
+                <div class="field">
+                    <label>Skills (click to select)</label>
+                    <div class="chip-group" id="skillChips">
+                    </div>
+                    <div class="hint">Select at least one skill relevant to the position</div>
+                    <div class="error-msg" id="skillsError"></div>
                 </div>
-            </form>
-        </main>
-    </div>
+                <div class="field">
+                    <label for="experience">Experience</label>
+                    <textarea id="experience" name="experience" placeholder="Describe your relevant experience, coursework, or projects..."></textarea>
+                    <div class="error-msg" id="experienceError"></div>
+                </div>
+            </div>
+
+            <div class="glass card apply-full">
+                <h2>Attachments</h2>
+                <div class="apply-grid">
+                    <div class="field">
+                        <label for="cvFile">Upload CV</label>
+                        <input type="file" id="cvFile" name="cvFile"/>
+                        <div class="hint">Accepted formats: PDF, DOC, DOCX</div>
+                    </div>
+                    <div class="field">
+                        <label for="transcriptFile">Upload Transcript</label>
+                        <input type="file" id="transcriptFile" name="transcriptFile"/>
+                        <div class="hint">Accepted formats: PDF, DOC, DOCX</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="apply-actions">
+            <button id="submitApplicationBtn" class="btn" type="submit">Submit Application</button>
+            <a class="btn ghost" href="jobs.jsp">Cancel</a>
+        </div>
+
+        <div id="successBox" class="success-box">Application submitted successfully.</div>
+        <div id="errorBox" class="error-box">Submission failed.</div>
+    </form>
 </div>
 
 <script>
@@ -429,276 +213,176 @@
         });
         const text = await response.text();
         let body = {};
-        try {
-            body = text ? JSON.parse(text) : {};
-        } catch (_) {
-            body = {error: text || ("HTTP " + response.status)};
-        }
-        if (!response.ok) {
-            throw new Error(body.error || ("HTTP " + response.status));
-        }
+        try { body = text ? JSON.parse(text) : {}; } catch (_) { body = {error: text || ("HTTP " + response.status)}; }
+        if (!response.ok) throw new Error(body.error || ("HTTP " + response.status));
         return body;
     }
 
-    const applyState = {
-        jobs: [],
-        unresolvedCandidates: []
-    };
+    var applyState = { jobs: [], unresolvedCandidates: [], selectedSkills: [] };
 
-    const applyTitleEl = document.getElementById("applyTitle");
-    const applyTargetLabelEl = document.getElementById("applyTargetLabel");
-    const selectionSummaryEl = document.getElementById("selectionSummary");
-    const submitApplicationBtnEl = document.getElementById("submitApplicationBtn");
-    const applyNowBtnEl = document.getElementById("applyNowBtn");
+    var SKILL_OPTIONS = ["Java", "SQL", "HTML/CSS", "JavaScript", "Git", "Python", "C/C++", "Data Structures", "Algorithms", "Communication"];
+
+    function buildSkillChips() {
+        var container = document.getElementById("skillChips");
+        SKILL_OPTIONS.forEach(function(skill) {
+            var chip = document.createElement("span");
+            chip.className = "skill-chip";
+            chip.textContent = skill;
+            chip.addEventListener("click", function() {
+                chip.classList.toggle("selected");
+                var idx = applyState.selectedSkills.indexOf(skill);
+                if (idx >= 0) {
+                    applyState.selectedSkills.splice(idx, 1);
+                } else {
+                    applyState.selectedSkills.push(skill);
+                }
+                document.getElementById("skillsError").textContent = "";
+            });
+            container.appendChild(chip);
+        });
+    }
+
+    function setFieldError(fieldId, errorId, message) {
+        var field = document.getElementById(fieldId);
+        var error = document.getElementById(errorId);
+        if (message) {
+            field.style.borderColor = "#EF4444";
+            error.textContent = message;
+        } else {
+            field.style.borderColor = "";
+            error.textContent = "";
+        }
+    }
+
+    function validateForm() {
+        var fullName = document.getElementById("fullName").value.trim();
+        var studentId = document.getElementById("studentId").value.trim();
+        var email = document.getElementById("email").value.trim();
+        var experience = document.getElementById("experience").value.trim();
+        var ok = true;
+
+        if (!fullName) { setFieldError("fullName", "fullNameError", "Please enter your full name."); ok = false; }
+        else { setFieldError("fullName", "fullNameError", ""); }
+
+        if (!studentId) { setFieldError("studentId", "studentIdError", "Please enter your student ID."); ok = false; }
+        else { setFieldError("studentId", "studentIdError", ""); }
+
+        if (!email) { setFieldError("email", "emailError", "Please enter your email."); ok = false; }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError("email", "emailError", "Invalid email format."); ok = false; }
+        else { setFieldError("email", "emailError", ""); }
+
+        if (applyState.selectedSkills.length === 0) { document.getElementById("skillsError").textContent = "Please select at least one skill."; ok = false; }
+
+        if (!experience) { setFieldError("experience", "experienceError", "Please fill in your experience."); ok = false; }
+        else { setFieldError("experience", "experienceError", ""); }
+
+        return ok;
+    }
 
     function mapLegacyIdToJobId(raw) {
-        if (!raw) {
-            return "";
-        }
-        const trimmed = String(raw).trim();
-        if (/^job-\d+$/i.test(trimmed)) {
-            return trimmed.toLowerCase();
-        }
-        if (/^\d+$/.test(trimmed)) {
-            return "job-" + trimmed.padStart(3, "0");
-        }
+        if (!raw) return "";
+        var trimmed = String(raw).trim();
+        if (/^job-\d+$/i.test(trimmed)) return trimmed.toLowerCase();
+        if (/^\d+$/.test(trimmed)) return "job-" + trimmed.padStart(3, "0");
         return "";
     }
 
     function parseRequestedJobCandidates() {
-        const params = new URLSearchParams(window.location.search);
-        const multiCandidates = (params.get("jobIds") || "")
-            .split(",")
-            .map((value) => value.trim())
-            .filter(Boolean);
-        if (multiCandidates.length) {
-            return multiCandidates;
-        }
-        const candidate = (params.get("jobId") || params.get("id") || "").trim();
+        var params = new URLSearchParams(window.location.search);
+        var multiCandidates = (params.get("jobIds") || "").split(",").map(function(v) { return v.trim(); }).filter(Boolean);
+        if (multiCandidates.length) return multiCandidates;
+        var candidate = (params.get("jobId") || params.get("id") || "").trim();
         return candidate ? [candidate] : [];
     }
 
     async function resolveSelectedJobs() {
-        const candidates = parseRequestedJobCandidates();
-        const jobsData = await api("/jobs?status=OPEN&page=1&size=200");
-        const jobs = jobsData.items || [];
-        if (jobs.length === 0) {
-            throw new Error("No open jobs available now.");
-        }
+        var candidates = parseRequestedJobCandidates();
+        var jobsData = await api("/jobs?status=OPEN&page=1&size=200");
+        var jobs = jobsData.items || [];
+        if (jobs.length === 0) throw new Error("No open jobs available now.");
+        if (!candidates.length) return { jobs: [jobs[0]], unresolvedCandidates: [] };
 
-        if (!candidates.length) {
-            return {
-                jobs: [jobs[0]],
-                unresolvedCandidates: []
-            };
-        }
-
-        const resolvedJobs = [];
-        const unresolvedCandidates = [];
-        const seenJobIds = new Set();
-
-        candidates.forEach((candidate) => {
-            const directMatch = jobs.find((job) => String(job.jobId || "").toLowerCase() === candidate.toLowerCase());
-            if (directMatch) {
-                if (!seenJobIds.has(directMatch.jobId)) {
-                    resolvedJobs.push(directMatch);
-                    seenJobIds.add(directMatch.jobId);
-                }
-                return;
-            }
-
-            const mapped = mapLegacyIdToJobId(candidate);
-            if (mapped) {
-                const mappedJob = jobs.find((job) => job.jobId === mapped);
-                if (mappedJob) {
-                    if (!seenJobIds.has(mappedJob.jobId)) {
-                        resolvedJobs.push(mappedJob);
-                        seenJobIds.add(mappedJob.jobId);
-                    }
-                    return;
-                }
-            }
-
-            if (/^\d+$/.test(candidate)) {
-                const index = Number(candidate) - 1;
-                if (index >= 0 && index < jobs.length) {
-                    const indexedJob = jobs[index];
-                    if (!seenJobIds.has(indexedJob.jobId)) {
-                        resolvedJobs.push(indexedJob);
-                        seenJobIds.add(indexedJob.jobId);
-                    }
-                    return;
-                }
-            }
-
+        var resolvedJobs = [], unresolvedCandidates = [], seenJobIds = new Set();
+        candidates.forEach(function(candidate) {
+            var directMatch = jobs.find(function(job) { return String(job.jobId || "").toLowerCase() === candidate.toLowerCase(); });
+            if (directMatch) { if (!seenJobIds.has(directMatch.jobId)) { resolvedJobs.push(directMatch); seenJobIds.add(directMatch.jobId); } return; }
+            var mapped = mapLegacyIdToJobId(candidate);
+            if (mapped) { var mj = jobs.find(function(j) { return j.jobId === mapped; }); if (mj && !seenJobIds.has(mj.jobId)) { resolvedJobs.push(mj); seenJobIds.add(mj.jobId); } return; }
+            if (/^\d+$/.test(candidate)) { var idx = Number(candidate) - 1; if (idx >= 0 && idx < jobs.length) { var ij = jobs[idx]; if (!seenJobIds.has(ij.jobId)) { resolvedJobs.push(ij); seenJobIds.add(ij.jobId); } return; } }
             unresolvedCandidates.push(candidate);
         });
-
-        if (!resolvedJobs.length) {
-            throw new Error("No selected jobs are available for application.");
-        }
-
-        return {
-            jobs: resolvedJobs,
-            unresolvedCandidates: unresolvedCandidates
-        };
+        if (!resolvedJobs.length) throw new Error("No selected jobs are available for application.");
+        return { jobs: resolvedJobs, unresolvedCandidates: unresolvedCandidates };
     }
 
-    function updateApplyHeading() {
-        const count = applyState.jobs.length;
-        const label = count === 1
-            ? ("Apply for " + applyState.jobs[0].title + " (" + applyState.jobs[0].jobId + ")")
-            : ("Apply for " + count + " Selected Jobs");
-        const submitLabel = count > 1 ? "Submit Applications" : "Submit Application";
-        const sideActionLabel = count > 1 ? "Apply to Selected Jobs" : "Apply Now";
-
-        applyTargetLabelEl.textContent = label;
-        applyTitleEl.textContent = label + " Application Form";
+    function updateHeading() {
+        var count = applyState.jobs.length;
+        var label = count === 1 ? ("Apply for " + applyState.jobs[0].title + " (" + applyState.jobs[0].jobId + ")") : ("Apply for " + count + " Selected Jobs");
+        document.getElementById("applyTitle").textContent = label + " Application Form";
         document.title = label + " - Application";
-        submitApplicationBtnEl.textContent = submitLabel;
-        applyNowBtnEl.textContent = sideActionLabel;
-    }
-
-    function renderSelectionSummary() {
-        const selectedList = applyState.jobs
-            .map((job) => job.title + " (" + job.jobId + ")")
-            .join(", ");
-        let summaryText = "You are applying for " + applyState.jobs.length
-            + (applyState.jobs.length === 1 ? " job: " : " jobs: ")
-            + selectedList + ".";
-
-        if (applyState.unresolvedCandidates.length) {
-            summaryText += " Ignored unavailable selections: " + applyState.unresolvedCandidates.join(", ") + ".";
-        }
-
-        selectionSummaryEl.textContent = summaryText;
+        document.getElementById("submitApplicationBtn").textContent = count > 1 ? "Submit Applications" : "Submit Application";
+        var selList = applyState.jobs.map(function(j) { return j.title + " (" + j.jobId + ")"; }).join(", ");
+        var summaryText = "Applying for " + count + (count === 1 ? " job: " : " jobs: ") + selList + ".";
+        if (applyState.unresolvedCandidates.length) summaryText += " Skipped: " + applyState.unresolvedCandidates.join(", ") + ".";
+        document.getElementById("selectionSummary").textContent = summaryText;
     }
 
     async function submitSingleApplication(form, jobId) {
-        const formData = new FormData(form);
+        var formData = new FormData(form);
         formData.set("jobId", jobId);
-        const response = await fetch("/applications", {
-            method: "POST",
-            body: formData
-        });
-        const text = await response.text();
-        let result = {};
-        try {
-            result = text ? JSON.parse(text) : {};
-        } catch (_) {
-            result = {error: text || ("HTTP " + response.status)};
-        }
-        if (!response.ok) {
-            throw new Error(result.error || ("HTTP " + response.status));
-        }
+        formData.set("skills", applyState.selectedSkills.join(","));
+        var response = await fetch("/applications", { method: "POST", body: formData });
+        var text = await response.text();
+        var result = {};
+        try { result = text ? JSON.parse(text) : {}; } catch (_) { result = {error: text || ("HTTP " + response.status)}; }
+        if (!response.ok) throw new Error(result.error || ("HTTP " + response.status));
         return result;
     }
 
     async function submitApplication(event) {
         event.preventDefault();
+        if (!validateForm()) return;
+        if (!applyState.jobs.length) { document.getElementById("errorBox").textContent = "Please select a job from the job list first."; document.getElementById("errorBox").style.display = "block"; return; }
 
-        const form = document.getElementById("applyForm");
-        const submitButtons = form.querySelectorAll("button[type='submit']");
-        const successBox = document.getElementById("successBox");
-        const errorBox = document.getElementById("errorBox");
-        const fullName = document.getElementById("fullName").value.trim();
-        const studentId = document.getElementById("studentId").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const skills = document.getElementById("skills").value.trim();
-        const experience = document.getElementById("experience").value.trim();
-
-        if (!fullName) {
-            alert("Please enter your full name.");
-            return;
-        }
-
-        if (!studentId) {
-            alert("Please enter your student ID.");
-            return;
-        }
-
-        if (!email) {
-            alert("Please enter your email.");
-            return;
-        }
-
-        if (!skills) {
-            alert("Please select at least one skill.");
-            return;
-        }
-
-        if (!experience) {
-            alert("Please fill in your experience.");
-            return;
-        }
-
+        var submitBtn = document.getElementById("submitApplicationBtn");
+        var successBox = document.getElementById("successBox");
+        var errorBox = document.getElementById("errorBox");
         successBox.style.display = "none";
         errorBox.style.display = "none";
-        submitButtons.forEach((btn) => {
-            btn.disabled = true;
-        });
+        submitBtn.disabled = true;
 
         try {
-            if (!applyState.jobs.length) {
-                throw new Error("Please select at least one job from the job list before applying.");
-            }
-
-            let createdCount = 0;
-            let duplicateCount = 0;
-            let uploadedAttachments = 0;
-            const failedJobs = [];
-
-            for (const job of applyState.jobs) {
+            var created = 0, skipped = 0, uploaded = 0, failed = [];
+            for (var i = 0; i < applyState.jobs.length; i++) {
                 try {
-                    const result = await submitSingleApplication(form, job.jobId);
-                    if (result.created === false) {
-                        duplicateCount++;
-                    } else {
-                        createdCount++;
-                    }
-                    uploadedAttachments += Array.isArray(result.attachments) ? result.attachments.length : 0;
-                } catch (error) {
-                    failedJobs.push(job.jobId + ": " + error.message);
-                }
+                    var result = await submitSingleApplication(event.target, applyState.jobs[i].jobId);
+                    if (result.created === false) skipped++; else created++;
+                    uploaded += Array.isArray(result.attachments) ? result.attachments.length : 0;
+                } catch (e) { failed.push(applyState.jobs[i].jobId + ": " + e.message); }
             }
-
-            if (failedJobs.length) {
-                throw new Error("Some applications could not be submitted: " + failedJobs.join(" | "));
-            }
-
-            successBox.textContent = createdCount + (createdCount === 1 ? " application submitted" : " applications submitted");
-            if (duplicateCount > 0) {
-                successBox.textContent += ", " + duplicateCount
-                    + (duplicateCount === 1 ? " already existed" : " already existed");
-            }
-            if (uploadedAttachments > 0) {
-                successBox.textContent += " (" + uploadedAttachments + " attachment(s) uploaded)";
-            }
-            successBox.textContent += ". Redirecting...";
+            if (failed.length) throw new Error("Partial failure: " + failed.join(" | "));
+            var msg = created + (created === 1 ? " application" : " applications") + " submitted";
+            if (skipped > 0) msg += ", " + skipped + " already existed";
+            if (uploaded > 0) msg += " (" + uploaded + " attachment(s))";
+            successBox.textContent = msg + ". Redirecting...";
             successBox.style.display = "block";
-            setTimeout(function () {
-                window.location.href = "applications.jsp";
-            }, 1100);
-        } catch (error) {
-            errorBox.textContent = error.message;
+            setTimeout(function() { window.location.href = "applications.jsp"; }, 1100);
+        } catch (e) {
+            errorBox.textContent = e.message;
             errorBox.style.display = "block";
-        } finally {
-            submitButtons.forEach((btn) => {
-                btn.disabled = false;
-            });
-        }
+        } finally { submitBtn.disabled = false; }
     }
 
-    resolveSelectedJobs()
-        .then((selection) => {
-            applyState.jobs = selection.jobs;
-            applyState.unresolvedCandidates = selection.unresolvedCandidates;
-            updateApplyHeading();
-            renderSelectionSummary();
-        })
-        .catch((error) => {
-            selectionSummaryEl.textContent = error.message;
-        });
+    document.getElementById("applyForm").addEventListener("submit", submitApplication);
+
+    buildSkillChips();
+    resolveSelectedJobs().then(function(sel) {
+        applyState.jobs = sel.jobs;
+        applyState.unresolvedCandidates = sel.unresolvedCandidates;
+        updateHeading();
+    }).catch(function(e) {
+        document.getElementById("selectionSummary").textContent = e.message;
+    });
 </script>
 </body>
 </html>

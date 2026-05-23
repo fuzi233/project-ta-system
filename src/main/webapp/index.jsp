@@ -1,10 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>TA Recruitment - 登录注册</title>
+    <title>TA Recruit - Login / Register</title>
     <style>
         :root {
             --bg-start: #EEF2FF;
@@ -1121,12 +1121,12 @@
         <img src="assets/images/bupt-is-logo.jpg" alt="BUPT International School Logo"/>
     </span>
     <div class="site-logo-text">
-        <strong>北京邮电大学国际学院</strong>
+        <strong>BUPT International School</strong>
         <span>BUPT International School</span>
     </div>
 </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite">操作成功</div>
+<div id="toast" class="toast" role="status" aria-live="polite">Ready</div>
 
 <main class="page">
     <section class="auth-wrap">
@@ -1134,57 +1134,57 @@
             <aside class="brand-pane">
                 <p class="kicker">BUPT International School</p>
                 <p class="brand-title">TA Recruitment</p>
-                <p class="brand-sub">请选择角色并登录或注册，开始使用系统。</p>
-                <div class="left-role-selector" aria-label="角色选择">
+                <p class="brand-sub">Select your role and login or register to get started.</p>
+                <div class="left-role-selector" aria-label="Role selection">
                     <button type="button" class="left-role-btn active" data-left-role="TA">TA</button>
                     <button type="button" class="left-role-btn" data-left-role="MO">MO</button>
                     <button type="button" class="left-role-btn" data-left-role="ADMIN">Admin</button>
                 </div>
             </aside>
             <div class="form-pane">
-            <div class="switcher" role="tablist" aria-label="登录注册切换">
-                <button id="tabLogin" class="active" type="button" role="tab" aria-selected="true">登录</button>
-                <button id="tabRegister" type="button" role="tab" aria-selected="false">注册</button>
+            <div class="switcher" role="tablist" aria-label="LoginRegister切换">
+                <button id="tabLogin" class="active" type="button" role="tab" aria-selected="true">Login</button>
+                <button id="tabRegister" type="button" role="tab" aria-selected="false">Register</button>
             </div>
 
             <div id="loginView" class="view active">
                 <form id="loginForm" novalidate>
                     <%-- 表单提交至LoginServlet --%>
                     <input type="hidden" name="role" id="loginRole" value=""/>
-                    <div class="role-grid-login" aria-label="登录角色选择">
+                    <div class="role-grid-login" aria-label="Login role selection">
                         <button class="role-option" data-role-login="TA" type="button">TA</button>
                         <button class="role-option" data-role-login="MO" type="button">MO</button>
                         <button class="role-option" data-role-login="ADMIN" type="button">Admin</button>
                     </div>
 
-                    <div class="field" id="loginEmailField">
+                    <div class="field" id="loginIdentifierField">
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2l-9 5.63a1.9 1.9 0 0 1-2 0L3 7.2V6Zm0 3.56V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.56l-7.94 4.97a3.9 3.9 0 0 1-4.12 0L3 9.56Z"/></svg>
                         </span>
-                        <input id="loginIdentifier" name="identifier" type="text" placeholder="先选择身份" required/>
-                        <div class="hint-msg" id="loginCredentialHint">TA: 学号/邮箱, MO: 教工号/邮箱, Admin: 管理员账号</div>
-                        <div class="error-msg" id="loginEmailError"></div>
+                        <input id="loginIdentifier" name="identifier" type="text" placeholder="Select role first" required/>
+                        <div class="hint-msg" id="loginCredentialHint">TA: Student ID, MO: Staff ID or Email, Admin: Username</div>
+                        <div class="error-msg" id="loginIdentifierError"></div>
                     </div>
 
                     <div class="field" id="loginPasswordField">
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M17 9h-1V7a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V7Zm3 7.73V17a1 1 0 1 1-2 0v-2.27a2 2 0 1 1 2 0Z"/></svg>
                         </span>
-                        <input id="loginPassword" class="with-right" name="password" type="password" placeholder="密码" required/>
-                        <button class="field-eye" type="button" data-toggle-eye="loginPassword" aria-label="显示或隐藏密码">
+                        <input id="loginPassword" class="with-right" name="password" type="password" placeholder="Password" required/>
+                        <button class="field-eye" type="button" data-toggle-eye="loginPassword" aria-label="Show or hide password">
                             <svg viewBox="0 0 24 24"><path d="M12 5c5.6 0 9.5 4.57 10.76 6.24a1.2 1.2 0 0 1 0 1.52C21.5 14.43 17.6 19 12 19S2.5 14.43 1.24 12.76a1.2 1.2 0 0 1 0-1.52C2.5 9.57 6.4 5 12 5Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
                         </button>
                         <div class="error-msg" id="loginPasswordError"></div>
                     </div>
 
                     <div class="aux-row">
-                        <label class="remember"><input type="checkbox" id="rememberMe" name="rememberMe"/> 记住我</label>
-                        <a class="ghost-link" href="#">忘记密码？</a>
+                        <label class="remember"><input type="checkbox" id="rememberMe" name="rememberMe"/> Remember me</label>
+                        <a class="ghost-link" href="#">Forgot password?</a>
                     </div>
 
                     <button id="loginBtn" class="submit-btn" type="submit">
                         <span class="spinner" aria-hidden="true"></span>
-                        <span>登录</span>
+                        <span>Login</span>
                     </button>
                 </form>
             </div>
@@ -1198,7 +1198,7 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.08 0-8 2.04-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.96-3.92-5-8-5Z"/></svg>
                         </span>
-                        <input id="registerName" name="name" type="text" placeholder="姓名" required/>
+                        <input id="registerName" name="name" type="text" placeholder="Full Name" required/>
                         <div class="error-msg" id="nameError"></div>
                     </div>
 
@@ -1206,8 +1206,8 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 2v2.2l-7 4.38-7-4.38V6h14Zm0 12H5V10.56l6.47 4.03a1 1 0 0 0 1.06 0L19 10.56V18Z"/></svg>
                         </span>
-                        <input id="registerIdentifier" name="identifier" type="text" placeholder="学号/教工号/管理员账号" required/>
-                        <div class="hint-msg" id="registerIdentifierHint">根据角色输入凭证：TA 学号/邮箱，MO 教工号/邮箱，Admin 账号</div>
+                        <input id="registerIdentifier" name="identifier" type="text" placeholder="Student ID / Staff ID / Admin Username" required/>
+                        <div class="hint-msg" id="registerIdentifierHint">TA: Student ID, MO: Staff ID or Email, Admin: Username</div>
                         <div class="error-msg" id="registerIdentifierError"></div>
                     </div>
 
@@ -1215,8 +1215,8 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2l-9 5.63a1.9 1.9 0 0 1-2 0L3 7.2V6Zm0 3.56V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.56l-7.94 4.97a3.9 3.9 0 0 1-4.12 0L3 9.56Z"/></svg>
                         </span>
-                        <input id="registerEmail" name="email" type="email" placeholder="邮箱" required/>
-                        <div class="hint-msg" id="registerEmailHint">请输入有效邮箱格式，如 name@example.com</div>
+                        <input id="registerEmail" name="email" type="email" placeholder="Email" required/>
+                        <div class="hint-msg" id="registerEmailHint">Valid email format, e.g. name@example.com</div>
                         <div class="error-msg" id="registerEmailError"></div>
                     </div>
 
@@ -1224,13 +1224,13 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M17 9h-1V7a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V7Zm3 7.73V17a1 1 0 1 1-2 0v-2.27a2 2 0 1 1 2 0Z"/></svg>
                         </span>
-                        <input id="registerPassword" class="with-right" name="password" type="password" placeholder="密码" required/>
-                        <button class="field-eye" type="button" data-toggle-eye="registerPassword" aria-label="显示或隐藏密码">
+                        <input id="registerPassword" class="with-right" name="password" type="password" placeholder="Password" required/>
+                        <button class="field-eye" type="button" data-toggle-eye="registerPassword" aria-label="Show or hide password">
                             <svg viewBox="0 0 24 24"><path d="M12 5c5.6 0 9.5 4.57 10.76 6.24a1.2 1.2 0 0 1 0 1.52C21.5 14.43 17.6 19 12 19S2.5 14.43 1.24 12.76a1.2 1.2 0 0 1 0-1.52C2.5 9.57 6.4 5 12 5Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
                         </button>
                         <div class="strength">
                             <div class="strength-track"><div id="strengthFill" class="strength-fill"></div></div>
-                            <div id="strengthText" class="strength-text">密码强度：弱</div>
+                            <div id="strengthText" class="strength-text">Strength: Weak</div>
                         </div>
                         <div class="error-msg" id="registerPasswordError"></div>
                     </div>
@@ -1239,14 +1239,14 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M17 9h-1V7a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V7Zm3 7.73V17a1 1 0 1 1-2 0v-2.27a2 2 0 1 1 2 0Z"/></svg>
                         </span>
-                        <input id="confirmPassword" class="with-right" name="confirmPassword" type="password" placeholder="确认密码" required/>
-                        <button class="field-eye" type="button" data-toggle-eye="confirmPassword" aria-label="显示或隐藏密码">
+                        <input id="confirmPassword" class="with-right" name="confirmPassword" type="password" placeholder="Confirm Password" required/>
+                        <button class="field-eye" type="button" data-toggle-eye="confirmPassword" aria-label="Show or hide password">
                             <svg viewBox="0 0 24 24"><path d="M12 5c5.6 0 9.5 4.57 10.76 6.24a1.2 1.2 0 0 1 0 1.52C21.5 14.43 17.6 19 12 19S2.5 14.43 1.24 12.76a1.2 1.2 0 0 1 0-1.52C2.5 9.57 6.4 5 12 5Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
                         </button>
                         <div class="error-msg" id="confirmPasswordError"></div>
                     </div>
 
-                    <div class="role-grid-register" aria-label="注册角色选择">
+                    <div class="role-grid-register" aria-label="Register role selection">
                         <button class="role-option active" type="button" data-role-register="TA">
                             <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.08 0-8 2.04-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.96-3.92-5-8-5Z"/></svg>
                             TA
@@ -1263,11 +1263,11 @@
 
                     <button id="registerBtn" class="submit-btn" type="submit">
                         <span class="spinner" aria-hidden="true"></span>
-                        <span>创建账户</span>
+                        <span>Create Account</span>
                     </button>
 
                     <div class="bottom-note">
-                        已有账户？<button id="toLoginLink" type="button">立即登录</button>
+                        Already have an account?<button id="toLoginLink" type="button">Login now</button>
                     </div>
                 </form>
             </div>
@@ -1329,6 +1329,7 @@
                 btn.classList.add("active");
                 registerRole.value = btn.getAttribute("data-role-register");
                 updateRegisterIdentifierUi(registerRole.value);
+                updateNameFieldVisibility(registerRole.value);
                 validateRegister();
             });
         });
@@ -1347,6 +1348,7 @@
             registerRole.value = role;
             updateLoginIdentifierUi(role);
             updateRegisterIdentifierUi(role);
+            updateNameFieldVisibility(role);
             validateLogin();
             validateRegister();
         }
@@ -1373,19 +1375,19 @@
             var input = document.getElementById("loginIdentifier");
             var hint = document.getElementById("loginCredentialHint");
             if (!role) {
-                input.placeholder = "先选择身份";
-                hint.textContent = "TA: 学号/邮箱, MO: 教工号/邮箱, Admin: 管理员账号";
+                input.placeholder = "Select role first";
+                hint.textContent = "TA: Student ID, MO: Staff ID or Email, Admin: Username";
                 return;
             }
             if (role === "TA") {
-                input.placeholder = "学号或邮箱";
-                hint.textContent = "示例: 2023213149 或 1171629723@qq.com";
+                input.placeholder = "Student ID";
+                hint.textContent = "Example: 2023213149";
             } else if (role === "MO") {
-                input.placeholder = "教工号或邮箱";
-                hint.textContent = "示例: TCH1001 或 mo001@bupt.edu.cn";
+                input.placeholder = "Staff ID or Email";
+                hint.textContent = "Example: TCH1001 or mo001@bupt.edu.cn";
             } else {
-                input.placeholder = "管理员账号";
-                hint.textContent = "示例: admin";
+                input.placeholder = "Admin Username";
+                hint.textContent = "Example: admin";
             }
         }
 
@@ -1393,14 +1395,23 @@
             var input = document.getElementById("registerIdentifier");
             var hint = document.getElementById("registerIdentifierHint");
             if (role === "TA") {
-                input.placeholder = "学号或邮箱";
-                hint.textContent = "示例: 2023213149 或 1171629723@qq.com";
+                input.placeholder = "Student ID";
+                hint.textContent = "Example: 2023213149";
             } else if (role === "MO") {
-                input.placeholder = "教工号或邮箱";
-                hint.textContent = "示例: TCH1001 或 mo001@bupt.edu.cn";
+                input.placeholder = "Staff ID or Email";
+                hint.textContent = "Example: TCH1001 or mo001@bupt.edu.cn";
             } else {
-                input.placeholder = "管理员账号";
-                hint.textContent = "示例: admin";
+                input.placeholder = "Admin Username";
+                hint.textContent = "Example: admin";
+            }
+        }
+
+        function updateNameFieldVisibility(role) {
+            var nameField = document.getElementById("nameField");
+            if (role === "ADMIN") {
+                nameField.style.display = "none";
+            } else {
+                nameField.style.display = "";
             }
         }
 
@@ -1428,22 +1439,22 @@
         function updateStrength() {
             var score = evaluateStrength(registerPassword.value);
             var width = 25;
-            var text = "密码强度：弱";
+            var text = "Strength: Weak";
             var color = "var(--weak)";
 
             if (score >= 2) {
                 width = 55;
-                text = "密码强度：中";
+                text = "Strength: Medium";
                 color = "var(--medium)";
             }
             if (score >= 4) {
                 width = 100;
-                text = "密码强度：强";
+                text = "Strength: Strong";
                 color = "var(--strong)";
             }
             if (!registerPassword.value) {
                 width = 0;
-                text = "密码强度：弱";
+                text = "Strength: Weak";
                 color = "var(--weak)";
             }
 
@@ -1459,7 +1470,7 @@
             var ok = true;
 
             if (!role) {
-                setFieldError("loginEmailField", "loginEmailError", "登录前必须选择角色");
+                setFieldError("loginIdentifierField", "loginIdentifierError", "Role must be selected before login");
                 ok = false;
             } else {
                 var identifierOk = false;
@@ -1472,15 +1483,15 @@
                 }
 
                 if (!identifierOk) {
-                    setFieldError("loginEmailField", "loginEmailError", "凭证格式与所选角色不匹配");
+                    setFieldError("loginIdentifierField", "loginIdentifierError", "Credential format does not match selected role");
                     ok = false;
                 } else {
-                    setFieldError("loginEmailField", "loginEmailError", "");
+                    setFieldError("loginIdentifierField", "loginIdentifierError", "");
                 }
             }
 
             if (!pwd) {
-                setFieldError("loginPasswordField", "loginPasswordError", "请输入密码");
+                setFieldError("loginPasswordField", "loginPasswordError", "Password is required");
                 ok = false;
             } else {
                 setFieldError("loginPasswordField", "loginPasswordError", "");
@@ -1497,15 +1508,15 @@
             var confirm = confirmPassword.value;
             var ok = true;
 
-            if (name.length < 2) {
-                setFieldError("nameField", "nameError", "姓名至少 2 个字符");
+            if (role !== "ADMIN" && name.length < 2) {
+                setFieldError("nameField", "nameError", "Name requires at least 2 characters");
                 ok = false;
             } else {
                 setFieldError("nameField", "nameError", "");
             }
 
             if (!isEmailValid(email)) {
-                setFieldError("registerEmailField", "registerEmailError", "邮箱格式不正确");
+                setFieldError("registerEmailField", "registerEmailError", "Invalid email format");
                 ok = false;
             } else {
                 setFieldError("registerEmailField", "registerEmailError", "");
@@ -1513,7 +1524,7 @@
 
             var identifierOk = false;
             if (role === "TA") {
-                identifierOk = /^\d{10}$/.test(identifier) || isEmailValid(identifier);
+                identifierOk = /^\d{10}$/.test(identifier);
             } else if (role === "MO") {
                 identifierOk = /^[A-Za-z]{3}\d{4}$/.test(identifier) || isEmailValid(identifier);
             } else if (role === "ADMIN") {
@@ -1521,21 +1532,21 @@
             }
 
             if (!identifierOk) {
-                setFieldError("registerIdentifierField", "registerIdentifierError", "凭证格式与角色不匹配");
+                setFieldError("registerIdentifierField", "registerIdentifierError", "Credential format does not match role");
                 ok = false;
             } else {
                 setFieldError("registerIdentifierField", "registerIdentifierError", "");
             }
 
             if (pwd.length < 8) {
-                setFieldError("registerPasswordField", "registerPasswordError", "密码至少 8 位");
+                setFieldError("registerPasswordField", "registerPasswordError", "Password requires at least 8 characters");
                 ok = false;
             } else {
                 setFieldError("registerPasswordField", "registerPasswordError", "");
             }
 
             if (!confirm || confirm !== pwd) {
-                setFieldError("confirmPasswordField", "confirmPasswordError", "两次输入密码不一致");
+                setFieldError("confirmPasswordField", "confirmPasswordError", "Passwords do not match");
                 ok = false;
             } else {
                 setFieldError("confirmPasswordField", "confirmPasswordError", "");
@@ -1560,7 +1571,7 @@
         registerPassword.addEventListener("input", updateStrength);
         confirmPassword.addEventListener("input", function () {
             if (confirmPassword.value && confirmPassword.value !== registerPassword.value) {
-                setFieldError("confirmPasswordField", "confirmPasswordError", "两次输入密码不一致");
+                setFieldError("confirmPasswordField", "confirmPasswordError", "Passwords do not match");
             } else {
                 setFieldError("confirmPasswordField", "confirmPasswordError", "");
             }
@@ -1596,15 +1607,15 @@
                 });
                 var loginResult = await loginResponse.json();
                 if (!loginResponse.ok) {
-                    setFieldError("loginPasswordField", "loginPasswordError", loginResult.error || "登录失败");
+                    setFieldError("loginPasswordField", "loginPasswordError", loginResult.error || "Login failed");
                     return;
                 }
-                showToast("登录成功，正在跳转...");
+                showToast("Login successful, redirecting...");
                 window.setTimeout(function () {
                     window.location.href = loginResult.redirect || "index.jsp";
                 }, 420);
             } catch (_) {
-                setFieldError("loginPasswordField", "loginPasswordError", "网络异常，请稍后重试");
+                setFieldError("loginPasswordField", "loginPasswordError", "Network error, please try again");
             } finally {
                 setLoading(loginBtn, false);
             }
@@ -1631,13 +1642,13 @@
                 });
                 var registerResult = await registerResponse.json();
                 if (!registerResponse.ok) {
-                    setFieldError("registerIdentifierField", "registerIdentifierError", registerResult.error || "注册失败");
+                    setFieldError("registerIdentifierField", "registerIdentifierError", registerResult.error || "Registration failed");
                     return;
                 }
-                showToast("账户创建成功");
+                showToast("Account created successfully");
                 switchView("login");
             } catch (_) {
-                setFieldError("registerIdentifierField", "registerIdentifierError", "网络异常，请稍后重试");
+                setFieldError("registerIdentifierField", "registerIdentifierError", "Network error, please try again");
             } finally {
                 setLoading(registerBtn, false);
             }

@@ -16,14 +16,14 @@
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
-            --bg: #eef2f6;
-            --panel: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #d7dee8;
-            --primary: #9cb8d3;
-            --primary-dark: #7f9fbe;
-            --shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+            --bg: #eef3ff;
+            --panel: rgba(255,255,255,0.72);
+            --text: #102039;
+            --muted: #4c5e7a;
+            --line: rgba(255,255,255,0.55);
+            --primary: #1575ff;
+            --primary-dark: #0094ff;
+            --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
             --radius-lg: 22px;
             --radius-md: 14px;
             --radius-sm: 10px;
@@ -35,8 +35,8 @@
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(180deg, #edf2f7 0%, #e9eef5 100%);
+            font-family: "SF Pro Text", "Segoe UI", sans-serif;
+            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
             color: var(--text);
         }
 
@@ -67,7 +67,7 @@
         .brand {
             font-size: 18px;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
         }
 
         .nav {
@@ -114,14 +114,14 @@
             height: 54px;
             border-radius: 12px;
             border: 1px solid #ced8e3;
-            background: #fff;
+            background: rgba(255,255,255,0.72);
             font-size: 16px;
         }
 
         .input,
         .select {
             padding: 0 16px;
-            color: #334155;
+            color: #16315b;
         }
 
         .btn {
@@ -138,12 +138,12 @@
 
         .btn-filter {
             background: #f8fafc;
-            color: #334155;
+            color: #16315b;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+            color: white;
             border: none;
         }
 
@@ -205,7 +205,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 24px;
-            background: #fff;
+            background: rgba(255,255,255,0.72);
             border: 1px solid #d9e2ec;
             border-radius: 16px;
             padding: 28px 28px;
@@ -225,7 +225,7 @@
         .job-select input {
             width: 18px;
             height: 18px;
-            accent-color: #86a8c5;
+            accent-color: #1575ff;
             cursor: pointer;
         }
 
@@ -259,8 +259,8 @@
             height: 52px;
             border-radius: 12px;
             border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
+            background: rgba(255,255,255,0.72);
+            color: #16315b;
             font-size: 16px;
             font-weight: 600;
             text-decoration: none;
@@ -276,8 +276,8 @@
         }
 
         .action-btn.primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+            color: white;
             border: none;
         }
 
@@ -292,7 +292,7 @@
             width: 46px;
             height: 42px;
             border: 1px solid #d0d9e4;
-            background: #fff;
+            background: rgba(255,255,255,0.72);
             color: #475569;
             font-size: 16px;
             display: inline-flex;
@@ -311,7 +311,7 @@
 
         .page-btn.active {
             background: #a6bfd8;
-            color: #fff;
+            color: white;
         }
 
         .empty-tip {
