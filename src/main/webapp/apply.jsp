@@ -27,14 +27,15 @@
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
-            --bg: #eef2f6;
-            --panel: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #d7dee8;
-            --primary: #9cb8d3;
-            --primary-dark: #7f9fbe;
-            --shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+            --bg: #eef3ff;
+            --panel: rgba(255, 255, 255, 0.92);
+            --text: #102039;
+            --muted: #4c5e7a;
+            --line: #d6e4ff;
+            --primary: #1575ff;
+            --primary-dark: #0094ff;
+            --accent: #00b7a5;
+            --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
         }
 
         * {
@@ -43,8 +44,8 @@
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(180deg, #edf2f7 0%, #e9eef5 100%);
+            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
             color: var(--text);
         }
 
@@ -75,7 +76,7 @@
         .brand {
             font-size: 18px;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
         }
 
         .nav {
@@ -86,7 +87,7 @@
 
         .nav a {
             text-decoration: none;
-            color: #475569;
+            color: var(--muted);
             font-size: 16px;
             font-weight: 500;
             padding: 24px 0 20px;
@@ -104,12 +105,12 @@
 
         .breadcrumb {
             font-size: 15px;
-            color: #64748b;
+            color: var(--muted);
             margin-bottom: 22px;
         }
 
         .breadcrumb a {
-            color: #64748b;
+            color: var(--muted);
             text-decoration: none;
         }
 
@@ -144,7 +145,7 @@
             padding: 18px 20px;
             font-size: 18px;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
             border-bottom: 1px solid #e5ebf2;
             background: #f8fafc;
         }
@@ -161,7 +162,7 @@
             display: block;
             font-size: 16px;
             font-weight: 600;
-            color: #334155;
+            color: #16315b;
             margin-bottom: 8px;
         }
 
@@ -174,7 +175,7 @@
             border-radius: 10px;
             padding: 12px 14px;
             font-size: 16px;
-            color: #334155;
+            color: #16315b;
             background: #fff;
         }
 
@@ -213,8 +214,8 @@
             height: 48px;
             border-radius: 12px;
             border: none;
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+            color: #fff !important;
             cursor: pointer;
             display: inline-flex;
             align-items: stretch;
@@ -223,6 +224,13 @@
             transition: all 0.2s ease;
             box-sizing: border-box;
             vertical-align: top;
+        }
+
+        .upload-btn.is-selected {
+            background: linear-gradient(135deg, rgba(225, 244, 239, 0.98), rgba(214, 239, 255, 0.98));
+            border: 1px solid #9fd8c9;
+            color: #175b63;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
 
         .upload-btn-text {
@@ -236,6 +244,11 @@
             font-size: 15px;
             font-weight: 700;
             line-height: 1;
+            color: #fff !important;
+        }
+
+        .upload-btn.is-selected .upload-btn-text {
+            color: #175b63 !important;
         }
 
         .upload-btn:hover {
@@ -247,7 +260,7 @@
             flex: 1;
             min-width: 180px;
             font-size: 15px;
-            color: #475569;
+            color: var(--muted);
             font-weight: 500;
             padding: 0;
         }
@@ -278,10 +291,10 @@
         .action-btn {
             height: 52px;
             border-radius: 12px;
-            border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
-            font-size: 16px;
+            border: 1px solid #c2d6ff;
+            background: rgba(255, 255, 255, 0.9);
+            color: #16315b;
+            font-size: .95rem;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
@@ -297,7 +310,7 @@
         }
 
         .action-btn.primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
             border: none;
         }
@@ -317,10 +330,10 @@
             min-width: 170px;
             height: 52px;
             border-radius: 12px;
-            border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
-            font-size: 16px;
+            border: 1px solid #c2d6ff;
+            background: rgba(255, 255, 255, 0.9);
+            color: #16315b;
+            font-size: .95rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -336,9 +349,18 @@
         }
 
         .footer-btn.primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
             border: none;
+        }
+
+        .action-btn:disabled,
+        .footer-btn:disabled {
+            background: #d8e1ef !important;
+            border-color: #d8e1ef !important;
+            color: #7a8aa3 !important;
+            box-shadow: none !important;
+            transform: none !important;
         }
 
         .result-box {
@@ -369,7 +391,7 @@
             margin: 0 0 14px;
             font-size: 17px;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
         }
 
         .result-list {
@@ -404,9 +426,9 @@
         }
 
         .result-item.info {
-            color: #8a6d1d;
-            border-color: #efd9a7;
-            background: #fffdf6;
+            color: #1f5f8b;
+            border-color: #bdd8f6;
+            background: #eef6ff;
         }
 
         .result-actions {
@@ -468,12 +490,14 @@
     </style>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <div class="page">
+    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
             <nav class="nav">
-                <a href="index.jsp">Home</a>
                 <a href="jobs.jsp" class="active">Job List</a>
                 <a href="applications.jsp">My Applications</a>
                 <a href="profile.jsp">Profile</a>
@@ -537,7 +561,7 @@
                                 <label for="cvFile">Upload CV</label>
                                 <div class="upload-shell">
                                     <div class="upload-row">
-                                        <label class="upload-btn" for="cvFile"><span class="upload-btn-text">Choose File</span></label>
+                                        <label id="cvUploadBtn" class="upload-btn" for="cvFile"><span class="upload-btn-text">Choose File</span></label>
                                         <div id="cvFileName" class="upload-name">No file chosen</div>
                                     </div>
                                     <input class="file-input" type="file" id="cvFile" name="cvFile">
@@ -550,7 +574,7 @@
                                 <label for="transcriptFile">Upload Transcript</label>
                                 <div class="upload-shell">
                                     <div class="upload-row">
-                                        <label class="upload-btn" for="transcriptFile"><span class="upload-btn-text">Choose File</span></label>
+                                        <label id="transcriptUploadBtn" class="upload-btn" for="transcriptFile"><span class="upload-btn-text">Choose File</span></label>
                                         <div id="transcriptFileName" class="upload-name">No file chosen</div>
                                     </div>
                                     <input class="file-input" type="file" id="transcriptFile" name="transcriptFile">
@@ -590,10 +614,12 @@
 <script>
     const acceptedFileExtensions = [".pdf", ".doc", ".docx"];
 
-    function updateFileStatus(inputId, nameId, errorId) {
+    function updateFileStatus(inputId, nameId, errorId, buttonId) {
         const input = document.getElementById(inputId);
         const name = document.getElementById(nameId);
         const error = document.getElementById(errorId);
+        const button = document.getElementById(buttonId);
+        const buttonText = button ? button.querySelector(".upload-btn-text") : null;
         const file = input.files[0];
 
         error.textContent = "";
@@ -601,15 +627,31 @@
 
         if (!file) {
             name.textContent = "No file chosen";
+            if (button) {
+                button.classList.remove("is-selected");
+            }
+            if (buttonText) {
+                buttonText.textContent = "Choose File";
+            }
             return;
         }
 
         name.textContent = file.name;
+        if (button) {
+            button.classList.add("is-selected");
+        }
+        if (buttonText) {
+            buttonText.textContent = "File Selected";
+        }
     }
 
     function resetFileFeedback() {
         document.getElementById("cvFileName").textContent = "No file chosen";
         document.getElementById("transcriptFileName").textContent = "No file chosen";
+        document.getElementById("cvUploadBtn").classList.remove("is-selected");
+        document.getElementById("transcriptUploadBtn").classList.remove("is-selected");
+        document.getElementById("cvUploadBtn").querySelector(".upload-btn-text").textContent = "Choose File";
+        document.getElementById("transcriptUploadBtn").querySelector(".upload-btn-text").textContent = "Choose File";
         document.getElementById("cvFileError").textContent = "";
         document.getElementById("cvFileError").style.display = "none";
         document.getElementById("transcriptFileError").textContent = "";
@@ -661,11 +703,11 @@
     }
 
     document.getElementById("cvFile").addEventListener("change", function () {
-        updateFileStatus("cvFile", "cvFileName", "cvFileError");
+        updateFileStatus("cvFile", "cvFileName", "cvFileError", "cvUploadBtn");
     });
 
     document.getElementById("transcriptFile").addEventListener("change", function () {
-        updateFileStatus("transcriptFile", "transcriptFileName", "transcriptFileError");
+        updateFileStatus("transcriptFile", "transcriptFileName", "transcriptFileError", "transcriptUploadBtn");
     });
 
     document.getElementById("applyForm").addEventListener("reset", function () {
@@ -803,8 +845,8 @@
         if (hasBlockingError) {
             resultBox.className = "result-box error";
             addResultItem("Application", "Application not submitted. Please fix the file errors below and try again.", "error");
-            addResultItem("CV", cvValidation.ok ? "Ready to upload: " + cvValidation.message : cvValidation.message, cvValidation.ok ? "info" : "error");
-            addResultItem("Transcript", transcriptValidation.ok ? "Ready to upload: " + transcriptValidation.message : transcriptValidation.message, transcriptValidation.ok ? "info" : "error");
+            addResultItem("CV", cvValidation.ok ? "File selected and ready: " + cvValidation.message : cvValidation.message, cvValidation.ok ? "info" : "error");
+            addResultItem("Transcript", transcriptValidation.ok ? "File selected and ready: " + transcriptValidation.message : transcriptValidation.message, transcriptValidation.ok ? "info" : "error");
             submitButtons.forEach(button => {
                 button.disabled = false;
                 if (button.dataset.originalText) {

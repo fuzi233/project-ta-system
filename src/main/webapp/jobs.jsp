@@ -16,14 +16,15 @@
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
-            --bg: #eef2f6;
-            --panel: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #d7dee8;
-            --primary: #9cb8d3;
-            --primary-dark: #7f9fbe;
-            --shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+            --bg: #eef3ff;
+            --panel: rgba(255, 255, 255, 0.92);
+            --text: #102039;
+            --muted: #4c5e7a;
+            --line: #d6e4ff;
+            --primary: #1575ff;
+            --primary-dark: #0094ff;
+            --accent: #00b7a5;
+            --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
             --radius-lg: 22px;
             --radius-md: 14px;
             --radius-sm: 10px;
@@ -35,8 +36,8 @@
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(180deg, #edf2f7 0%, #e9eef5 100%);
+            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
             color: var(--text);
         }
 
@@ -48,7 +49,7 @@
 
         .shell {
             background: rgba(255, 255, 255, 0.92);
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--line);
             border-radius: 24px;
             box-shadow: var(--shadow);
             overflow: hidden;
@@ -65,9 +66,9 @@
         }
 
         .brand {
-            font-size: 18px;
+            font-size: 1rem;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
         }
 
         .nav {
@@ -78,16 +79,16 @@
 
         .nav a {
             text-decoration: none;
-            color: #475569;
-            font-size: 16px;
+            color: var(--muted);
+            font-size: .95rem;
             font-weight: 500;
             padding: 24px 0 20px;
             border-bottom: 3px solid transparent;
         }
 
         .nav a.active {
-            color: #0f172a;
-            border-bottom-color: #718096;
+            color: #16315b;
+            border-bottom-color: #1575ff;
         }
 
         .content {
@@ -121,7 +122,7 @@
         .input,
         .select {
             padding: 0 16px;
-            color: #334155;
+            color: #16315b;
         }
 
         .btn {
@@ -138,7 +139,7 @@
 
         .btn-filter {
             background: #f8fafc;
-            color: #334155;
+            color: #16315b;
         }
 
         .divider {
@@ -176,7 +177,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            color: #64748b;
+            color: var(--muted);
             font-size: 18px;
         }
 
@@ -190,10 +191,10 @@
             min-width: 132px;
             height: 52px;
             border-radius: 12px;
-            border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
-            font-size: 16px;
+            border: 1px solid #c2d6ff;
+            background: rgba(255, 255, 255, 0.9);
+            color: #16315b;
+            font-size: .95rem;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
@@ -208,7 +209,7 @@
         }
 
         .action-btn.primary {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
             border: none;
         }
@@ -225,7 +226,7 @@
             height: 42px;
             border: 1px solid #d0d9e4;
             background: #fff;
-            color: #475569;
+            color: var(--muted);
             font-size: 16px;
             display: inline-flex;
             align-items: center;
@@ -242,7 +243,7 @@
         }
 
         .page-btn.active {
-            background: #a6bfd8;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
         }
 
@@ -250,7 +251,7 @@
             display: none;
             text-align: center;
             padding: 36px 0 12px;
-            color: #64748b;
+            color: var(--muted);
             font-size: 18px;
         }
 
@@ -311,12 +312,14 @@
     </style>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <div class="page">
+    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
             <nav class="nav">
-                <a href="index.jsp">Home</a>
                 <a href="jobs.jsp" class="active">Job List</a>
                 <a href="applications.jsp">My Applications</a>
                 <a href="profile.jsp">Profile</a>

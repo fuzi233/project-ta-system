@@ -20,7 +20,8 @@ const state = {
     moUserId: document.body.dataset.moUserId || "",
     jobs: [],
     applicationsByJob: {},
-    collapsedJobs: {}
+    collapsedJobs: {},
+    reviewStatus: ""
 };
 
 const createJobState = {
@@ -77,6 +78,14 @@ const reviewJobSelectEl = document.getElementById("reviewJobSelect");
 const reviewJobSearchEl = document.getElementById("reviewJobSearch");
 const reviewJobOptionsEl = document.getElementById("reviewJobOptions");
 const reviewClearFilterBtnEl = document.getElementById("reviewClearFilterBtn");
+const reviewStatusFilterEls = Array.from(document.querySelectorAll("[data-review-status]"));
+const reviewStatusCountEls = {
+    all: document.querySelector("[data-review-count='all']"),
+    submitted: document.querySelector("[data-review-count='submitted']"),
+    interviewed: document.querySelector("[data-review-count='interviewed']"),
+    accepted: document.querySelector("[data-review-count='accepted']"),
+    rejected: document.querySelector("[data-review-count='rejected']")
+};
 const moJobFormEl = document.getElementById("mo-job-form");
 const moOutputEl = document.getElementById("mo-output");
 const commonSkillSelectEl = document.getElementById("commonSkillSelect");
@@ -247,9 +256,77 @@ function normalizeStatus(status) {
     return (status || "").trim().toUpperCase();
 }
 
-function isPendingStatus(status) {
+function getStatusLabel(status) {
     const normalized = normalizeStatus(status);
-    return normalized !== "ACCEPTED" && normalized !== "REJECTED";
+    if (normalized === "INTERVIEWED") {
+        return "Interviewed";
+    }
+    if (normalized === "ACCEPTED") {
+        return "Accepted";
+    }
+    if (normalized === "REJECTED") {
+        return "Rejected";
+    }
+    return "Pending";
+}
+
+function getStatusTone(status) {
+    const normalized = normalizeStatus(status);
+    if (normalized === "INTERVIEWED") {
+        return "interviewed";
+    }
+    if (normalized === "ACCEPTED") {
+        return "accepted";
+    }
+    if (normalized === "REJECTED") {
+        return "rejected";
+    }
+    return "pending";
+}
+
+function isOutstandingStatus(status) {
+    const normalized = normalizeStatus(status);
+    return normalized === "" || normalized === "SUBMITTED" || normalized === "INTERVIEWED";
+}
+
+function matchesReviewStatus(candidate) {
+    if (!state.reviewStatus) {
+        return true;
+    }
+    return normalizeStatus(candidate.status) === state.reviewStatus;
+}
+
+function showToast(message) {
+    if (!message) {
+        return;
+    }
+    const existingToast = document.getElementById("mo-review-toast");
+    if (existingToast) {
+        existingToast.remove();
+    }
+    const toast = document.createElement("div");
+    toast.id = "mo-review-toast";
+    toast.className = "mo-review-toast show";
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    window.setTimeout(() => {
+        toast.classList.remove("show");
+        window.setTimeout(() => toast.remove(), 220);
+    }, 1800);
+}
+
+function confirmReviewAction(candidate, targetStatus) {
+    const displayName = candidate.displayName || candidate.applicantId || "this candidate";
+    const targetLabel = getStatusLabel(targetStatus);
+    return window.confirm("Confirm " + targetLabel + " for " + displayName + "?");
+}
+
+function createStatusTag(status) {
+    const tag = document.createElement("span");
+    const tone = getStatusTone(status);
+    tag.className = "status-tag " + tone;
+    tag.textContent = getStatusLabel(status);
+    return tag;
 }
 
 function getSortedApplications(jobId) {
@@ -266,21 +343,24 @@ function summarizeApplications(applications) {
     const summary = {
         total: applications.length,
         pending: 0,
+        interviewed: 0,
         accepted: 0,
-        rejected: 0
+        rejected: 0,
+        actionable: 0
     };
     applications.forEach((application) => {
         const normalized = normalizeStatus(application.status);
-        if (normalized === "ACCEPTED") {
-            summary.accepted += 1;
-            return;
-        }
-        if (normalized === "REJECTED") {
-            summary.rejected += 1;
-            return;
-        }
-        if (isPendingStatus(application.status)) {
+        if (normalized === "SUBMITTED" || normalized === "") {
             summary.pending += 1;
+        } else if (normalized === "INTERVIEWED") {
+            summary.interviewed += 1;
+        } else if (normalized === "ACCEPTED") {
+            summary.accepted += 1;
+        } else if (normalized === "REJECTED") {
+            summary.rejected += 1;
+        }
+        if (isOutstandingStatus(application.status)) {
+            summary.actionable += 1;
         }
     });
     return summary;
@@ -328,17 +408,21 @@ function buildVisibleJobs() {
             const allApplications = getSortedApplications(job.jobId);
             const stats = summarizeApplications(allApplications);
             const jobMatchesKeyword = !keyword || buildJobSearchBlob(job).includes(keyword);
+            const statusMatchedApplications = allApplications.filter(matchesReviewStatus);
             const matchedApplications = !keyword
-                ? allApplications
-                : allApplications.filter((candidate) => buildCandidateSearchBlob(job, candidate).includes(keyword));
-            const applications = keyword && !jobMatchesKeyword ? matchedApplications : allApplications;
+                ? statusMatchedApplications
+                : statusMatchedApplications.filter((candidate) => buildCandidateSearchBlob(job, candidate).includes(keyword));
+            const applications = !keyword
+                ? statusMatchedApplications
+                : (jobMatchesKeyword ? statusMatchedApplications : matchedApplications);
             return {
                 job: job,
                 stats: stats,
                 jobMatchesKeyword: jobMatchesKeyword,
                 allApplications: allApplications,
                 applications: applications,
-                matchedCount: matchedApplications.length
+                matchedCount: matchedApplications.length,
+                visibleCount: statusMatchedApplications.length
             };
         })
         .filter((entry) => {
@@ -346,11 +430,14 @@ function buildVisibleJobs() {
                 return false;
             }
             if (!keyword) {
-                return true;
+                return entry.visibleCount > 0 || !state.reviewStatus;
             }
             return entry.jobMatchesKeyword || entry.matchedCount > 0;
         })
         .sort((a, b) => {
+            if (b.stats.actionable !== a.stats.actionable) {
+                return b.stats.actionable - a.stats.actionable;
+            }
             if (b.stats.pending !== a.stats.pending) {
                 return b.stats.pending - a.stats.pending;
             }
@@ -361,20 +448,48 @@ function buildVisibleJobs() {
         });
 }
 
-function buildStatusSelect(currentStatus) {
-    const select = document.createElement("select");
-    select.className = "mini-select";
-    const statuses = ["SUBMITTED", "INTERVIEWED", "ACCEPTED", "REJECTED"];
-    statuses.forEach((status) => {
-        const option = document.createElement("option");
-        option.value = status;
-        option.textContent = status;
-        if ((currentStatus || "").toUpperCase() === status) {
-            option.selected = true;
+function updateReviewStatusFilters() {
+    const selectedJobId = (reviewJobSelectEl.value || "").trim();
+    const keyword = (reviewJobSearchEl.value || "").trim().toLowerCase();
+    const filteredApplications = state.jobs
+        .filter((job) => !selectedJobId || job.jobId === selectedJobId)
+        .flatMap((job) => getSortedApplications(job.jobId).filter((candidate) => {
+            if (!keyword) {
+                return true;
+            }
+            return buildJobSearchBlob(job).includes(keyword) || buildCandidateSearchBlob(job, candidate).includes(keyword);
+        }));
+
+    const counts = {
+        all: filteredApplications.length,
+        submitted: 0,
+        interviewed: 0,
+        accepted: 0,
+        rejected: 0
+    };
+
+    filteredApplications.forEach((candidate) => {
+        const normalized = normalizeStatus(candidate.status);
+        if (normalized === "INTERVIEWED") {
+            counts.interviewed += 1;
+        } else if (normalized === "ACCEPTED") {
+            counts.accepted += 1;
+        } else if (normalized === "REJECTED") {
+            counts.rejected += 1;
+        } else {
+            counts.submitted += 1;
         }
-        select.appendChild(option);
     });
-    return select;
+
+    Object.entries(reviewStatusCountEls).forEach(([key, element]) => {
+        if (element) {
+            element.textContent = String(counts[key]);
+        }
+    });
+
+    reviewStatusFilterEls.forEach((button) => {
+        button.classList.toggle("active", button.dataset.reviewStatus === state.reviewStatus);
+    });
 }
 
 async function updateApplicationStatus(applicationId, status, triggerBtn) {
@@ -393,6 +508,7 @@ async function updateApplicationStatus(applicationId, status, triggerBtn) {
             })
         });
         await loadReviewData();
+        showToast("Application marked as " + getStatusLabel(status) + ".");
     } catch (error) {
         alert(error.message);
     } finally {
@@ -416,57 +532,69 @@ function buildCandidateRow(job, candidate, isLatest) {
     row.appendChild(main);
 
     const statusCell = document.createElement("div");
+    statusCell.className = "candidate-status";
     const nameLine = document.createElement("div");
+    nameLine.className = "candidate-label";
     nameLine.textContent = "Submitter: " + (candidate.displayName || "Unknown");
-    nameLine.style.fontWeight = "700";
-    nameLine.style.color = "#173c6b";
     const stateLine = document.createElement("div");
-    stateLine.textContent = "Current: " + (candidate.status || "SUBMITTED");
+    stateLine.className = "candidate-status-meta";
+    stateLine.textContent = "Current status";
     statusCell.appendChild(nameLine);
     statusCell.appendChild(stateLine);
+    statusCell.appendChild(createStatusTag(candidate.status));
     row.appendChild(statusCell);
 
     const dateCell = document.createElement("div");
+    dateCell.className = "candidate-date";
     dateCell.textContent = "Submitted: " + fmtDate(candidate.submittedAt);
     row.appendChild(dateCell);
 
     const actions = document.createElement("div");
     actions.className = "candidate-actions";
 
-    const statusSelect = buildStatusSelect(candidate.status);
-    actions.appendChild(statusSelect);
+    const currentStatus = normalizeStatus(candidate.status);
 
-    const updateBtn = document.createElement("button");
-    updateBtn.type = "button";
-    updateBtn.className = "btn ghost";
-    updateBtn.textContent = "Update";
-    updateBtn.addEventListener("click", async () => {
-        await updateApplicationStatus(candidate.applicationId, statusSelect.value, updateBtn);
+    const interviewBtn = document.createElement("button");
+    interviewBtn.type = "button";
+    interviewBtn.className = "btn btn-review-interview";
+    interviewBtn.textContent = currentStatus === "INTERVIEWED" ? "Interviewed" : "Mark Interviewed";
+    interviewBtn.disabled = currentStatus === "INTERVIEWED" || currentStatus === "ACCEPTED" || currentStatus === "REJECTED";
+    interviewBtn.addEventListener("click", async () => {
+        if (!confirmReviewAction(candidate, "INTERVIEWED")) {
+            return;
+        }
+        await updateApplicationStatus(candidate.applicationId, "INTERVIEWED", interviewBtn);
     });
-    actions.appendChild(updateBtn);
+    actions.appendChild(interviewBtn);
 
     const approveBtn = document.createElement("button");
     approveBtn.type = "button";
-    approveBtn.className = "btn";
+    approveBtn.className = "btn btn-review-approve";
     approveBtn.textContent = "Approve";
+    approveBtn.disabled = currentStatus === "ACCEPTED";
     approveBtn.addEventListener("click", async () => {
-        statusSelect.value = "ACCEPTED";
+        if (!confirmReviewAction(candidate, "ACCEPTED")) {
+            return;
+        }
         await updateApplicationStatus(candidate.applicationId, "ACCEPTED", approveBtn);
     });
     actions.appendChild(approveBtn);
 
     const rejectBtn = document.createElement("button");
     rejectBtn.type = "button";
-    rejectBtn.className = "btn ghost";
+    rejectBtn.className = "btn btn-review-reject";
     rejectBtn.textContent = "Reject";
+    rejectBtn.disabled = currentStatus === "REJECTED";
     rejectBtn.addEventListener("click", async () => {
-        statusSelect.value = "REJECTED";
+        if (!confirmReviewAction(candidate, "REJECTED")) {
+            return;
+        }
         await updateApplicationStatus(candidate.applicationId, "REJECTED", rejectBtn);
     });
     actions.appendChild(rejectBtn);
 
     const detailLink = document.createElement("a");
-    detailLink.className = "btn";
+    detailLink.className = "btn btn-review-detail";
     detailLink.href = "mo-candidate-detail.jsp?jobId=" + encodeURIComponent(job.jobId)
         + "&candidateUserId=" + encodeURIComponent(candidate.applicantId)
         + "&applicationId=" + encodeURIComponent(candidate.applicationId || "");
@@ -488,6 +616,7 @@ function buildCandidateRow(job, candidate, isLatest) {
 
 function renderReview() {
     reviewListEl.innerHTML = "";
+    updateReviewStatusFilters();
     if (!state.jobs.length) {
         reviewHintEl.textContent = "No jobs created by current MO yet.";
         const empty = document.createElement("div");
@@ -501,10 +630,13 @@ function renderReview() {
     const visibleJobs = buildVisibleJobs();
 
     if (!visibleJobs.length) {
-        reviewHintEl.textContent = "No jobs match current filter.";
+        const emptyMessage = state.reviewStatus
+            ? "No applications match the current status filter."
+            : "No jobs match current filter.";
+        reviewHintEl.textContent = emptyMessage;
         const empty = document.createElement("div");
         empty.className = "panel empty-note";
-        empty.textContent = "No jobs match current filter.";
+        empty.textContent = emptyMessage;
         reviewListEl.appendChild(empty);
         return;
     }
@@ -516,7 +648,7 @@ function renderReview() {
         const stats = entry.stats;
         const applications = entry.applications;
         visibleApplicationCount += applications.length;
-        ensureCollapsedState(job.jobId, stats.pending === 0);
+        ensureCollapsedState(job.jobId, stats.actionable === 0);
 
         const block = document.createElement("section");
         block.className = "job-block";
@@ -558,6 +690,7 @@ function renderReview() {
         summary.className = "job-head-summary";
         summary.appendChild(buildJobStat("Total", stats.total, ""));
         summary.appendChild(buildJobStat("Pending", stats.pending, "pending"));
+        summary.appendChild(buildJobStat("Interviewed", stats.interviewed, "interviewed"));
         summary.appendChild(buildJobStat("Accepted", stats.accepted, "accepted"));
         summary.appendChild(buildJobStat("Rejected", stats.rejected, "rejected"));
 
@@ -569,10 +702,10 @@ function renderReview() {
         const actions = document.createElement("div");
         actions.className = "job-head-actions";
 
-        if (stats.pending > 0) {
+        if (stats.actionable > 0) {
             const focus = document.createElement("span");
             focus.className = "job-focus";
-            focus.textContent = "Priority job";
+            focus.textContent = "Needs review";
             actions.appendChild(focus);
         }
 
@@ -616,9 +749,10 @@ function renderReview() {
         reviewListEl.appendChild(block);
     }
 
+    const statusText = state.reviewStatus ? getStatusLabel(state.reviewStatus) : "All";
     reviewHintEl.textContent = keyword
-        ? "Showing " + visibleJobs.length + " jobs / " + visibleApplicationCount + " filtered applications."
-        : "Showing " + visibleJobs.length + " jobs / " + visibleApplicationCount + " applications.";
+        ? "Showing " + visibleJobs.length + " jobs / " + visibleApplicationCount + " " + statusText.toLowerCase() + " applications matching the current search."
+        : "Showing " + visibleJobs.length + " jobs / " + visibleApplicationCount + " " + statusText.toLowerCase() + " applications.";
 }
 
 async function loadReviewData() {
@@ -693,9 +827,16 @@ reviewRefreshBtnEl.addEventListener("click", async () => {
 });
 reviewJobSelectEl.addEventListener("change", renderReview);
 reviewJobSearchEl.addEventListener("input", renderReview);
+reviewStatusFilterEls.forEach((button) => {
+    button.addEventListener("click", () => {
+        state.reviewStatus = button.dataset.reviewStatus || "";
+        renderReview();
+    });
+});
 reviewClearFilterBtnEl.addEventListener("click", () => {
     reviewJobSelectEl.value = "";
     reviewJobSearchEl.value = "";
+    state.reviewStatus = "";
     renderReview();
 });
 

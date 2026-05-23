@@ -20,6 +20,161 @@ function pretty(value) {
     return JSON.stringify(value, null, 2);
 }
 
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function decodeEscapedUnicode(value) {
+    if (typeof value !== "string") {
+        return value;
+    }
+    return value
+        .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+        .replace(/\\n/g, "\n");
+}
+
+function formatList(items) {
+    if (!Array.isArray(items) || items.length === 0) {
+        return "-";
+    }
+    return items.map((item) => "- " + decodeEscapedUnicode(String(item))).join("\n");
+}
+
+function renderHrInsight(insight) {
+    if (!insight || typeof insight !== "object") {
+        return pretty(insight);
+    }
+
+    const lines = [
+        `Candidate: ${decodeEscapedUnicode(insight.displayName || insight.candidateUserId || "-")}`,
+        `Score: ${insight.score ?? "-"}`,
+        `Workload: ${insight.workload ?? "-"}`,
+        `Provider: ${decodeEscapedUnicode(insight.provider || "-")}`,
+        "",
+        "Resume Summary:",
+        decodeEscapedUnicode(insight.resumeSummary || "-"),
+        "",
+        "Matched Skills:",
+        formatList(insight.matchedSkills),
+        "",
+        "Missing Skills:",
+        formatList(insight.missingSkills),
+        "",
+        "Explanation:",
+        decodeEscapedUnicode(insight.explanation || "-")
+    ];
+
+    return lines.join("\n");
+}
+
+function renderHrInsightHtml(insight) {
+    if (!insight || typeof insight !== "object") {
+        return `<p class="hr-ai-copy">${escapeHtml(pretty(insight))}</p>`;
+    }
+
+    const matched = Array.isArray(insight.matchedSkills) ? insight.matchedSkills : [];
+    const missing = Array.isArray(insight.missingSkills) ? insight.missingSkills : [];
+
+    return `
+        <div class="hr-ai-section">
+            <h3>Overview</h3>
+            <p class="hr-ai-copy"><strong>Candidate:</strong> ${escapeHtml(decodeEscapedUnicode(insight.displayName || insight.candidateUserId || "-"))}</p>
+            <p class="hr-ai-copy"><strong>Score:</strong> ${escapeHtml(insight.score ?? "-")}</p>
+            <p class="hr-ai-copy"><strong>Workload:</strong> ${escapeHtml(insight.workload ?? "-")}</p>
+            <p class="hr-ai-copy"><strong>Provider:</strong> ${escapeHtml(decodeEscapedUnicode(insight.provider || "-"))}</p>
+        </div>
+        <div class="hr-ai-section">
+            <h3>Resume Summary</h3>
+            <p class="hr-ai-copy">${escapeHtml(decodeEscapedUnicode(insight.resumeSummary || "-"))}</p>
+        </div>
+        <div class="hr-ai-section">
+            <h3>Matched Skills</h3>
+            ${matched.length ? `<ul class="hr-ai-list">${matched.map((item) => `<li>${escapeHtml(decodeEscapedUnicode(item))}</li>`).join("")}</ul>` : `<p class="hr-ai-copy">-</p>`}
+        </div>
+        <div class="hr-ai-section">
+            <h3>Missing Skills</h3>
+            ${missing.length ? `<ul class="hr-ai-list">${missing.map((item) => `<li>${escapeHtml(decodeEscapedUnicode(item))}</li>`).join("")}</ul>` : `<p class="hr-ai-copy">-</p>`}
+        </div>
+        <div class="hr-ai-section">
+            <h3>Explanation</h3>
+            <p class="hr-ai-copy">${escapeHtml(decodeEscapedUnicode(insight.explanation || "-"))}</p>
+        </div>
+    `;
+}
+
+function renderHrCandidateDetail(candidate) {
+    if (!candidate || typeof candidate !== "object") {
+        return pretty(candidate);
+    }
+
+    const lines = [
+        `Name: ${decodeEscapedUnicode(candidate.displayName || "-")}`,
+        `User ID: ${decodeEscapedUnicode(candidate.candidateUserId || "-")}`,
+        `Role: ${decodeEscapedUnicode(candidate.role || "-")}`,
+        `Identifier: ${decodeEscapedUnicode(candidate.identifier || "-")}`,
+        `Email: ${decodeEscapedUnicode(candidate.email || "-")}`,
+        `Skills: ${decodeEscapedUnicode(candidate.skills || "-")}`,
+        `Workload: ${candidate.workload ?? "-"}`,
+        `Updated At: ${decodeEscapedUnicode(candidate.updatedAt || "-")}`,
+        "",
+        "Resume Text:",
+        decodeEscapedUnicode(candidate.resumeText || "-")
+    ];
+
+    return lines.join("\n");
+}
+
+function renderHrCandidateDetailHtml(candidate) {
+    if (!candidate || typeof candidate !== "object") {
+        return `<p class="hr-ai-copy">${escapeHtml(pretty(candidate))}</p>`;
+    }
+
+    const skills = decodeEscapedUnicode(candidate.skills || "-");
+    const resumeText = decodeEscapedUnicode(candidate.resumeText || "-");
+
+    return `
+        <div class="hr-detail-grid">
+            <div class="hr-detail-item">
+                <p class="hr-detail-label">Name</p>
+                <div class="hr-detail-value">${escapeHtml(decodeEscapedUnicode(candidate.displayName || "-"))}</div>
+            </div>
+            <div class="hr-detail-item">
+                <p class="hr-detail-label">User ID</p>
+                <div class="hr-detail-value">${escapeHtml(decodeEscapedUnicode(candidate.candidateUserId || "-"))}</div>
+            </div>
+            <div class="hr-detail-item">
+                <p class="hr-detail-label">Role</p>
+                <div class="hr-detail-value">${escapeHtml(decodeEscapedUnicode(candidate.role || "-"))}</div>
+            </div>
+            <div class="hr-detail-item">
+                <p class="hr-detail-label">Identifier</p>
+                <div class="hr-detail-value">${escapeHtml(decodeEscapedUnicode(candidate.identifier || "-"))}</div>
+            </div>
+            <div class="hr-detail-item">
+                <p class="hr-detail-label">Email</p>
+                <div class="hr-detail-value">${escapeHtml(decodeEscapedUnicode(candidate.email || "-"))}</div>
+            </div>
+            <div class="hr-detail-item">
+                <p class="hr-detail-label">Workload</p>
+                <div class="hr-detail-value">${escapeHtml(candidate.workload ?? "-")}</div>
+            </div>
+            <div class="hr-detail-item full">
+                <p class="hr-detail-label">Skills</p>
+                <div class="hr-detail-value">${escapeHtml(skills)}</div>
+            </div>
+            <div class="hr-detail-item full">
+                <p class="hr-detail-label">Resume Text</p>
+                <div class="hr-detail-value">${escapeHtml(resumeText)}</div>
+            </div>
+        </div>
+    `;
+}
+
 const jobFilter = document.getElementById("job-filter");
 if (jobFilter) {
     const jobsOutput = document.getElementById("jobs-output");
@@ -70,189 +225,6 @@ if (statusForm) {
             output.textContent = pretty(data);
         } catch (error) {
             output.textContent = error.message;
-        }
-    });
-}
-
-const moForm = document.getElementById("mo-job-form");
-let moRefreshJobs = null;
-if (moForm) {
-    const output = document.getElementById("mo-output");
-    moForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const payload = Object.fromEntries(new FormData(moForm).entries());
-        payload.slots = Number(payload.slots);
-        try {
-            const data = await api("/mo/jobs", {
-                method: "POST",
-                body: JSON.stringify(payload)
-            });
-            output.textContent = pretty(data);
-            if (moRefreshJobs) {
-                await moRefreshJobs();
-            }
-        } catch (error) {
-            output.textContent = error.message;
-        }
-    });
-}
-
-let moLoadCandidates = null;
-
-// MO Candidate Screening
-const candidateFilterForm = document.getElementById("candidate-filter-form");
-if (candidateFilterForm) {
-    const candidatesOutput = document.getElementById("candidates-output");
-    
-    async function loadCandidates(jobId, status = "", page = 1, size = 20) {
-        try {
-            let url = `/mo/candidates?jobId=${encodeURIComponent(jobId)}&page=${page}&size=${size}`;
-            if (status) {
-                url += `&status=${encodeURIComponent(status)}`;
-            }
-            const data = await api(url);
-            candidatesOutput.textContent = pretty(data);
-        } catch (error) {
-            candidatesOutput.textContent = error.message;
-        }
-    }
-    
-    candidateFilterForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const formData = new FormData(candidateFilterForm);
-        const jobId = formData.get("jobId");
-        const status = formData.get("status");
-        const page = parseInt(formData.get("page")) || 1;
-        const size = parseInt(formData.get("size")) || 20;
-        
-        await loadCandidates(jobId, status, page, size);
-    });
-
-    moLoadCandidates = async (jobId) => {
-        const formData = new FormData(candidateFilterForm);
-        const status = formData.get("status") || "";
-        const page = parseInt(formData.get("page")) || 1;
-        const size = parseInt(formData.get("size")) || 20;
-        await loadCandidates(jobId, status, page, size);
-    };
-}
-
-// MO Open Job List
-const moJobsTableBody = document.getElementById("mo-jobs-table-body");
-if (moJobsTableBody) {
-    const refreshBtn = document.getElementById("mo-jobs-refresh");
-    const candidateJobIdInput = document.getElementById("candidateJobId");
-
-    function renderJobRows(jobs) {
-        moJobsTableBody.innerHTML = "";
-        if (!jobs || jobs.length === 0) {
-            const row = document.createElement("tr");
-            const cell = document.createElement("td");
-            cell.colSpan = 5;
-            cell.className = "empty-note";
-            cell.textContent = "No open jobs.";
-            row.appendChild(cell);
-            moJobsTableBody.appendChild(row);
-            return;
-        }
-
-        for (const job of jobs) {
-            const row = document.createElement("tr");
-
-            const idCell = document.createElement("td");
-            idCell.textContent = job.jobId;
-            row.appendChild(idCell);
-
-            const titleCell = document.createElement("td");
-            titleCell.textContent = job.title;
-            row.appendChild(titleCell);
-
-            const moduleCell = document.createElement("td");
-            moduleCell.textContent = job.moduleCode;
-            row.appendChild(moduleCell);
-
-            const slotsCell = document.createElement("td");
-            slotsCell.textContent = String(job.slots);
-            row.appendChild(slotsCell);
-
-            const actionCell = document.createElement("td");
-            const useBtn = document.createElement("button");
-            useBtn.type = "button";
-            useBtn.className = "btn ghost";
-            useBtn.textContent = "Use";
-            useBtn.addEventListener("click", async () => {
-                if (candidateJobIdInput) {
-                    candidateJobIdInput.value = job.jobId;
-                }
-                if (moLoadCandidates) {
-                    try {
-                        await moLoadCandidates(job.jobId);
-                    } catch (_) {
-                    }
-                }
-            });
-            actionCell.appendChild(useBtn);
-            row.appendChild(actionCell);
-
-            moJobsTableBody.appendChild(row);
-        }
-    }
-
-    async function loadMoJobs() {
-        try {
-            if (refreshBtn) {
-                refreshBtn.disabled = true;
-            }
-            const data = await api("/jobs?status=OPEN&page=1&size=200");
-            renderJobRows(data.items || []);
-        } catch (error) {
-            moJobsTableBody.innerHTML = "";
-            const row = document.createElement("tr");
-            const cell = document.createElement("td");
-            cell.colSpan = 5;
-            cell.className = "empty-note";
-            cell.textContent = error.message;
-            row.appendChild(cell);
-            moJobsTableBody.appendChild(row);
-        } finally {
-            if (refreshBtn) {
-                refreshBtn.disabled = false;
-            }
-        }
-    }
-
-    moRefreshJobs = loadMoJobs;
-
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", async () => {
-            await loadMoJobs();
-        });
-    }
-
-    loadMoJobs();
-}
-
-// MO Status Update
-const statusUpdateForm = document.getElementById("status-update-form");
-if (statusUpdateForm) {
-    const statusOutput = document.getElementById("status-output");
-    
-    statusUpdateForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const formData = new FormData(statusUpdateForm);
-        const payload = {
-            applicationId: formData.get("applicationId"),
-            status: formData.get("status")
-        };
-        
-        try {
-            const data = await api("/mo/applications", {
-                method: "PUT",
-                body: JSON.stringify(payload)
-            });
-            statusOutput.textContent = pretty(data);
-        } catch (error) {
-            statusOutput.textContent = error.message;
         }
     });
 }
@@ -485,7 +457,7 @@ if (hrCandidateSelect) {
             return;
         }
         const data = await api(`/hr/candidates?candidateUserId=${encodeURIComponent(candidateUserId)}`);
-        hrCandidateOutput.textContent = pretty(data.candidate || data);
+        hrCandidateOutput.innerHTML = renderHrCandidateDetailHtml(data.candidate || data);
     }
 
     hrCandidateSelect.addEventListener("change", async () => {
@@ -509,7 +481,7 @@ if (hrCandidateSelect) {
                 method: "POST",
                 body: JSON.stringify({candidateUserId, jobId})
             });
-            hrAiOutput.textContent = pretty(data.insight || data);
+            hrAiOutput.innerHTML = renderHrInsightHtml(data.insight || data);
         } catch (error) {
             hrAiOutput.textContent = error.message;
         }
