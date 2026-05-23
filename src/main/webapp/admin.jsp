@@ -38,6 +38,71 @@
             gap: .8rem;
         }
 
+        .hr-detail-panel,
+        .hr-ai-panel {
+            min-height: 220px;
+            white-space: normal;
+        }
+
+        .hr-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .75rem;
+        }
+
+        .hr-detail-item {
+            border: 1px solid #d6e4ff;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .82);
+            padding: .75rem .85rem;
+        }
+
+        .hr-detail-item.full {
+            grid-column: 1 / -1;
+        }
+
+        .hr-detail-label {
+            margin: 0 0 .28rem;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #58708f;
+        }
+
+        .hr-detail-value {
+            color: #16315b;
+            font-weight: 600;
+            line-height: 1.5;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .hr-ai-section + .hr-ai-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dfe9fb;
+        }
+
+        .hr-ai-section h3 {
+            margin: 0 0 .45rem;
+            color: #12396a;
+            font-size: 1rem;
+        }
+
+        .hr-ai-copy {
+            margin: 0;
+            color: #27486f;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .hr-ai-list {
+            margin: .2rem 0 0;
+            padding-left: 1.1rem;
+            color: #27486f;
+        }
+
         .hr-ai-btn {
             position: sticky;
             top: 1rem;
@@ -58,12 +123,17 @@
                 position: static;
                 width: 100%;
             }
+            .hr-detail-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <main class="shell">
-    <a class="link" href="index.jsp">&larr; Back to Login</a>
+    <a class="link" href="index.jsp">&larr; Exit</a>
 
     <section class="glass card">
         <h1>HR Candidate Review Workspace</h1>
@@ -78,14 +148,14 @@
                 <select id="hr-job-select"></select>
             </div>
             <div class="hr-side">
-                <pre id="hr-candidate-output" class="panel" style="flex:1">Loading candidate list...</pre>
+                <div id="hr-candidate-output" class="panel hr-detail-panel" style="flex:1">Loading candidate list...</div>
                 <button id="hr-ai-analyze-btn" class="btn hr-ai-btn" type="button">AI Analyze</button>
             </div>
         </div>
 
         <div class="glass card hr-stack">
             <h2>AI Decision Support</h2>
-            <pre id="hr-ai-output" class="panel">No AI analysis yet.</pre>
+            <div id="hr-ai-output" class="panel hr-ai-panel">No AI analysis yet.</div>
         </div>
     </section>
 
@@ -137,6 +207,6 @@
         </div>
     </section>
 </main>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=3"></script>
 </body>
 </html>

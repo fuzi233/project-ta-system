@@ -3,7 +3,6 @@
 ## Module Owner Scope
 
 This document records the delivery for:
-
 - test cases (unit + integration)
 - acceptance script
 - documentation integration (testing guide + user manual + screenshot checklist)
@@ -36,6 +35,6 @@ bash scripts/acceptance/run_acceptance.sh
 ```
 
 ## Notes
-
 - Acceptance script assumes the server is running at `http://localhost:8080`.
 - Role permissions are enforced in all script checks (TA/MO/Admin).
+- acceptance script

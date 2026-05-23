@@ -7,14 +7,14 @@
     <title>TA Recruitment - Sign In</title>
     <style>
         :root {
-            --bg-start: #EEF2FF;
-            --bg-end: #E0E7FF;
-            --ink: #1E293B;
-            --muted: #64748B;
-            --line: #CBD5E1;
+            --bg-start: #ffffff;
+            --bg-end: #d9e8ff;
+            --ink: #102039;
+            --muted: #4c5e7a;
+            --line: #c2d6ff;
             --white: #FFFFFF;
-            --blue: #3B82F6;
-            --cyan: #06B6D4;
+            --blue: #1575ff;
+            --cyan: #00b7a5;
             --error: #EF4444;
             --success: #10B981;
             --weak: #F97316;
@@ -32,9 +32,9 @@
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
             color: var(--ink);
-            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            background: radial-gradient(circle at 20% 15%, var(--bg-start) 0%, #eef3ff 45%, var(--bg-end) 100%);
             overflow-x: hidden;
         }
 
@@ -137,7 +137,7 @@
 
         .brand .desc {
             margin: 2px 0 0;
-            color: #334155;
+            color: #16315b;
             max-width: 420px;
             line-height: 1.7;
             font-size: 16px;
@@ -191,7 +191,7 @@
             padding: 10px 14px;
             font-size: 14px;
             font-weight: 700;
-            color: #475569;
+            color: var(--muted);
             background: transparent;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -244,7 +244,7 @@
             text-align: center;
             font-size: 13px;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
@@ -256,7 +256,7 @@
         .role-option svg {
             width: 16px;
             height: 16px;
-            fill: #334155;
+            fill: #16315b;
         }
 
         .role-option.active {
@@ -353,7 +353,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #475569;
+            color: var(--muted);
             font-size: 13px;
         }
 
@@ -373,7 +373,7 @@
         }
 
         .ghost-link:hover {
-            color: #334155;
+            color: #16315b;
         }
 
         .submit-btn {
@@ -398,9 +398,12 @@
         }
 
         .submit-btn:disabled {
-            opacity: 0.75;
+            opacity: 1;
             cursor: not-allowed;
             transform: none;
+            background: #d8e1ef;
+            color: #7a8aa3;
+            box-shadow: none;
         }
 
         .spinner {

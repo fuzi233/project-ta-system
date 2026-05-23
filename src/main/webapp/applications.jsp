@@ -16,14 +16,15 @@
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
-            --bg: #eef2f6;
-            --panel: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --line: #d7dee8;
-            --primary: #9cb8d3;
-            --primary-dark: #7f9fbe;
-            --shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+            --bg: #eef3ff;
+            --panel: rgba(255, 255, 255, 0.92);
+            --text: #102039;
+            --muted: #4c5e7a;
+            --line: #d6e4ff;
+            --primary: #1575ff;
+            --primary-dark: #0094ff;
+            --accent: #00b7a5;
+            --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
 
             --pending-bg: #f6edd8;
             --pending-text: #8a6d1d;
@@ -41,8 +42,8 @@
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(180deg, #edf2f7 0%, #e9eef5 100%);
+            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
             color: var(--text);
         }
 
@@ -54,7 +55,7 @@
 
         .shell {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #e2e8f0;
+            border: 1px solid #d6e4ff;
             border-radius: 24px;
             box-shadow: var(--shadow);
             overflow: hidden;
@@ -71,9 +72,9 @@
         }
 
         .brand {
-            font-size: 18px;
+            font-size: 1rem;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
         }
 
         .nav {
@@ -84,16 +85,16 @@
 
         .nav a {
             text-decoration: none;
-            color: #475569;
-            font-size: 16px;
+            color: var(--muted);
+            font-size: .95rem;
             font-weight: 500;
             padding: 24px 0 20px;
             border-bottom: 3px solid transparent;
         }
 
         .nav a.active {
-            color: #0f172a;
-            border-bottom-color: #718096;
+            color: #16315b;
+            border-bottom-color: #1575ff;
         }
 
         .content {
@@ -102,12 +103,12 @@
 
         .breadcrumb {
             font-size: 15px;
-            color: #64748b;
+            color: var(--muted);
             margin-bottom: 22px;
         }
 
         .breadcrumb a {
-            color: #64748b;
+            color: var(--muted);
             text-decoration: none;
         }
 
@@ -115,12 +116,12 @@
             margin: 0 0 22px;
             font-size: 46px;
             font-weight: 800;
-            color: #10213f;
+            color: #0e3369;
         }
 
         .divider {
             height: 1px;
-            background: #dbe3ec;
+            background: #d6e4ff;
             margin-bottom: 20px;
         }
 
@@ -137,21 +138,21 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0;
-            border: 1px solid #d2dbe6;
+            border: 1px solid #c2d6ff;
             border-radius: 12px;
             overflow: hidden;
-            background: #fff;
+            background: rgba(255, 255, 255, .88);
         }
 
         .filter-btn {
             height: 50px;
             min-width: 120px;
             border: none;
-            background: #fff;
-            color: #475569;
-            font-size: 16px;
-            font-weight: 500;
-            border-right: 1px solid #d2dbe6;
+            background: transparent;
+            color: #486287;
+            font-size: .95rem;
+            font-weight: 600;
+            border-right: 1px solid #c2d6ff;
             cursor: pointer;
             position: relative;
         }
@@ -160,8 +161,12 @@
             border-right: none;
         }
 
+        .filter-btn:hover {
+            background: rgba(21, 117, 255, 0.08);
+        }
+
         .filter-btn.active {
-            background: #a7bfd7;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
         }
 
@@ -175,8 +180,13 @@
             border-radius: 999px;
             margin-left: 6px;
             font-size: 13px;
-            background: rgba(15, 23, 42, 0.08);
+            background: rgba(16, 32, 57, 0.1);
             color: inherit;
+        }
+
+        .filter-btn.active .badge-count {
+            background: rgba(255, 255, 255, 0.28);
+            color: #fff;
         }
 
         .sort-box {
@@ -184,18 +194,18 @@
             align-items: center;
             gap: 12px;
             font-size: 18px;
-            color: #475569;
+            color: var(--muted);
         }
 
         .sort-select {
             height: 50px;
             min-width: 220px;
-            border: 1px solid #d2dbe6;
+            border: 1px solid #c2d6ff;
             border-radius: 12px;
             padding: 0 16px;
-            font-size: 16px;
-            background: #fff;
-            color: #334155;
+            font-size: .95rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #16315b;
         }
 
         .application-list {
@@ -205,11 +215,11 @@
         }
 
         .application-card {
-            background: #fff;
-            border: 1px solid #d9e2ec;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #d6e4ff;
             border-radius: 16px;
             padding: 24px 26px;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 8px 18px rgba(16, 32, 57, 0.06);
             display: flex;
             justify-content: space-between;
             gap: 20px;
@@ -220,12 +230,12 @@
             margin: 0 0 12px;
             font-size: 22px;
             font-weight: 800;
-            color: #1e293b;
+            color: #16315b;
         }
 
         .application-meta {
             font-size: 16px;
-            color: #64748b;
+            color: var(--muted);
             line-height: 1.8;
         }
 
@@ -239,7 +249,7 @@
 
         .status-note {
             font-size: 14px;
-            color: #64748b;
+            color: var(--muted);
         }
 
         .status-tag {
@@ -276,10 +286,10 @@
             min-width: 132px;
             height: 52px;
             border-radius: 12px;
-            border: 1px solid #ccd6e2;
-            background: #fff;
-            color: #334155;
-            font-size: 16px;
+            border: 1px solid #c2d6ff;
+            background: rgba(255, 255, 255, 0.9);
+            color: #16315b;
+            font-size: .95rem;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
@@ -295,7 +305,7 @@
         }
 
         .action-btn.withdraw {
-            background: linear-gradient(135deg, #9db7d0 0%, #86a8c5 100%);
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
             border: none;
         }
@@ -312,7 +322,7 @@
             height: 42px;
             border: 1px solid #d0d9e4;
             background: #fff;
-            color: #475569;
+            color: var(--muted);
             font-size: 16px;
             display: inline-flex;
             align-items: center;
@@ -329,7 +339,7 @@
         }
 
         .page-btn.active {
-            background: #a6bfd8;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
         }
 
@@ -337,7 +347,7 @@
             display: none;
             text-align: center;
             padding: 38px 20px 8px;
-            color: #64748b;
+            color: var(--muted);
             font-size: 18px;
         }
 
@@ -410,12 +420,14 @@
     </style>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <div class="page">
+    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
             <nav class="nav">
-                <a href="index.jsp">Home</a>
                 <a href="jobs.jsp">Job List</a>
                 <a href="applications.jsp" class="active">My Applications</a>
                 <a href="profile.jsp">Profile</a>

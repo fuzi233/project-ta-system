@@ -354,7 +354,7 @@
 </head>
 <body data-mo-user-id="<%= userId %>">
 <main class="shell">
-    <a class="link" href="index.jsp">&larr; Home</a>
+    <a class="link" href="index.jsp">&larr; Exit</a>
 
     <section class="glass hero">
         <p class="eyebrow">MO Workspace</p>
@@ -379,8 +379,25 @@
                 <button id="reviewClearFilterBtn" class="btn ghost" type="button">Clear Filter</button>
                 <div id="reviewHint" class="hint">Loading jobs and applications...</div>
             </div>
+            <div class="filter-group review-status-filters" role="tablist" aria-label="Application status filter">
+                <button type="button" class="filter-btn active" data-review-status="">
+                    All <span class="badge-count" data-review-count="all">0</span>
+                </button>
+                <button type="button" class="filter-btn" data-review-status="SUBMITTED">
+                    Pending <span class="badge-count" data-review-count="submitted">0</span>
+                </button>
+                <button type="button" class="filter-btn" data-review-status="INTERVIEWED">
+                    Interviewed <span class="badge-count" data-review-count="interviewed">0</span>
+                </button>
+                <button type="button" class="filter-btn" data-review-status="ACCEPTED">
+                    Accepted <span class="badge-count" data-review-count="accepted">0</span>
+                </button>
+                <button type="button" class="filter-btn" data-review-status="REJECTED">
+                    Rejected <span class="badge-count" data-review-count="rejected">0</span>
+                </button>
+            </div>
             <p class="hint" style="margin-top:-.25rem;">
-                Note: each submission creates one application record; jobs with pending applications are shown first, and non-priority jobs are collapsed by default.
+                Note: each submission creates one application record. Review by clear actions only: Mark Interviewed, Approve, or Reject.
             </p>
             <div id="reviewList" class="review-grid"></div>
         </div>
