@@ -15,6 +15,7 @@ import cn.ebu6304.tarecruitment.service.ApplicationService;
 import cn.ebu6304.tarecruitment.service.JobService;
 import cn.ebu6304.tarecruitment.service.WorkloadService;
 import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.file.Path;
@@ -34,7 +35,9 @@ public class AppContext {
     private final AttachmentService attachmentService;
 
     private AppContext() {
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false);
 
         String dataDir = System.getProperty("ta.data.dir", "data");
         Path base = Path.of(dataDir);

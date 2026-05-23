@@ -3,6 +3,7 @@
 {"jobId": "job-003", "title": "NLP Lab Assistant", "moduleCode": "EBU6402", "requiredSkills": "Natural Language Processing,Python,Prompt Engineering", "slots": 2, "status": "OPEN", "createdBy": "mo-002", "createdAt": "2026-04-10T06:00:00+00:00"}
 {"jobId": "job-004", "title": "Web Development TA", "moduleCode": "EBU6108", "requiredSkills": "JavaScript,Web Development,HTML/CSS,Testing", "slots": 2, "status": "OPEN", "createdBy": "mo-003", "createdAt": "2026-04-10T03:00:00+00:00"}
 {"jobId": "job-005", "title": "Data Analysis TA", "moduleCode": "EBU6005", "requiredSkills": "Data Analysis,Python,Excel,Statistics", "slots": 3, "status": "OPEN", "createdBy": "mo-001", "createdAt": "2026-04-10T00:00:00+00:00"}
-{"jobId":"JOB-1775977662","title":"Acceptance Test Job","moduleCode":"EBU6304","requiredSkills":"Java","slots":2,"status":"OPEN","createdBy":"mo-7bd2bcaa","createdAt":"2026-04-12T15:07:42.989414+08:00"}
-{"jobId":"Job-007","title":"test","moduleCode":"EBU666","requiredSkills":"Python","slots":2,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-04-12T16:59:05.734889+08:00"}
-{"jobId":"job-009","title":"Test-2","moduleCode":"EBU200","requiredSkills":"MySQL","slots":10,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-04-12T17:48:27.070456+08:00"}
+{"jobId":"11","title":"11","moduleCode":"111","requiredSkills":"111","slots":1111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:17.119025500+08:00"}
+{"jobId":"1","title":"11","moduleCode":"111","requiredSkills":"1111","slots":11111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:34.234573+08:00"}
+{"jobId":"job-test","title":"Test TA","moduleCode":"TEST101","requiredSkills":"Java,Testing","slots":2,"hoursPerWeek":10,"applicationDeadline":"2026-06-15","monthlyStipend":800,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-05-24T04:42:31.152841+08:00"}
+{"jobId":"job-new-01","title":"New Test TA","moduleCode":"TEST999","requiredSkills":"Go,Rust,Testing","slots":3,"hoursPerWeek":12,"applicationDeadline":"2026-07-01","monthlyStipend":1000,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-05-24T05:01:23.902841+08:00"}

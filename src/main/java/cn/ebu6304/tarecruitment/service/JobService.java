@@ -21,14 +21,20 @@ public class JobService {
             String moduleCode,
             String requiredSkills,
             int slots,
+            Integer hoursPerWeek,
+            String applicationDeadline,
+            Integer monthlyStipend,
             String createdBy
     ) {
         String normalizedJobId = Validators.requireNonBlank(jobId, "jobId");
         String normalizedTitle = Validators.requireNonBlank(title, "title");
         String normalizedModule = Validators.requireNonBlank(moduleCode, "moduleCode");
         String normalizedSkills = Validators.requireNonBlank(requiredSkills, "requiredSkills");
+        String normalizedDeadline = Validators.requireNonBlank(applicationDeadline, "applicationDeadline");
         String normalizedCreator = Validators.requireNonBlank(createdBy, "createdBy");
         int normalizedSlots = Validators.requirePositive(slots, "slots");
+        int normalizedHours = Validators.requirePositive(hoursPerWeek == null ? 0 : hoursPerWeek, "hoursPerWeek");
+        int normalizedStipend = Validators.requirePositive(monthlyStipend == null ? 0 : monthlyStipend, "monthlyStipend");
 
         JobPosting record = new JobPosting(
                 normalizedJobId,
@@ -36,6 +42,9 @@ public class JobService {
                 normalizedModule,
                 normalizedSkills,
                 normalizedSlots,
+                normalizedHours,
+                normalizedDeadline,
+                normalizedStipend,
                 "OPEN",
                 normalizedCreator,
                 OffsetDateTime.now().toString()

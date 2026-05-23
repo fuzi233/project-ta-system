@@ -35,7 +35,7 @@ class AiServiceTest {
                 "Built Java coursework systems and supported lab sessions.",
                 "2026-04-10T00:00:00Z"
         ));
-        fixture.jobRepository.createIfAbsent(new JobPosting("job1", "AI TA", "CS6304", "Java, Machine Learning", 2, "OPEN", "mo1", "2026-04-10T00:00:00Z"));
+        fixture.jobRepository.createIfAbsent(new JobPosting("job1", "AI TA", "CS6304", "Java, Machine Learning", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-04-10T00:00:00Z"));
 
         AiService service = fixture.aiService();
         AiService.MatchInsight insight = service.match("ta1", "job1");
@@ -58,7 +58,7 @@ class AiServiceTest {
                 "Solid profile with multiple coding assignments.",
                 "2026-04-10T00:00:00Z"
         ));
-        fixture.jobRepository.createIfAbsent(new JobPosting("job2", "Data TA", "CS7001", "Java, Data Analysis", 1, "OPEN", "mo2", "2026-04-10T00:00:00Z"));
+        fixture.jobRepository.createIfAbsent(new JobPosting("job2", "Data TA", "CS7001", "Java, Data Analysis", 1, 10, "2026-01-01", 800, "OPEN", "mo2", "2026-04-10T00:00:00Z"));
 
         for (int i = 0; i < 4; i++) {
             fixture.applicationRepository.saveIfAbsent(new ApplicationRecord(
@@ -86,7 +86,7 @@ class AiServiceTest {
                 "Served as a peer tutor for software engineering labs, led code review sessions, and delivered a full Java web prototype.",
                 "2026-04-10T00:00:00Z"
         ));
-        fixture.jobRepository.createIfAbsent(new JobPosting("job10", "SE TA", "EBU6304", "Java, Software Engineering, Testing", 2, "OPEN", "mo1", "2026-04-10T00:00:00Z"));
+        fixture.jobRepository.createIfAbsent(new JobPosting("job10", "SE TA", "EBU6304", "Java, Software Engineering, Testing", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-04-10T00:00:00Z"));
 
         AiService.HrCandidateInsight insight = fixture.aiService().hrAssessCandidate("ta10", "job10");
 

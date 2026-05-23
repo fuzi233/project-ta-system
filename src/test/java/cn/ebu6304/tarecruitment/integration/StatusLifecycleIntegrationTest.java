@@ -32,7 +32,7 @@ class StatusLifecycleIntegrationTest {
         JobService jobService = new JobService(jobRepository);
         ApplicationService applicationService = new ApplicationService(applicationRepository, jobRepository);
 
-        jobService.createJob("job-1", "Java TA", "EBU6304", "Java", 2, "mo-1");
+        jobService.createJob("job-1", "Java TA", "EBU6304", "Java", 2, 10, "2026-01-01", 800, "mo-1");
         applicationService.submitApplication("app-1", "ta-1", "job-1");
         applicationService.updateStatus("app-1", "INTERVIEWED");
         applicationService.updateStatus("app-1", "ACCEPTED");

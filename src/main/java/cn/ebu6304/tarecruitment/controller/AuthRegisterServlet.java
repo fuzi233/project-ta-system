@@ -31,6 +31,10 @@ public class AuthRegisterServlet extends BaseServlet {
             if (!AuthValidators.isEmail(email)) {
                 throw new ApiException(400, "Invalid email format");
             }
+            if ((AuthSession.ROLE_TA.equals(role) || AuthSession.ROLE_MO.equals(role))
+                    && !AuthValidators.isBuptEmail(email)) {
+                throw new ApiException(400, "TA and MO registration emails must end with @bupt.edu.cn");
+            }
             AuthValidators.validateIdentifierByRole(role, identifier);
             if (password.length() < 8) {
                 throw new ApiException(400, "Password must be at least 8 characters");

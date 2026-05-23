@@ -184,8 +184,12 @@ public class JsonlFileStore<T> {
         try {
             return objectMapper.readValue(line, valueType);
         } catch (IOException parseException) {
-            reader.mark(1024 * 1024);
-            boolean atEof = reader.readLine() == null;
+            reader.mark(16 * 1024 * 1024);
+            String nextLine = reader.readLine();
+            if (nextLine != null) {
+                reader.reset();
+            }
+            boolean atEof = nextLine == null;
             if (atEof) {
                 return null;
             }

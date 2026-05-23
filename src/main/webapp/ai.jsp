@@ -3,7 +3,7 @@
 <%
     String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
     if (role == null) {
-        response.sendRedirect("index.jsp");
+        String qs = request.getQueryString(); String target = request.getRequestURI().substring(request.getContextPath().length()) + (qs != null ? "?" + qs : ""); response.sendRedirect("index.jsp?redirect=" + java.net.URLEncoder.encode(target, "UTF-8"));
         return;
     }
 %>
@@ -16,8 +16,10 @@
     <link rel="stylesheet" href="assets/css/style.css"/>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <main class="shell narrow">
-    <a class="link" href="index.jsp">&larr; Home</a>
+    <a class="link" href="index.jsp">&larr; Exit</a>
 
     <section class="glass card">
         <h1>AI Insights Lab</h1>

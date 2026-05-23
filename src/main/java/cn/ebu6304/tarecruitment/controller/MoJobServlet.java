@@ -21,6 +21,9 @@ public class MoJobServlet extends BaseServlet {
                     payload.moduleCode(),
                     payload.requiredSkills(),
                     payload.slots(),
+                    payload.hoursPerWeek(),
+                    payload.applicationDeadline(),
+                    payload.monthlyStipend(),
                     current.userId()
             );
             int status = createJobResponse.created() ? 201 : 200;
@@ -39,6 +42,9 @@ public class MoJobServlet extends BaseServlet {
             String moduleCode,
             String requiredSkills,
             int slots,
+            Integer hoursPerWeek,
+            String applicationDeadline,
+            Integer monthlyStipend,
             String createdBy
     ) {
     }
