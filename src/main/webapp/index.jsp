@@ -27,7 +27,7 @@
             display:flex;align-items:center;justify-content:space-between;
             padding:.6rem 1.2rem;margin-bottom:1rem;
             border:1px solid var(--line);border-radius:18px;
-            background:rgba(255,255,255,0.78);backdrop-filter:blur(24px);box-shadow:var(--shadow);
+            background:rgba(255,255,255,0.78);backdrop-filter:blur(24px);box-shadow:var(--shadow);position:relative;z-index:20;
         }
         .brand{font-size:1.05rem;font-weight:700;color:#0e3369;}
         .topbar-right{display:flex;align-items:center;gap:.8rem;position:relative;}
@@ -41,10 +41,10 @@
         .signin-btn.ghost{background:rgba(255,255,255,0.72);color:#0f2d58;border:1px solid #c2d6ff;}
 
         .login-drop{
-            display:none;position:absolute;right:0;top:100%;margin-top:8px;width:380px;
-            max-width:calc(100vw - 2rem);background:rgba(255,255,255,0.96);
+            display:none;position:fixed;right:calc((100vw - min(1080px, calc(100vw - 2rem))) / 2 + 1.2rem);top:2.9rem;width:380px;
+            max-width:calc(100vw - 2rem);background:rgba(255,255,255,0.97);
             backdrop-filter:blur(24px);border:1px solid #d6e4ff;border-radius:18px;
-            box-shadow:0 24px 50px rgba(16,32,57,0.2);padding:1.4rem;z-index:10;
+            box-shadow:0 24px 50px rgba(16,32,57,0.25);padding:1.4rem;z-index:999;
         }
         .login-drop.show{display:block;animation:rise 240ms ease;}
         .login-drop h3{margin:0 0 .8rem;font-size:1rem;color:#0e3369;}
@@ -145,6 +145,26 @@
 <body>
 <div id="toast" class="toast" role="status">Ready</div>
 
+<div id="loginDrop" class="login-drop">
+    <h3>Sign In</h3>
+    <div class="role-row">
+        <button class="role-chip active" data-login-role="TA">TA</button>
+        <button class="role-chip" data-login-role="MO">MO</button>
+        <button class="role-chip" data-login-role="ADMIN">Admin</button>
+    </div>
+    <input type="hidden" id="loginRole" value="TA"/>
+    <div class="field"><input id="loginIdentifier" type="text" placeholder="Student ID / Staff ID / Username"/></div>
+    <div class="field"><input id="loginPassword" type="password" placeholder="Password"/></div>
+    <div class="error-msg" id="loginError"></div>
+    <button class="login-submit" onclick="doLogin()">Sign In</button>
+    <div class="demo-strip">
+        <button class="demo-btn" data-demo-role="TA" data-demo-id="ta001@bupt.edu.cn" data-demo-pw="TaDemo@123">TA Demo</button>
+        <button class="demo-btn" data-demo-role="MO" data-demo-id="mo001@bupt.edu.cn" data-demo-pw="MoDemo@123">MO Demo</button>
+        <button class="demo-btn" data-demo-role="ADMIN" data-demo-id="hradmin" data-demo-pw="HrDemo@123">Admin Demo</button>
+    </div>
+    <div class="bottom-note">Need an account? <button onclick="window.location.href='register.jsp'">Create account</button></div>
+</div>
+
 <div class="shell">
     <header class="topbar">
         <div class="brand">TA Recruitment</div>
@@ -154,25 +174,6 @@
                 <a href="javascript:void(0)" onclick="signOut()" style="color:#1575ff;font-weight:600;">Sign Out</a>
             </span>
             <button id="signinToggle" class="signin-btn" onclick="toggleLogin()">Sign In</button>
-            <div id="loginDrop" class="login-drop">
-                <h3>Sign In</h3>
-                <div class="role-row">
-                    <button class="role-chip active" data-login-role="TA">TA</button>
-                    <button class="role-chip" data-login-role="MO">MO</button>
-                    <button class="role-chip" data-login-role="ADMIN">Admin</button>
-                </div>
-                <input type="hidden" id="loginRole" value="TA"/>
-                <div class="field"><input id="loginIdentifier" type="text" placeholder="Student ID / Staff ID / Username"/></div>
-                <div class="field"><input id="loginPassword" type="password" placeholder="Password"/></div>
-                <div class="error-msg" id="loginError"></div>
-                <button class="login-submit" onclick="doLogin()">Sign In</button>
-                <div class="demo-strip">
-                    <button class="demo-btn" data-demo-role="TA" data-demo-id="ta001@bupt.edu.cn" data-demo-pw="TaDemo@123">TA Demo</button>
-                    <button class="demo-btn" data-demo-role="MO" data-demo-id="mo001@bupt.edu.cn" data-demo-pw="MoDemo@123">MO Demo</button>
-                    <button class="demo-btn" data-demo-role="ADMIN" data-demo-id="hradmin" data-demo-pw="HrDemo@123">Admin Demo</button>
-                </div>
-                <div class="bottom-note">Need an account? <button onclick="window.location.href='register.jsp'">Create account</button></div>
-            </div>
         </div>
     </header>
 
@@ -212,7 +213,10 @@
     function toggleLogin() { document.getElementById("loginDrop").classList.toggle("show"); }
     document.addEventListener("click", function(e) {
         var d = document.getElementById("loginDrop");
-        if (!d.contains(e.target) && e.target !== document.getElementById("signinToggle")) d.classList.remove("show");
+        var t = document.getElementById("signinToggle");
+        if (!d.contains(e.target) && e.target !== t) {
+            d.classList.remove("show");
+        }
     });
 
     document.querySelectorAll(".demo-btn").forEach(function(b) {
