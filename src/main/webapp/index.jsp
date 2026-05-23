@@ -189,8 +189,10 @@
         <button id="batchApplyBtn" class="signin-btn">Apply to Selected Jobs</button>
     </div>
 
+    <div id="loadingArea" style="text-align:center;padding:2rem;color:var(--muted);font-size:1rem;">Loading jobs...</div>
     <section id="jobArea"></section>
     <div id="emptyTip" class="empty-tip">No open positions at this time.</div>
+    <div id="errorTip" class="empty-tip" style="color:#EF4444;"></div>
 </div>
 
 <script>
@@ -246,14 +248,23 @@
     async function loadJobs() {
         var q = document.getElementById("searchInput").value.trim();
         var st = document.getElementById("statusFilter").value;
-        var data = await api("/jobs?status=" + (st||"OPEN") + "&page=1&size=200&q=" + encodeURIComponent(q));
-        state.jobs = data.items || [];
-        groupAndRender();
+        document.getElementById("loadingArea").style.display = "block";
+        document.getElementById("errorTip").style.display = "none";
+        try {
+            var data = await api("/jobs?status=" + (st||"OPEN") + "&page=1&size=200&q=" + encodeURIComponent(q));
+            state.jobs = data.items || [];
+            groupAndRender();
+        } catch(e) {
+            document.getElementById("loadingArea").style.display = "none";
+            document.getElementById("errorTip").textContent = "Failed to load jobs: " + esc(e.message);
+            document.getElementById("errorTip").style.display = "block";
+        }
     }
 
     function groupAndRender() {
         var area = document.getElementById("jobArea");
         var empty = document.getElementById("emptyTip");
+        document.getElementById("loadingArea").style.display = "none";
         area.innerHTML = "";
 
         var kw = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -263,7 +274,7 @@
                 return (j.title||"").toLowerCase().indexOf(kw)>=0 || (j.moduleCode||"").toLowerCase().indexOf(kw)>=0 || (j.requiredSkills||"").toLowerCase().indexOf(kw)>=0;
             });
         }
-        if (!filtered.length) { empty.style.display = "block"; return; }
+        if (!filtered.length) { empty.style.display = "block"; document.getElementById("errorTip").style.display = "none"; return; }
         empty.style.display = "none";
 
         var groups = {};

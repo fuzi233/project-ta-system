@@ -448,6 +448,30 @@
             flex-wrap: wrap;
         }
 
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+        .skill-chip {
+            border: 1px solid #c2d6ff;
+            border-radius: 9999px;
+            padding: .45rem .85rem;
+            font-size: .85rem;
+            background: rgba(255,255,255,.85);
+            color: #16315b;
+            cursor: pointer;
+            transition: all 120ms ease;
+            user-select: none;
+            font-weight: 500;
+        }
+        .skill-chip.selected {
+            border-color: #1575ff;
+            background: linear-gradient(135deg, #1575ff, #0094ff);
+            color: #fff;
+            font-weight: 700;
+        }
+
         @media (max-width: 1100px) {
             .form-layout {
                 grid-template-columns: 1fr;
@@ -557,17 +581,9 @@
                         <div class="panel-header">Skills and Experience</div>
                         <div class="panel-body">
                             <div class="field">
-                                <label for="skills">Skills</label>
-                                <select class="select" id="skills" name="skills">
-                                    <option value="">Select skills...</option>
-                                    <option>Java</option>
-                                    <option>SQL</option>
-                                    <option>HTML/CSS</option>
-                                    <option>JavaScript</option>
-                                    <option>Git</option>
-                                    <option>Python</option>
-                                    <option>C/C++</option>
-                                </select>
+                                <label>Skills <span style="font-weight:400;color:var(--muted);font-size:.82rem;">(click to select)</span></label>
+                                <div class="chip-group" id="skillChips"></div>
+                                <div class="field-error" id="skillsError"></div>
                             </div>
 
                             <div class="field">
@@ -626,11 +642,31 @@
 <script>
     var acceptedFileExtensions = [".pdf", ".doc", ".docx"];
     var STORAGE_KEY = "ta_apply_profile";
+    var SKILL_OPTIONS = ["Java", "SQL", "HTML/CSS", "JavaScript", "Git", "Python", "C/C++", "Data Analysis", "Machine Learning", "Algorithms", "Communication"];
 
     var state = {
         jobIds: [],
-        jobDetails: []
+        jobDetails: [],
+        selectedSkills: []
     };
+
+    // ---- Skill chips ----
+    function buildSkillChips() {
+        var container = document.getElementById("skillChips");
+        SKILL_OPTIONS.forEach(function(skill) {
+            var chip = document.createElement("span");
+            chip.className = "skill-chip";
+            chip.textContent = skill;
+            chip.addEventListener("click", function() {
+                chip.classList.toggle("selected");
+                var idx = state.selectedSkills.indexOf(skill);
+                if (idx >= 0) { state.selectedSkills.splice(idx, 1); }
+                else { state.selectedSkills.push(skill); }
+                document.getElementById("skillsError").textContent = "";
+            });
+            container.appendChild(chip);
+        });
+    }
 
     // ---- Auto-fill from localStorage ----
     function loadProfile() {
@@ -768,7 +804,6 @@
         var fn = document.getElementById("fullName").value.trim();
         var sid = document.getElementById("studentId").value.trim();
         var em = document.getElementById("email").value.trim();
-        var sk = document.getElementById("skills").value;
         var exp = document.getElementById("experience").value.trim();
 
         if (!fn) { showFieldError("fullName", "fullNameError", "Please enter your full name."); ok = false; }
@@ -780,6 +815,9 @@
         if (!em) { showFieldError("email", "emailError", "Please enter your email."); ok = false; }
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showFieldError("email", "emailError", "Invalid email format."); ok = false; }
         else showFieldError("email", "emailError", "");
+
+        if (state.selectedSkills.length === 0) { document.getElementById("skillsError").textContent = "Please select at least one skill."; ok = false; }
+        else document.getElementById("skillsError").textContent = "";
 
         return ok;
     }
@@ -817,6 +855,7 @@
             var jobId = state.jobDetails[i].jobId;
             var fd = new FormData(form);
             fd.set("jobId", jobId);
+            fd.set("skills", state.selectedSkills.join(","));
             try {
                 var resp = await fetch("/applications", { method: "POST", body: fd });
                 var text = await resp.text();
@@ -871,6 +910,7 @@
         return body;
     }
 
+    buildSkillChips();
     loadProfile();
     resolveJobs().then(function(jobs) {
         state.jobDetails = jobs;

@@ -5,3 +5,5 @@
 {"jobId": "job-005", "title": "Data Analysis TA", "moduleCode": "EBU6005", "requiredSkills": "Data Analysis,Python,Excel,Statistics", "slots": 3, "status": "OPEN", "createdBy": "mo-001", "createdAt": "2026-04-10T00:00:00+00:00"}
 {"jobId":"11","title":"11","moduleCode":"111","requiredSkills":"111","slots":1111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:17.119025500+08:00"}
 {"jobId":"1","title":"11","moduleCode":"111","requiredSkills":"1111","slots":11111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:34.234573+08:00"}
+{"jobId":"job-test","title":"Test TA","moduleCode":"TEST101","requiredSkills":"Java,Testing","slots":2,"hoursPerWeek":10,"applicationDeadline":"2026-06-15","monthlyStipend":800,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-05-24T04:42:31.152841+08:00"}
+{"jobId":"job-new-01","title":"New Test TA","moduleCode":"TEST999","requiredSkills":"Go,Rust,Testing","slots":3,"hoursPerWeek":12,"applicationDeadline":"2026-07-01","monthlyStipend":1000,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-05-24T05:01:23.902841+08:00"}

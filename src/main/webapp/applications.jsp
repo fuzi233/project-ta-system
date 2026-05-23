@@ -464,6 +464,9 @@
                     <button id="filterRejected" class="filter-btn" type="button">
                         Rejected <span id="countRejected" class="badge-count">0</span>
                     </button>
+                    <button id="filterInterviewed" class="filter-btn" type="button">
+                        Interviewed <span id="countInterviewed" class="badge-count">0</span>
+                    </button>
                 </div>
 
                 <div class="sort-box">
@@ -521,13 +524,15 @@
         all: document.getElementById("countAll"),
         pending: document.getElementById("countPending"),
         accepted: document.getElementById("countAccepted"),
-        rejected: document.getElementById("countRejected")
+        rejected: document.getElementById("countRejected"),
+        interviewed: document.getElementById("countInterviewed")
     };
     const filterButtons = {
         all: document.getElementById("filterAll"),
         pending: document.getElementById("filterPending"),
         accepted: document.getElementById("filterAccepted"),
-        rejected: document.getElementById("filterRejected")
+        rejected: document.getElementById("filterRejected"),
+        interviewed: document.getElementById("filterInterviewed")
     };
 
     let applications = [];
@@ -720,6 +725,7 @@
     filterButtons.pending.addEventListener("click", () => setActiveFilter("pending"));
     filterButtons.accepted.addEventListener("click", () => setActiveFilter("accepted"));
     filterButtons.rejected.addEventListener("click", () => setActiveFilter("rejected"));
+    filterButtons.interviewed.addEventListener("click", () => setActiveFilter("interviewed"));
     sortSelectEl.addEventListener("change", renderApplications);
 
     boot();

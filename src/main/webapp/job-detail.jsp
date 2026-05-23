@@ -1,371 +1,149 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%
-    String role = (String) session.getAttribute("role");
-%>
-<%
-    String id = request.getParameter("id");
-
-    String jobTitle = "Programming TA";
-    String course = "Java Programming";
-    String deadline = "Jan 25, 2024";
-    String responsibilities = "<li>Assist in grading assignments</li>"
-            + "<li>Hold weekly office hours</li>"
-            + "<li>Support class activities</li>";
-    String requiredSkills = "<li>Basic Java knowledge</li>"
-            + "<li>Git version control</li>";
-    String preferredExperience = "<li>Tutoring or TA experience</li>"
-            + "<li>Familiarity with Eclipse IDE</li>";
-    String workload = "8 - 10 hours per week";
-
-    if ("2".equals(id)) {
-        jobTitle = "Database TA";
-        course = "Database Systems";
-        teacher = "Prof. Zhang";
-        deadline = "Jan 30, 2024";
-        responsibilities = "<li>Support SQL lab sessions</li>"
-                + "<li>Answer student questions in tutorials</li>"
-                + "<li>Help mark database assignments</li>";
-        requiredSkills = "<li>SQL and relational database basics</li>"
-                + "<li>Knowledge of MySQL</li>";
-        preferredExperience = "<li>Experience in database coursework</li>"
-                + "<li>Good communication skills</li>";
-        workload = "6 - 8 hours per week";
-    } else if ("3".equals(id)) {
-        jobTitle = "Web Development TA";
-        course = "Web Technologies";
-        teacher = "Prof. Lee";
-        deadline = "Feb 5, 2024";
-        responsibilities = "<li>Assist students with HTML/CSS/JavaScript</li>"
-                + "<li>Support lab demonstrations</li>"
-                + "<li>Help review web project submissions</li>";
-        requiredSkills = "<li>HTML, CSS, JavaScript basics</li>"
-                + "<li>Frontend debugging ability</li>";
-        preferredExperience = "<li>Experience building web pages</li>"
-                + "<li>Knowledge of responsive design</li>";
-        workload = "7 - 9 hours per week";
-    }
-%>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= jobTitle %> - Job Detail</title>
+    <title>Job Detail - TA Recruit</title>
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
-        :root {
-            --bg: #eef3ff;
-            --panel: rgba(255, 255, 255, 0.92);
-            --text: #102039;
-            --muted: #4c5e7a;
-            --line: #d6e4ff;
-            --primary: #1575ff;
-            --primary-dark: #0094ff;
-            --accent: #00b7a5;
-            --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
-            color: var(--text);
-        }
-
-        .page {
-            max-width: 1280px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
-
-        .shell {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .topbar {
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-            border-bottom: 1px solid var(--line);
-            background: rgba(255,255,255,0.96);
-        }
-
-        .brand {
-            font-size: 18px;
-            font-weight: 700;
-            color: #16315b;
-        }
-
-        .nav {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: var(--muted);
-            font-size: 16px;
-            font-weight: 500;
-            padding: 24px 0 20px;
-            border-bottom: 3px solid transparent;
-        }
-
-        .nav a.active {
-            color: #0f172a;
-            border-bottom-color: #718096;
-        }
-
-        .content {
-            padding: 30px 34px 40px;
-        }
-
-        .breadcrumb {
-            font-size: 15px;
-            color: var(--muted);
-            margin-bottom: 22px;
-        }
-
-        .breadcrumb a {
-            color: var(--muted);
-            text-decoration: none;
-        }
-
-        .title {
-            margin: 0 0 22px;
-            font-size: 46px;
-            font-weight: 800;
-            color: #10213f;
-        }
-
-        .divider {
-            height: 1px;
-            background: #dbe3ec;
-            margin-bottom: 28px;
-        }
-
-        .layout {
-            display: grid;
-            grid-template-columns: 1fr 2.3fr 0.9fr;
-            gap: 18px;
-        }
-
-        .panel {
-            background: #fff;
-            border: 1px solid #d9e2ec;
-            border-radius: 16px;
-            overflow: hidden;
-            min-height: 520px;
-        }
-
-        .panel-header {
-            padding: 18px 20px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #16315b;
-            border-bottom: 1px solid #e5ebf2;
-            background: #f8fafc;
-        }
-
-        .panel-body {
-            padding: 22px 20px 24px;
-        }
-
-        .job-name {
-            margin: 0 0 18px;
-            font-size: 24px;
-            font-weight: 800;
-            color: #1e293b;
-        }
-
-        .info-item {
-            margin-bottom: 14px;
-            font-size: 18px;
-            color: var(--muted);
-        }
-
-        .section-title {
-            margin: 0 0 12px;
-            font-size: 20px;
-            font-weight: 800;
-            color: #16315b;
-        }
-
-        .detail-section {
-            margin-bottom: 28px;
-        }
-
-        .detail-section ul {
-            margin: 0;
-            padding-left: 22px;
-            color: var(--muted);
-            font-size: 18px;
-            line-height: 1.8;
-        }
-
-        .workload {
-            font-size: 18px;
-            color: var(--muted);
-        }
-
-        .action-col {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            padding: 28px 16px;
-        }
-
-        .action-btn {
-            height: 52px;
-            border-radius: 12px;
-            border: 1px solid #c2d6ff;
-            background: rgba(255, 255, 255, 0.9);
-            color: #16315b;
-            font-size: .95rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(31, 41, 55, 0.08);
-        }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
-            color: #fff;
-            border: none;
-        }
-
-        @media (max-width: 1100px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-
-            .panel {
-                min-height: auto;
-            }
-
-            .action-col {
-                padding: 0;
-            }
-        }
-
-        @media (max-width: 720px) {
-            .page {
-                padding: 0 14px;
-                margin: 20px auto;
-            }
-
-            .topbar {
-                flex-direction: column;
-                height: auto;
-                gap: 10px;
-                padding: 18px;
-            }
-
-            .nav {
-                gap: 16px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .content {
-                padding: 24px 18px 30px;
-            }
-
-            .title {
-                font-size: 34px;
-            }
-        }
+        :root{--primary:#1575ff;--accent:#00b7a5;--muted:#4c5e7a;--line:#d6e4ff;}
+        *{box-sizing:border-box;}
+        body{font-family:"SF Pro Text","Segoe UI",sans-serif;background:radial-gradient(circle at 20% 15%,#ffffff 0%,#eef3ff 45%,#d9e8ff 100%);color:#102039;min-height:100vh;margin:0;}
+        .shell{width:min(860px,calc(100% - 2rem));margin:2rem auto 3rem;}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.2rem;margin-bottom:1rem;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.78);backdrop-filter:blur(24px);box-shadow:0 24px 50px rgba(16,32,57,0.15);}
+        .brand{font-size:1.05rem;font-weight:700;color:#0e3369;}
+        .nav{display:flex;gap:1.5rem;align-items:center;}
+        .nav a{text-decoration:none;color:var(--muted);font-size:.9rem;font-weight:500;}
+        .glass{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.72);backdrop-filter:blur(24px);box-shadow:0 24px 50px rgba(16,32,57,0.15);padding:1.4rem;margin-bottom:1rem;}
+        h1{margin:0 0 .3rem;font-size:1.6rem;color:#10213f;}
+        h2{font-size:1rem;color:#12396a;margin:0 0 .5rem;}
+        .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .detail-grid .full{grid-column:1/-1;}
+        ul{margin:0;padding-left:1.2rem;color:var(--muted);font-size:.9rem;line-height:1.7;}
+        .info-row{display:flex;gap:.5rem;margin-bottom:.35rem;font-size:.9rem;color:var(--muted);flex-wrap:wrap;}
+        .info-row strong{color:#102039;min-width:80px;}
+        .btn{border:1px solid #c2d6ff;border-radius:10px;background:linear-gradient(135deg,#1575ff,#0094ff 55%,#00b7a5);color:#fff;padding:.6rem 1.2rem;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;}
+        .btn.ghost{background:rgba(255,255,255,0.72);color:#0f2d58;}
+        .actions{display:flex;gap:.8rem;margin-top:1rem;}
+        .toast{position:fixed;left:50%;transform:translate(-50%,-140%);top:18px;padding:.6rem 1rem;border-radius:9999px;background:#10B981;color:#fff;font-size:.85rem;box-shadow:0 10px 22px rgba(16,185,129,0.28);opacity:0;pointer-events:none;transition:transform .3s ease,opacity .3s ease;z-index:99;}
+        .toast.show{transform:translate(-50%,0);opacity:1;}
+        #loading{padding:3rem;text-align:center;color:var(--muted);font-size:1rem;}
+        #error{display:none;padding:3rem;text-align:center;color:#EF4444;}
+        @media(max-width:720px){.detail-grid{grid-template-columns:1fr;}}
     </style>
 </head>
 <body>
-<div class="bg-orb orb-a"></div>
-<div class="bg-orb orb-b"></div>
-<div class="page">
-    <a class="link" href="index.jsp">&larr; Exit</a>
-    <div class="shell">
-        <header class="topbar">
-            <div class="brand">TA Recruitment System</div>
-            <nav class="nav">
-                <a href="jobs.jsp" class="active">Job List</a>
-                <a href="applications.jsp">My Applications</a>
-                <a href="profile.jsp">Profile</a>
-            </nav>
-        </header>
+<div id="toast" class="toast"></div>
 
-        <main class="content">
-            <div class="breadcrumb">
-                <a href="index.jsp">Home</a> &nbsp;›&nbsp;
-                <a href="jobs.jsp">Job List</a> &nbsp;›&nbsp;
-                Job Detail
+<div class="shell">
+    <header class="topbar">
+        <div class="brand">TA Recruitment</div>
+        <nav class="nav">
+            <a href="index.jsp">Home</a>
+            <a href="index.jsp">Job List</a>
+        </nav>
+    </header>
+
+    <div id="loading">Loading job details...</div>
+    <div id="error"></div>
+
+    <div id="detail" style="display:none;">
+        <section class="glass">
+            <h1 id="jobTitle"></h1>
+            <p style="color:var(--muted);margin:0;font-size:.9rem;" id="jobSubtitle"></p>
+        </section>
+
+        <section class="detail-grid">
+            <div class="glass">
+                <h2>Basic Info</h2>
+                <div class="info-row"><strong>Job ID</strong> <span id="jobId"></span></div>
+                <div class="info-row"><strong>Module</strong> <span id="moduleCode"></span></div>
+                <div class="info-row"><strong>Status</strong> <span id="status"></span></div>
+                <div class="info-row"><strong>Slots</strong> <span id="slots"></span></div>
+                <div class="info-row" id="hoursRow"><strong>Hours/wk</strong> <span id="hoursPerWeek"></span></div>
+                <div class="info-row" id="stipendRow"><strong>Stipend</strong> <span id="stipend"></span></div>
+                <div class="info-row" id="deadlineRow"><strong>Deadline</strong> <span id="deadline"></span></div>
             </div>
-
-            <h1 class="title">Job Detail</h1>
-            <div class="divider"></div>
-
-            <div class="layout">
-                <section class="panel">
-                    <div class="panel-header">Job Info</div>
-                    <div class="panel-body">
-                        <h2 class="job-name"><%= jobTitle %></h2>
-                        <div class="info-item">Course: <%= course %></div>
-                        <div class="info-item">Teacher: <%= teacher %></div>
-                        <div class="info-item">Deadline: <%= deadline %></div>
-                    </div>
-                </section>
-
-                <section class="panel">
-                    <div class="panel-header">Job Detail</div>
-                    <div class="panel-body">
-                        <div class="detail-section">
-                            <h3 class="section-title">Responsibilities:</h3>
-                            <ul><%= responsibilities %></ul>
-                        </div>
-
-                        <div class="detail-section">
-                            <h3 class="section-title">Required Skills:</h3>
-                            <ul><%= requiredSkills %></ul>
-                        </div>
-
-                        <div class="detail-section">
-                            <h3 class="section-title">Preferred Experience:</h3>
-                            <ul><%= preferredExperience %></ul>
-                        </div>
-
-                        <div class="detail-section">
-                            <h3 class="section-title">Weekly Workload</h3>
-                            <div class="workload"><%= workload %></div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="panel">
-                    <div class="action-col">
-                        <a class="action-btn primary" href="apply.jsp?id=<%= id == null ? "1" : id %>">Apply Now</a>
-                        <a class="action-btn" href="#">Save</a>
-                        <a class="action-btn" href="jobs.jsp">Back</a>
-                    </div>
-                </section>
+            <div class="glass">
+                <h2>Required Skills</h2>
+                <ul id="skillsList"></ul>
             </div>
-        </main>
+            <div class="glass full">
+                <h2>Responsibilities</h2>
+                <ul>
+                    <li>Support module learning activities and lab sessions</li>
+                    <li>Assist in grading assignments and providing feedback</li>
+                    <li>Hold weekly office hours for student consultation</li>
+                    <li>Coordinate with the module owner on course workflow</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="actions">
+            <a id="applyBtn" class="btn" href="#">Apply Now</a>
+            <a class="btn ghost" href="javascript:history.back()">Back</a>
+        </div>
     </div>
 </div>
+
+<script>
+    var jobId = new URLSearchParams(window.location.search).get("id") || new URLSearchParams(window.location.search).get("jobId") || "";
+
+    function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+    function showToast(m) { var t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},2200); }
+
+    async function loadJob() {
+        if (!jobId) { document.getElementById("loading").textContent = "No job ID specified."; return; }
+        try {
+            var data = await api("/jobs?status=&page=1&size=500");
+            var jobs = data.items || [];
+            var job = jobs.find(function(j) { return j.jobId === jobId || (j.jobId||"").toLowerCase() === jobId.toLowerCase(); });
+            if (!job) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("error").style.display = "block";
+                document.getElementById("error").textContent = "Job not found: " + esc(jobId);
+                return;
+            }
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("detail").style.display = "block";
+            document.title = job.title + " - Job Detail";
+
+            document.getElementById("jobTitle").textContent = job.title;
+            document.getElementById("jobSubtitle").textContent = job.jobId + " | Module: " + (job.moduleCode||"-");
+            document.getElementById("jobId").textContent = job.jobId || "-";
+            document.getElementById("moduleCode").textContent = job.moduleCode || "-";
+            document.getElementById("status").textContent = job.status || "-";
+            document.getElementById("slots").textContent = job.slots || "-";
+            if (job.hoursPerWeek) { document.getElementById("hoursPerWeek").textContent = job.hoursPerWeek + " h/wk"; }
+            else { document.getElementById("hoursRow").style.display = "none"; }
+            if (job.monthlyStipend) { document.getElementById("stipend").textContent = "¥" + job.monthlyStipend + "/mo"; }
+            else { document.getElementById("stipendRow").style.display = "none"; }
+            if (job.applicationDeadline) { document.getElementById("deadline").textContent = job.applicationDeadline; }
+            else { document.getElementById("deadlineRow").style.display = "none"; }
+
+            var skills = (job.requiredSkills || "").split(",").map(function(s) { return s.trim(); }).filter(Boolean);
+            var list = document.getElementById("skillsList");
+            if (skills.length) { skills.forEach(function(s) { var li = document.createElement("li"); li.textContent = s; list.appendChild(li); }); }
+            else { list.innerHTML = "<li>No specific skills listed</li>"; }
+            document.getElementById("applyBtn").href = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+        } catch(e) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("error").style.display = "block";
+            document.getElementById("error").textContent = "Failed to load job: " + esc(e.message);
+        }
+    }
+
+    async function api(url) {
+        var r = await fetch(url, {headers:{"Content-Type":"application/json"}});
+        var t = await r.text();
+        var b = {};
+        try { b = t ? JSON.parse(t) : {}; } catch(_) { b = {error:t||("HTTP "+r.status)}; }
+        if (!r.ok) throw new Error(b.error||("HTTP "+r.status));
+        return b;
+    }
+
+    loadJob();
+</script>
 </body>
 </html>
