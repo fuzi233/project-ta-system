@@ -31,8 +31,8 @@ class MoScreeningServiceTest {
         applicationRepository = new ApplicationRepository(new JsonlFileStore<>(tmpDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper));
         applicationService = new ApplicationService(applicationRepository, jobRepository);
 
-        jobRepository.createIfAbsent(new JobPosting("JOB001", "SE TA", "EBU6304", "Java,Testing", 2, "OPEN", "mo-001", "2026-04-10T00:00:00Z"));
-        jobRepository.createIfAbsent(new JobPosting("JOB002", "ML TA", "EBU6201", "Python,ML", 2, "OPEN", "mo-002", "2026-04-10T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("JOB001", "SE TA", "EBU6304", "Java,Testing", 2, 10, "2026-01-01", 800, "OPEN", "mo-001", "2026-04-10T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("JOB002", "ML TA", "EBU6201", "Python,ML", 2, 10, "2026-01-01", 800, "OPEN", "mo-002", "2026-04-10T00:00:00Z"));
 
         applicationRepository.saveIfAbsent(new ApplicationRecord("APP001", "user1", "JOB001", "SUBMITTED", "2026-04-07T00:00:00Z"));
         applicationRepository.saveIfAbsent(new ApplicationRecord("APP002", "user2", "JOB001", "REVIEWING", "2026-04-07T00:00:00Z"));

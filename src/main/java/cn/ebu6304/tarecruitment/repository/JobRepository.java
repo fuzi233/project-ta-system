@@ -62,6 +62,21 @@ public class JobRepository {
         });
     }
 
+    public synchronized long count(String query, String status) {
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
+        return currentJobsSortedByLine().stream()
+                .filter(job -> {
+                    boolean queryMatch = normalizedQuery.isEmpty()
+                            || job.title().toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                            || job.moduleCode().toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                            || job.requiredSkills().toLowerCase(Locale.ROOT).contains(normalizedQuery);
+                    boolean statusMatch = normalizedStatus.isEmpty() || normalizedStatus.equals(job.status().toUpperCase(Locale.ROOT));
+                    return queryMatch && statusMatch;
+                })
+                .count();
+    }
+
     public synchronized List<JobPosting> listAll() {
         return currentJobsSortedByLine();
     }

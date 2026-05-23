@@ -29,7 +29,7 @@ class WorkloadServiceTest {
         ApplicationService applicationService = new ApplicationService(applicationRepository, jobRepository);
         WorkloadService workloadService = new WorkloadService(applicationRepository);
 
-        jobService.createJob("job-1", "Algorithms TA", "CS101", "Java", 2, "mo1");
+        jobService.createJob("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-06-01", 800, "mo1");
         applicationService.submitApplication("app-1", "taA", "job-1");
         applicationService.submitApplication("app-2", "taA", "job-1");
         applicationService.submitApplication("app-3", "taB", "job-1");
@@ -65,7 +65,7 @@ class WorkloadServiceTest {
         ApplicationService applicationService = new ApplicationService(applicationRepository, jobRepository);
         WorkloadService workloadService = new WorkloadService(applicationRepository);
 
-        jobService.createJob("job-1", "Algorithms TA", "CS101", "Java", 2, "mo1");
+        jobService.createJob("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-06-01", 800, "mo1");
         applicationService.submitApplication("app-1", "taA", "job-1");
 
         WorkloadService.WorkloadSnapshot snapshot = workloadService.snapshot(0);

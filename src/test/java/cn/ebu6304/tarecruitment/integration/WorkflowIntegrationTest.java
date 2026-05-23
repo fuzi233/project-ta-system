@@ -31,7 +31,7 @@ class WorkflowIntegrationTest {
         ApplicationService applicationService = new ApplicationService(applicationRepository, jobRepository);
         WorkloadService workloadService = new WorkloadService(applicationRepository);
 
-        jobService.createJob("job1", "Networks TA", "CS202", "Network,Java", 3, "moA");
+        jobService.createJob("job1", "Networks TA", "CS202", "Network,Java", 3, 10, "2026-01-01", 800, "moA");
         applicationService.submitApplication("app1", "taA", "job1");
         applicationService.submitApplication("app2", "taA", "job1");
         applicationService.submitApplication("app3", "taB", "job1");

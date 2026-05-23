@@ -58,6 +58,10 @@ public class ApplicationRepository {
         );
     }
 
+    public synchronized List<ApplicationRecord> listLatestApplications() {
+        return currentRecordsSortedByLine();
+    }
+
     public synchronized Map<String, Long> workloadByApplicant() {
         Map<String, Long> result = new HashMap<>();
         for (ApplicationRecord record : currentRecordsSortedByLine()) {

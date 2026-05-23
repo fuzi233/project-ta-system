@@ -33,7 +33,7 @@ class PerformanceBaselineTest {
         JobService jobService = new JobService(jobRepository);
         ApplicationService applicationService = new ApplicationService(applicationRepository, jobRepository);
 
-        jobService.createJob("job-perf", "Perf TA", "CS999", "Java", 5, "mo-perf");
+        jobService.createJob("job-perf", "Perf TA", "CS999", "Java", 5, 10, "2026-01-01", 800, "mo-perf");
 
         for (int i = 0; i < 10_000; i++) {
             String applicantId = "ta" + (i % 500);

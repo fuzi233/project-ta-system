@@ -30,7 +30,7 @@ class ApplicationServiceTest {
         JobRepository jobRepository = new JobRepository(jobStore);
         ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
 
-        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
 
         ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
 
@@ -81,7 +81,7 @@ class ApplicationServiceTest {
         ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
         ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
 
-        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
         service.submitApplication("app-1", "ta001", "job-1");
 
         service.updateStatus("app-1", "REVIEWING");
@@ -102,7 +102,7 @@ class ApplicationServiceTest {
 
         JobRepository jobRepository = new JobRepository(jobStore);
         ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
-        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
 
         ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
         ApplicationService.SubmitResponse first = service.submitApplication(null, "ta001", "job-1");
@@ -124,8 +124,8 @@ class ApplicationServiceTest {
 
         JobRepository jobRepository = new JobRepository(jobStore);
         ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
-        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
-        jobRepository.createIfAbsent(new JobPosting("job-2", "Database TA", "CS102", "SQL", 1, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-2", "Database TA", "CS102", "SQL", 1, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
 
         ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
         ApplicationService.SubmitResponse first = service.submitApplication(null, "ta001", "job-1");
@@ -148,7 +148,7 @@ class ApplicationServiceTest {
 
         JobRepository jobRepository = new JobRepository(jobStore);
         ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
-        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 2, 10, "2026-01-01", 800, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
 
         ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
         service.submitApplication("app-1", "ta001", "job-1");

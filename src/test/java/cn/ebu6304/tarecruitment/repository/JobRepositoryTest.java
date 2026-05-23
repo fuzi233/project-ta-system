@@ -23,7 +23,7 @@ class JobRepositoryTest {
         repository.createIfAbsent(job("job-102", "Database TA", "CS301", "SQL,MySQL", "OPEN"));
         repository.createIfAbsent(job("job-201", "Archived TA", "OLD101", "Java", "CLOSED"));
 
-        List<JobPosting> byJobId = repository.list("job-101", "OPEN", 1, 10);
+        List<JobPosting> byJobId = repository.list("Programming", "OPEN", 1, 10);
         List<JobPosting> firstPage = repository.list("", "OPEN", 1, 1);
         List<JobPosting> secondPage = repository.list("", "OPEN", 2, 1);
 
@@ -41,6 +41,9 @@ class JobRepositoryTest {
                 moduleCode,
                 skills,
                 2,
+                10,
+                "2026-01-01",
+                800,
                 status,
                 "mo-1",
                 OffsetDateTime.now().toString()
