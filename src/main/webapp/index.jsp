@@ -238,7 +238,8 @@
             if (!r.ok) { err.textContent = j.error || "Login failed"; return; }
             showToast("Signed in. Redirecting...");
             document.getElementById("loginDrop").classList.remove("show");
-            setTimeout(function(){ window.location.href = j.redirect || "index.jsp"; }, 400);
+            var redirect = new URLSearchParams(window.location.search).get("redirect");
+            setTimeout(function(){ window.location.href = redirect || j.redirect || "index.jsp"; }, 400);
         } catch(_) { err.textContent = "Network error"; }
     }
 
@@ -362,6 +363,12 @@
     document.getElementById("signinToggle").style.display = "none";
     document.getElementById("loggedInBar").style.display = "inline";
     document.getElementById("loggedInRole").textContent = "<%= role %>";
+    <% } else { %>
+    var redir = new URLSearchParams(window.location.search).get("redirect");
+    if (redir) {
+        document.getElementById("loginDrop").classList.add("show");
+        showToast("Please sign in to continue");
+    }
     <% } %>
     loadJobs();
 </script>

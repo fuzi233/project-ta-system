@@ -6,7 +6,7 @@
     String displayName = (String) session.getAttribute(AuthSession.ATTR_DISPLAY_NAME);
     String identifier = (String) session.getAttribute(AuthSession.ATTR_IDENTIFIER);
     if (userId == null || role == null) {
-        response.sendRedirect("index.jsp");
+        String qs = request.getQueryString(); String target = request.getRequestURI().substring(request.getContextPath().length()) + (qs != null ? "?" + qs : ""); response.sendRedirect("index.jsp?redirect=" + java.net.URLEncoder.encode(target, "UTF-8"));
         return;
     }
     String roleUpper = role.toUpperCase();

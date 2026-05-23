@@ -4,7 +4,7 @@
     String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
     String userId = (String) session.getAttribute(AuthSession.ATTR_USER_ID);
     if (role == null || !AuthSession.ROLE_MO.equalsIgnoreCase(role) || userId == null) {
-        response.sendRedirect("index.jsp");
+        String qs = request.getQueryString(); String target = request.getRequestURI().substring(request.getContextPath().length()) + (qs != null ? "?" + qs : ""); response.sendRedirect("index.jsp?redirect=" + java.net.URLEncoder.encode(target, "UTF-8"));
         return;
     }
 %>
