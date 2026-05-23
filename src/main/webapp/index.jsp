@@ -1240,7 +1240,7 @@
                     <button type="button" class="demo-btn" data-demo-role="ADMIN" data-demo-identifier="hradmin" data-demo-password="HrDemo@123">Admin / HR Demo</button>
                 </div>
                 <form id="loginForm" novalidate>
-                    <%-- 表单提交至LoginServlet --%>
+                    <%-- Form submits to LoginServlet --%>
                     <input type="hidden" name="role" id="loginRole" value=""/>
                     <div class="field" id="loginEmailField">
                         <span class="field-icon" aria-hidden="true">
@@ -1279,7 +1279,7 @@
 
             <div id="registerView" class="view">
                 <form id="registerForm" novalidate>
-                    <%-- 表单提交至RegisterServlet --%>
+                    <%-- Form submits to RegisterServlet --%>
                     <input type="hidden" id="registerRole" name="role" value="TA"/>
 
                     <div class="role-pill-group" aria-label="Register role">
