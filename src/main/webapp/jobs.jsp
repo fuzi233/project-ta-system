@@ -255,6 +255,51 @@
             font-size: 18px;
         }
 
+        .job-check {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .job-check input {
+            width: 20px;
+            height: 20px;
+            accent-color: #1575ff;
+            cursor: pointer;
+        }
+
+        .selection-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border: 1px solid #d6e4ff;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(12px);
+        }
+
+        .selection-count {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #16315b;
+        }
+
+        .selection-msg {
+            display: none;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+
         @media (max-width: 1024px) {
             .toolbar {
                 grid-template-columns: 1fr 1fr;
@@ -353,12 +398,21 @@
 
             <div class="divider"></div>
 
+            <div id="selectionBar" class="selection-bar" style="display:none;">
+                <span id="selectionCount" class="selection-count">0 jobs selected</span>
+                <button id="batchApplyBtn" class="action-btn primary">Apply to Selected Jobs</button>
+            </div>
+
             <section id="jobList" class="job-list">
                 <article class="job-card"
+                         data-job-id="1"
                          data-title="programming ta"
                          data-type="programming"
                          data-skill="java"
                          data-semester="spring">
+                    <label class="job-check">
+                        <input type="checkbox" class="job-checkbox" data-job-id="1" onchange="updateSelection()"/>
+                    </label>
                     <div class="job-main">
                         <h2>Programming TA</h2>
                         <div class="job-meta">
@@ -368,15 +422,18 @@
                     </div>
                     <div class="job-actions">
                         <a class="action-btn" href="job-detail.jsp?id=1">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=1">Apply</a>
                     </div>
                 </article>
 
                 <article class="job-card"
+                         data-job-id="2"
                          data-title="database ta"
                          data-type="database"
                          data-skill="sql"
                          data-semester="spring">
+                    <label class="job-check">
+                        <input type="checkbox" class="job-checkbox" data-job-id="2" onchange="updateSelection()"/>
+                    </label>
                     <div class="job-main">
                         <h2>Database TA</h2>
                         <div class="job-meta">
@@ -386,15 +443,18 @@
                     </div>
                     <div class="job-actions">
                         <a class="action-btn" href="job-detail.jsp?id=2">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=2">Apply</a>
                     </div>
                 </article>
 
                 <article class="job-card"
+                         data-job-id="3"
                          data-title="web development ta"
                          data-type="web"
                          data-skill="html"
                          data-semester="spring">
+                    <label class="job-check">
+                        <input type="checkbox" class="job-checkbox" data-job-id="3" onchange="updateSelection()"/>
+                    </label>
                     <div class="job-main">
                         <h2>Web Development TA</h2>
                         <div class="job-meta">
@@ -404,7 +464,6 @@
                     </div>
                     <div class="job-actions">
                         <a class="action-btn" href="job-detail.jsp?id=3">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=3">Apply</a>
                     </div>
                 </article>
             </section>
@@ -421,29 +480,56 @@
     </div>
 </div>
 
+<div id="selectionMsg" class="selection-msg">Please select at least one job to apply.</div>
+
 <script>
+    function updateSelection() {
+        var checkboxes = document.querySelectorAll(".job-checkbox:checked");
+        var count = checkboxes.length;
+        var bar = document.getElementById("selectionBar");
+        var countEl = document.getElementById("selectionCount");
+        var msg = document.getElementById("selectionMsg");
+
+        if (count === 0) {
+            bar.style.display = "none";
+            msg.style.display = "none";
+        } else {
+            bar.style.display = "flex";
+            countEl.textContent = count + (count === 1 ? " job selected" : " jobs selected");
+        }
+    }
+
+    document.getElementById("batchApplyBtn").addEventListener("click", function() {
+        var checkboxes = document.querySelectorAll(".job-checkbox:checked");
+        var jobIds = [];
+        checkboxes.forEach(function(cb) { jobIds.push(cb.getAttribute("data-job-id")); });
+
+        if (jobIds.length === 0) {
+            var msg = document.getElementById("selectionMsg");
+            msg.style.display = "block";
+            return;
+        }
+        window.location.href = "apply.jsp?jobIds=" + jobIds.join(",");
+    });
+
     function filterJobs() {
-        const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-        const type = document.getElementById("typeFilter").value;
-        const skill = document.getElementById("skillFilter").value;
-        const semester = document.getElementById("semesterFilter").value;
+        var keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+        var type = document.getElementById("typeFilter").value;
+        var skill = document.getElementById("skillFilter").value;
+        var semester = document.getElementById("semesterFilter").value;
+        var cards = document.querySelectorAll(".job-card");
+        var emptyTip = document.getElementById("emptyTip");
+        var visibleCount = 0;
 
-        const cards = document.querySelectorAll(".job-card");
-        const emptyTip = document.getElementById("emptyTip");
-
-        let visibleCount = 0;
-
-        cards.forEach(card => {
-            const title = card.dataset.title;
-            const cardType = card.dataset.type;
-            const cardSkill = card.dataset.skill;
-            const cardSemester = card.dataset.semester;
-
-            const matchKeyword = !keyword || title.includes(keyword);
-            const matchType = !type || cardType === type;
-            const matchSkill = !skill || cardSkill === skill;
-            const matchSemester = !semester || cardSemester === semester;
-
+        cards.forEach(function(card) {
+            var title = card.dataset.title;
+            var cardType = card.dataset.type;
+            var cardSkill = card.dataset.skill;
+            var cardSemester = card.dataset.semester;
+            var matchKeyword = !keyword || title.includes(keyword);
+            var matchType = !type || cardType === type;
+            var matchSkill = !skill || cardSkill === skill;
+            var matchSemester = !semester || cardSemester === semester;
             if (matchKeyword && matchType && matchSkill && matchSemester) {
                 card.style.display = "flex";
                 visibleCount++;
@@ -451,7 +537,6 @@
                 card.style.display = "none";
             }
         });
-
         emptyTip.style.display = visibleCount === 0 ? "block" : "none";
     }
 </script>

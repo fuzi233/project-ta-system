@@ -34,6 +34,9 @@
 
             --rejected-bg: #f5dddd;
             --rejected-text: #9a4a4a;
+
+            --interviewed-bg: #e3eef9;
+            --interviewed-text: #2c5a8c;
         }
 
         * {
@@ -276,6 +279,11 @@
             color: var(--rejected-text);
         }
 
+        .interviewed {
+            background: var(--interviewed-bg);
+            color: var(--interviewed-text);
+        }
+
         .application-actions {
             display: flex;
             gap: 12px;
@@ -491,7 +499,7 @@
     const pendingStatuses = new Set(["SUBMITTED"]);
     const statusClassMap = {
         SUBMITTED: "pending",
-        INTERVIEWED: "pending",
+        INTERVIEWED: "interviewed",
         ACCEPTED: "accepted",
         REJECTED: "rejected"
     };

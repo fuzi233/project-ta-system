@@ -8,13 +8,23 @@
     }
 %>
 <%
-    String id = request.getParameter("id");
-
-    String jobTitle = "Programming TA";
-    if ("2".equals(id)) {
-        jobTitle = "Database TA";
-    } else if ("3".equals(id)) {
-        jobTitle = "Web Development TA";
+    String jobIdsParam = request.getParameter("jobIds");
+    String singleId = request.getParameter("jobId");
+    String legacyId = request.getParameter("id");
+    String effectiveJobIds = jobIdsParam;
+    if (effectiveJobIds == null || effectiveJobIds.isBlank()) {
+        if (singleId != null && !singleId.isBlank()) effectiveJobIds = singleId;
+        else if (legacyId != null && !legacyId.isBlank()) effectiveJobIds = legacyId;
+    }
+    int jobCount = 0;
+    if (effectiveJobIds != null && !effectiveJobIds.isBlank()) {
+        jobCount = effectiveJobIds.split(",").length;
+    }
+    String pageTitle = "Apply";
+    if (jobCount == 1) {
+        pageTitle = "Apply for " + effectiveJobIds.trim();
+    } else if (jobCount > 1) {
+        pageTitle = "Apply for " + jobCount + " Jobs";
     }
 %>
 
@@ -23,7 +33,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply - <%= jobTitle %></title>
+    <title><%= pageTitle %> - TA Recruit</title>
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
         :root {
@@ -508,30 +518,37 @@
             <div class="breadcrumb">
                 <a href="index.jsp">Home</a> &nbsp;›&nbsp;
                 <a href="jobs.jsp">Job List</a> &nbsp;›&nbsp;
-                Apply for <%= jobTitle %>
+                <span id="breadcrumbLabel"><%= pageTitle %></span>
             </div>
 
-            <h1 class="title"><%= jobTitle %> Application Form</h1>
+            <h1 id="pageTitle" class="title"><%= pageTitle %> Application Form</h1>
             <div class="divider"></div>
 
-            <form id="applyForm" onsubmit="submitApplication(event)">
+            <div id="jobsSummary" class="selection-bar" style="display:none;">
+                <span id="jobsSummaryText"></span>
+            </div>
+
+            <form id="applyForm" novalidate>
                 <div class="form-layout">
                     <section class="panel">
                         <div class="panel-header">Personal Information</div>
                         <div class="panel-body">
                             <div class="field">
                                 <label for="fullName">Full Name</label>
-                                <input class="input" type="text" id="fullName" name="fullName">
+                                <input class="input" type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                                <div class="field-error" id="fullNameError"></div>
                             </div>
 
                             <div class="field">
                                 <label for="studentId">Student ID</label>
-                                <input class="input" type="text" id="studentId" name="studentId">
+                                <input class="input" type="text" id="studentId" name="studentId" placeholder="e.g. 2023213149">
+                                <div class="field-error" id="studentIdError"></div>
                             </div>
 
                             <div class="field">
                                 <label for="email">Email</label>
                                 <input class="input" type="email" id="email" name="email" placeholder="example@student.com">
+                                <div class="field-error" id="emailError"></div>
                             </div>
                         </div>
                     </section>
@@ -548,6 +565,8 @@
                                     <option>HTML/CSS</option>
                                     <option>JavaScript</option>
                                     <option>Git</option>
+                                    <option>Python</option>
+                                    <option>C/C++</option>
                                 </select>
                             </div>
 
@@ -585,8 +604,8 @@
                             </div>
 
                             <div class="footer-actions">
-                                <button class="footer-btn primary" type="submit"><span class="btn-text">Submit Application</span></button>
-                                <button class="footer-btn" type="reset"><span class="btn-text">Cancel</span></button>
+                                <button id="submitBtn" class="footer-btn primary" type="submit"><span class="btn-text">Submit Application</span></button>
+                                <a class="footer-btn" href="jobs.jsp" style="text-decoration:none;"><span class="btn-text">Back to Job List</span></a>
                             </div>
 
                             <div id="resultBox" class="result-box">
@@ -598,13 +617,6 @@
                             </div>
                         </div>
                     </section>
-
-                    <section class="panel">
-                        <div class="action-col">
-                            <button class="action-btn primary" type="submit"><span class="btn-text">Apply Now</span></button>
-                            <a class="action-btn" href="jobs.jsp"><span class="btn-text">Back</span></a>
-                        </div>
-                    </section>
                 </div>
             </form>
         </main>
@@ -612,324 +624,261 @@
 </div>
 
 <script>
-    const acceptedFileExtensions = [".pdf", ".doc", ".docx"];
+    var acceptedFileExtensions = [".pdf", ".doc", ".docx"];
+    var STORAGE_KEY = "ta_apply_profile";
 
-    function updateFileStatus(inputId, nameId, errorId, buttonId) {
-        const input = document.getElementById(inputId);
-        const name = document.getElementById(nameId);
-        const error = document.getElementById(errorId);
-        const button = document.getElementById(buttonId);
-        const buttonText = button ? button.querySelector(".upload-btn-text") : null;
-        const file = input.files[0];
+    var state = {
+        jobIds: [],
+        jobDetails: []
+    };
 
-        error.textContent = "";
-        error.style.display = "none";
-
-        if (!file) {
-            name.textContent = "No file chosen";
-            if (button) {
-                button.classList.remove("is-selected");
-            }
-            if (buttonText) {
-                buttonText.textContent = "Choose File";
-            }
-            return;
-        }
-
-        name.textContent = file.name;
-        if (button) {
-            button.classList.add("is-selected");
-        }
-        if (buttonText) {
-            buttonText.textContent = "File Selected";
-        }
-    }
-
-    function resetFileFeedback() {
-        document.getElementById("cvFileName").textContent = "No file chosen";
-        document.getElementById("transcriptFileName").textContent = "No file chosen";
-        document.getElementById("cvUploadBtn").classList.remove("is-selected");
-        document.getElementById("transcriptUploadBtn").classList.remove("is-selected");
-        document.getElementById("cvUploadBtn").querySelector(".upload-btn-text").textContent = "Choose File";
-        document.getElementById("transcriptUploadBtn").querySelector(".upload-btn-text").textContent = "Choose File";
-        document.getElementById("cvFileError").textContent = "";
-        document.getElementById("cvFileError").style.display = "none";
-        document.getElementById("transcriptFileError").textContent = "";
-        document.getElementById("transcriptFileError").style.display = "none";
-        hideResultBox();
-    }
-
-    function hideResultBox() {
-        const resultBox = document.getElementById("resultBox");
-        const resultList = document.getElementById("resultList");
-        const viewApplicationsBtn = document.getElementById("viewApplicationsBtn");
-
-        resultBox.style.display = "none";
-        resultBox.className = "result-box";
-        resultList.innerHTML = "";
-        viewApplicationsBtn.style.display = "none";
-    }
-
-    function addResultItem(label, message, type) {
-        const resultList = document.getElementById("resultList");
-        const item = document.createElement("div");
-        item.className = "result-item " + type;
-        item.innerHTML = "<strong>" + label + ":</strong> " + message;
-        resultList.appendChild(item);
-    }
-
-    function getFileValidationResult(file, requiredLabel) {
-        if (!file) {
-            return {
-                ok: false,
-                message: requiredLabel + " file is required before submitting."
-            };
-        }
-
-        const fileName = file.name.toLowerCase();
-        const isAccepted = acceptedFileExtensions.some(ext => fileName.endsWith(ext));
-
-        if (!isAccepted) {
-            return {
-                ok: false,
-                message: "Only PDF, DOC, and DOCX files are accepted."
-            };
-        }
-
-        return {
-            ok: true,
-            message: file.name
-        };
-    }
-
-    document.getElementById("cvFile").addEventListener("change", function () {
-        updateFileStatus("cvFile", "cvFileName", "cvFileError", "cvUploadBtn");
-    });
-
-    document.getElementById("transcriptFile").addEventListener("change", function () {
-        updateFileStatus("transcriptFile", "transcriptFileName", "transcriptFileError", "transcriptUploadBtn");
-    });
-
-    document.getElementById("applyForm").addEventListener("reset", function () {
-        setTimeout(resetFileFeedback, 0);
-    });
-
-    async function api(url, options = {}) {
-        const response = await fetch(url, {
-            headers: {"Content-Type": "application/json"},
-            ...options
-        });
-        const text = await response.text();
-        let body = {};
+    // ---- Auto-fill from localStorage ----
+    function loadProfile() {
         try {
-            body = text ? JSON.parse(text) : {};
-        } catch (_) {
-            body = {error: text || ("HTTP " + response.status)};
-        }
-        if (!response.ok) {
-            throw new Error(body.error || ("HTTP " + response.status));
-        }
-        return body;
+            var stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                var profile = JSON.parse(stored);
+                if (profile.fullName) document.getElementById("fullName").value = profile.fullName;
+                if (profile.studentId) document.getElementById("studentId").value = profile.studentId;
+                if (profile.email) document.getElementById("email").value = profile.email;
+            }
+        } catch (_) {}
+    }
+
+    function saveProfile() {
+        var profile = {
+            fullName: document.getElementById("fullName").value.trim(),
+            studentId: document.getElementById("studentId").value.trim(),
+            email: document.getElementById("email").value.trim()
+        };
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch (_) {}
+    }
+
+    // ---- Parse jobIds from URL ----
+    function parseJobIds() {
+        var params = new URLSearchParams(window.location.search);
+        var jobIdsParam = params.get("jobIds") || params.get("jobId") || params.get("id") || "";
+        return jobIdsParam.split(",").map(function(s) { return s.trim(); }).filter(Boolean);
     }
 
     function mapLegacyIdToJobId(raw) {
-        if (!raw) {
-            return "";
-        }
-        const trimmed = String(raw).trim();
-        if (/^job-\d+$/i.test(trimmed)) {
-            return trimmed.toLowerCase();
-        }
-        if (/^\d+$/.test(trimmed)) {
-            return "job-" + trimmed.padStart(3, "0");
-        }
+        if (!raw) return "";
+        var trimmed = String(raw).trim();
+        if (/^job-\d+$/i.test(trimmed)) return trimmed.toLowerCase();
+        if (/^\d+$/.test(trimmed)) return "job-" + trimmed.padStart(3, "0");
         return "";
     }
 
-    async function resolveJobId() {
-        const params = new URLSearchParams(window.location.search);
-        const candidate = params.get("jobId") || params.get("id") || "";
-        const mapped = mapLegacyIdToJobId(candidate);
-        const jobsData = await api("/jobs?status=OPEN&page=1&size=200");
-        const jobs = jobsData.items || [];
+    // ---- Resolve job details ----
+    async function resolveJobs() {
+        var candidates = parseJobIds();
+        var data = await api("/jobs?status=OPEN&page=1&size=200");
+        var jobs = data.items || [];
+        var resolved = [];
+        var seen = {};
 
-        if (jobs.length === 0) {
-            throw new Error("No open jobs available now.");
-        }
-
-        if (mapped && jobs.some((job) => job.jobId === mapped)) {
-            return mapped;
-        }
-
-        if (/^\d+$/.test(String(candidate || ""))) {
-            const index = Number(candidate) - 1;
-            if (index >= 0 && index < jobs.length) {
-                return jobs[index].jobId;
-            }
-        }
-
-        return jobs[0].jobId;
-    }
-
-    async function submitApplication(event) {
-        event.preventDefault();
-
-        const form = document.getElementById("applyForm");
-        const fullName = document.getElementById("fullName").value.trim();
-        const studentId = document.getElementById("studentId").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const skills = document.getElementById("skills").value.trim();
-        const experience = document.getElementById("experience").value.trim();
-        const submitButtons = document.querySelectorAll('button[type="submit"]');
-        const cvFile = document.getElementById("cvFile").files[0];
-        const transcriptFile = document.getElementById("transcriptFile").files[0];
-        const cvValidation = getFileValidationResult(cvFile, "CV");
-        const transcriptValidation = getFileValidationResult(transcriptFile, "Transcript");
-        let hasBlockingError = false;
-
-        hideResultBox();
-        document.getElementById("cvFileError").textContent = "";
-        document.getElementById("cvFileError").style.display = "none";
-        document.getElementById("transcriptFileError").textContent = "";
-        document.getElementById("transcriptFileError").style.display = "none";
-
-        if (!fullName) {
-            alert("Please enter your full name.");
-            return;
-        }
-
-        if (!studentId) {
-            alert("Please enter your student ID.");
-            return;
-        }
-
-        if (!email) {
-            alert("Please enter your email.");
-            return;
-        }
-
-        if (!skills) {
-            alert("Please select at least one skill.");
-            return;
-        }
-
-        if (!experience) {
-            alert("Please fill in your experience.");
-            return;
-        }
-
-        if (!cvValidation.ok) {
-            document.getElementById("cvFileError").textContent = cvValidation.message;
-            document.getElementById("cvFileError").style.display = "block";
-            hasBlockingError = true;
-        }
-
-        if (!transcriptValidation.ok) {
-            document.getElementById("transcriptFileError").textContent = transcriptValidation.message;
-            document.getElementById("transcriptFileError").style.display = "block";
-            hasBlockingError = true;
-        }
-
-        submitButtons.forEach(button => {
-            button.disabled = true;
-            if (button.classList.contains("primary")) {
-                button.dataset.originalText = button.textContent;
-                button.textContent = "Submitting...";
+        candidates.forEach(function(c) {
+            var mapped = mapLegacyIdToJobId(c);
+            var match = jobs.find(function(j) { return j.jobId === mapped; }) ||
+                        jobs.find(function(j) { return String(j.jobId).toLowerCase() === c.toLowerCase(); });
+            if (match && !seen[match.jobId]) {
+                resolved.push(match);
+                seen[match.jobId] = true;
             }
         });
 
-        const resultBox = document.getElementById("resultBox");
-        const viewApplicationsBtn = document.getElementById("viewApplicationsBtn");
-        resultBox.style.display = "block";
+        if (!resolved.length && jobs.length) resolved = [jobs[0]];
+        return resolved;
+    }
 
-        if (hasBlockingError) {
-            resultBox.className = "result-box error";
-            addResultItem("Application", "Application not submitted. Please fix the file errors below and try again.", "error");
-            addResultItem("CV", cvValidation.ok ? "File selected and ready: " + cvValidation.message : cvValidation.message, cvValidation.ok ? "info" : "error");
-            addResultItem("Transcript", transcriptValidation.ok ? "File selected and ready: " + transcriptValidation.message : transcriptValidation.message, transcriptValidation.ok ? "info" : "error");
-            submitButtons.forEach(button => {
-                button.disabled = false;
-                if (button.dataset.originalText) {
-                    button.textContent = button.dataset.originalText;
-                }
-            });
+    // ---- Update page heading ----
+    function updateHeading() {
+        var count = state.jobDetails.length;
+        var title, breadcrumb;
+        if (count === 1) {
+            var j = state.jobDetails[0];
+            title = "Apply for " + j.title + " (" + j.jobId + ")";
+            breadcrumb = "Apply for " + j.title + " (" + j.jobId + ")";
+        } else {
+            title = "Apply for " + count + " Jobs";
+            breadcrumb = "Apply for " + count + " Jobs";
+        }
+        document.getElementById("pageTitle").textContent = title + " Application Form";
+        document.getElementById("breadcrumbLabel").textContent = breadcrumb;
+        document.title = title + " - TA Recruit";
+
+        var names = state.jobDetails.map(function(j) { return j.title + " (" + j.jobId + ")"; }).join(", ");
+        document.getElementById("jobsSummary").style.display = "block";
+        document.getElementById("jobsSummaryText").textContent = "Applying for " + count + (count === 1 ? " job: " : " jobs: ") + names;
+    }
+
+    // ---- UI helpers ----
+    function showFieldError(fieldId, errorId, msg) {
+        var field = document.getElementById(fieldId);
+        var error = document.getElementById(errorId);
+        if (msg) { error.textContent = msg; error.style.display = "block"; field.style.borderColor = "#EF4444"; }
+        else { error.textContent = ""; error.style.display = "none"; field.style.borderColor = ""; }
+    }
+
+    function hideResultBox() {
+        var rb = document.getElementById("resultBox");
+        rb.style.display = "none";
+        rb.className = "result-box";
+        document.getElementById("resultList").innerHTML = "";
+        document.getElementById("viewApplicationsBtn").style.display = "none";
+    }
+
+    function addResultItem(label, message, type) {
+        var list = document.getElementById("resultList");
+        var item = document.createElement("div");
+        item.className = "result-item " + type;
+        item.innerHTML = "<strong>" + label + ":</strong> " + message;
+        list.appendChild(item);
+    }
+
+    function getFileValidationResult(file, label) {
+        if (!file) return { ok: false, message: label + " file is required." };
+        var ext = file.name.toLowerCase();
+        var ok = acceptedFileExtensions.some(function(e) { return ext.endsWith(e); });
+        return ok ? { ok: true, message: file.name } : { ok: false, message: "Only PDF, DOC, and DOCX files are accepted." };
+    }
+
+    // ---- File upload UI ----
+    function updateFileStatus(inputId, nameId, errorId, buttonId) {
+        var input = document.getElementById(inputId);
+        var name = document.getElementById(nameId);
+        var btn = document.getElementById(buttonId);
+        var btnText = btn ? btn.querySelector(".upload-btn-text") : null;
+        document.getElementById(errorId).textContent = "";
+        document.getElementById(errorId).style.display = "none";
+        if (!input.files[0]) {
+            name.textContent = "No file chosen";
+            if (btn) btn.classList.remove("is-selected");
+            if (btnText) btnText.textContent = "Choose File";
             return;
         }
-
-        try {
-            const jobId = await resolveJobId();
-            const formData = new FormData(form);
-            formData.set("jobId", jobId);
-
-            const response = await fetch("/applications", {
-                method: "POST",
-                body: formData
-            });
-
-            const text = await response.text();
-            let result = {};
-
-            try {
-                result = text ? JSON.parse(text) : {};
-            } catch (_) {
-                result = {error: text || ("HTTP " + response.status)};
-            }
-
-            if (!response.ok) {
-                throw new Error(result.error || ("HTTP " + response.status));
-            }
-
-            const attachments = Array.isArray(result.attachments) ? result.attachments : [];
-            const attachmentMap = {};
-            attachments.forEach(item => {
-                if (item && item.attachmentType) {
-                    attachmentMap[String(item.attachmentType).toLowerCase()] = item;
-                }
-            });
-
-            const cvResult = attachmentMap.cv;
-            const transcriptResult = attachmentMap.transcript;
-            const allAttachmentSucceeded = Boolean(cvResult) && Boolean(transcriptResult);
-
-            resultBox.className = allAttachmentSucceeded ? "result-box success" : "result-box partial";
-
-            if (result.created === false) {
-                addResultItem("Application", "Application already exists. Current application status: Pending review.", "info");
-            } else {
-                addResultItem("Application", "Application submitted successfully. Current application status: Pending review.", "success");
-            }
-
-            addResultItem(
-                "CV",
-                cvResult
-                    ? "Uploaded successfully: " + (cvResult.originalFilename || (cvFile ? cvFile.name : "CV file"))
-                    : "Upload failed: The CV file was not saved successfully.",
-                cvResult ? "success" : "error"
-            );
-
-            addResultItem(
-                "Transcript",
-                transcriptResult
-                    ? "Uploaded successfully: " + (transcriptResult.originalFilename || (transcriptFile ? transcriptFile.name : "Transcript file"))
-                    : "Upload failed: The transcript file was not saved successfully.",
-                transcriptResult ? "success" : "error"
-            );
-
-            viewApplicationsBtn.style.display = "inline-flex";
-        } catch (error) {
-            resultBox.className = "result-box error";
-            addResultItem("Application", error.message, "error");
-            addResultItem("CV", "Upload not completed.", "error");
-            addResultItem("Transcript", "Upload not completed.", "error");
-        } finally {
-            submitButtons.forEach(button => {
-                button.disabled = false;
-                if (button.dataset.originalText) {
-                    button.textContent = button.dataset.originalText;
-                }
-            });
-        }
+        name.textContent = input.files[0].name;
+        if (btn) btn.classList.add("is-selected");
+        if (btnText) btnText.textContent = "File Selected";
     }
+
+    // ---- Validation ----
+    function validateForm() {
+        var ok = true;
+        var fn = document.getElementById("fullName").value.trim();
+        var sid = document.getElementById("studentId").value.trim();
+        var em = document.getElementById("email").value.trim();
+        var sk = document.getElementById("skills").value;
+        var exp = document.getElementById("experience").value.trim();
+
+        if (!fn) { showFieldError("fullName", "fullNameError", "Please enter your full name."); ok = false; }
+        else showFieldError("fullName", "fullNameError", "");
+
+        if (!sid) { showFieldError("studentId", "studentIdError", "Please enter your student ID."); ok = false; }
+        else showFieldError("studentId", "studentIdError", "");
+
+        if (!em) { showFieldError("email", "emailError", "Please enter your email."); ok = false; }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showFieldError("email", "emailError", "Invalid email format."); ok = false; }
+        else showFieldError("email", "emailError", "");
+
+        return ok;
+    }
+
+    // ---- Submit ----
+    async function submitApplication(event) {
+        event.preventDefault();
+        var form = event.target;
+
+        if (!validateForm()) return;
+
+        var cvFile = document.getElementById("cvFile").files[0];
+        var transcriptFile = document.getElementById("transcriptFile").files[0];
+        var cvVal = getFileValidationResult(cvFile, "CV");
+        var trVal = getFileValidationResult(transcriptFile, "Transcript");
+
+        if (!cvVal.ok) { document.getElementById("cvFileError").textContent = cvVal.message; document.getElementById("cvFileError").style.display = "block"; return; }
+        if (!trVal.ok) { document.getElementById("transcriptFileError").textContent = trVal.message; document.getElementById("transcriptFileError").style.display = "block"; return; }
+
+        var count = state.jobDetails.length;
+        if (!confirm("Submit applications for " + count + (count === 1 ? " job?" : " jobs?"))) return;
+
+        saveProfile();
+        hideResultBox();
+
+        var submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.querySelector(".btn-text").textContent = "Submitting...";
+
+        var resultBox = document.getElementById("resultBox");
+        resultBox.style.display = "block";
+        var totalCreated = 0, totalSkipped = 0, totalUploaded = 0, failed = [];
+
+        for (var i = 0; i < state.jobDetails.length; i++) {
+            var jobId = state.jobDetails[i].jobId;
+            var fd = new FormData(form);
+            fd.set("jobId", jobId);
+            try {
+                var resp = await fetch("/applications", { method: "POST", body: fd });
+                var text = await resp.text();
+                var r = {};
+                try { r = text ? JSON.parse(text) : {}; } catch (_) { r = {error: text}; }
+                if (!resp.ok) throw new Error(r.error || "HTTP " + resp.status);
+
+                if (r.created === false) totalSkipped++;
+                else totalCreated++;
+
+                var atts = Array.isArray(r.attachments) ? r.attachments : [];
+                atts.forEach(function(a) { if (a && a.attachmentType) totalUploaded++; });
+
+            } catch (e) {
+                failed.push(jobId + ": " + e.message);
+            }
+        }
+
+        if (failed.length) {
+            resultBox.className = "result-box partial";
+            addResultItem("Summary", totalCreated + " created, " + totalSkipped + " existed, " + failed.length + " failed", "error");
+            failed.forEach(function(f) { addResultItem("Failed", f, "error"); });
+        } else {
+            resultBox.className = "result-box success";
+            var msg = totalCreated + " application(s) submitted";
+            if (totalSkipped > 0) msg += ", " + totalSkipped + " already existed";
+            if (totalUploaded > 0) msg += " (" + totalUploaded + " attachment(s) uploaded)";
+            addResultItem("Summary", msg, "success");
+            document.getElementById("viewApplicationsBtn").style.display = "inline-flex";
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.querySelector(".btn-text").textContent = "Submit Application";
+    }
+
+    // ---- Init ----
+    document.getElementById("cvFile").addEventListener("change", function() {
+        updateFileStatus("cvFile", "cvFileName", "cvFileError", "cvUploadBtn");
+    });
+    document.getElementById("transcriptFile").addEventListener("change", function() {
+        updateFileStatus("transcriptFile", "transcriptFileName", "transcriptFileError", "transcriptUploadBtn");
+    });
+    document.getElementById("applyForm").addEventListener("submit", submitApplication);
+
+    async function api(url, options) {
+        options = options || {};
+        var resp = await fetch(url, { headers: {"Content-Type": "application/json"}, ...options });
+        var text = await resp.text();
+        var body = {};
+        try { body = text ? JSON.parse(text) : {}; } catch (_) { body = {error: text || ("HTTP " + resp.status)}; }
+        if (!resp.ok) throw new Error(body.error || ("HTTP " + resp.status));
+        return body;
+    }
+
+    loadProfile();
+    resolveJobs().then(function(jobs) {
+        state.jobDetails = jobs;
+        updateHeading();
+    }).catch(function(e) {
+        document.getElementById("jobsSummaryText").textContent = e.message;
+        document.getElementById("jobsSummary").style.display = "block";
+    });
 </script>
 </body>
 </html>
