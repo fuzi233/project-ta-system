@@ -7,533 +7,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Jobs - TA Recruitment System</title>
+    <title>Available Jobs - TA Recruitment</title>
     <link rel="stylesheet" href="assets/css/style.css"/>
     <style>
-        :root {
-            --bg: #eef3ff;
-            --panel: rgba(255, 255, 255, 0.92);
-            --text: #102039;
-            --muted: #4c5e7a;
-            --line: #d6e4ff;
-            --primary: #1575ff;
-            --primary-dark: #0094ff;
-            --accent: #00b7a5;
-            --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
-            --radius-lg: 22px;
-            --radius-md: 14px;
-            --radius-sm: 10px;
-        }
+        :root{--primary:#1575ff;--accent:#00b7a5;--muted:#4c5e7a;--line:#d6e4ff;--shadow:0 24px 50px rgba(16,32,57,0.15);}
+        *{box-sizing:border-box;}
+        body{font-family:"SF Pro Text","Segoe UI",sans-serif;background:radial-gradient(circle at 20% 15%,#ffffff 0%,#eef3ff 45%,#d9e8ff 100%);color:#102039;min-height:100vh;margin:0;}
+        .shell{width:min(1080px,calc(100% - 2rem));margin:2rem auto 3rem;}
+        .topbar{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.2rem;margin-bottom:1rem;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.78);backdrop-filter:blur(24px);box-shadow:var(--shadow);}
+        .brand{font-size:1.05rem;font-weight:700;color:#0e3369;}
+        .nav{display:flex;gap:1.5rem;align-items:center;}
+        .nav a{text-decoration:none;color:var(--muted);font-size:.9rem;font-weight:500;}
+        .nav a.active{color:#1575ff;font-weight:700;}
+        .signin-btn{border:1px solid #c2d6ff;border-radius:10px;background:linear-gradient(135deg,#1575ff,#0094ff 55%,#00b7a5);color:#fff;padding:.5rem 1rem;font-size:.88rem;font-weight:600;cursor:pointer;transition:transform 120ms ease;text-decoration:none;display:inline-block;}
+        .signin-btn:hover{transform:translateY(-1px);}
+        .signin-btn.ghost{background:rgba(255,255,255,0.72);color:#0f2d58;border:1px solid #c2d6ff;}
+        .page-title{margin:0 0 1.2rem;font-size:2rem;font-weight:800;color:#10213f;}
+        .toolbar{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;}
+        .toolbar input,.toolbar select{border:1px solid #c2d6ff;border-radius:10px;padding:.6rem .8rem;font-size:.9rem;background:#fff;color:#16315b;}
+        .toolbar input{flex:1;min-width:200px;}
+        .selection-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.2rem;margin-bottom:1rem;border:1px solid #d6e4ff;border-radius:14px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);}
+        .sel-count{font-size:.92rem;font-weight:700;color:#0e3369;}
 
-        * {
-            box-sizing: border-box;
-        }
+        .job-group{margin-bottom:1.2rem;}
+        .group-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.7rem 1rem;border-radius:14px;border:1px solid #d6e4ff;background:rgba(234,243,255,0.85);cursor:pointer;user-select:none;}
+        .group-head:hover{background:rgba(220,235,255,0.9);}
+        .group-head h3{margin:0;font-size:1rem;color:#12396a;}
+        .group-meta{font-size:.82rem;color:var(--muted);}
+        .group-arrow{transition:transform 200ms ease;font-size:.85rem;color:var(--muted);}
+        .job-group.collapsed .group-arrow{transform:rotate(-90deg);}
+        .group-body{display:flex;flex-direction:column;gap:.6rem;margin-top:.5rem;padding-left:.3rem;}
+        .job-group.collapsed .group-body{display:none;}
 
-        body {
-            margin: 0;
-            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
-            color: var(--text);
-        }
-
-        .page {
-            max-width: 1280px;
-            margin: 40px auto;
-            padding: 0 24px;
-        }
-
-        .shell {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .topbar {
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-            border-bottom: 1px solid var(--line);
-            background: rgba(255,255,255,0.95);
-        }
-
-        .brand {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #16315b;
-        }
-
-        .nav {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: var(--muted);
-            font-size: .95rem;
-            font-weight: 500;
-            padding: 24px 0 20px;
-            border-bottom: 3px solid transparent;
-        }
-
-        .nav a.active {
-            color: #16315b;
-            border-bottom-color: #1575ff;
-        }
-
-        .content {
-            padding: 36px 34px 40px;
-        }
-
-        .page-title {
-            margin: 0 0 28px;
-            font-size: 48px;
-            font-weight: 800;
-            color: #10213f;
-        }
-
-        .toolbar {
-            display: grid;
-            grid-template-columns: 1.8fr 0.8fr 0.8fr 0.8fr auto;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-
-        .input,
-        .select,
-        .btn {
-            height: 54px;
-            border-radius: 12px;
-            border: 1px solid #ced8e3;
-            background: #fff;
-            font-size: 16px;
-        }
-
-        .input,
-        .select {
-            padding: 0 16px;
-            color: #16315b;
-        }
-
-        .btn {
-            padding: 0 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(31, 41, 55, 0.08);
-        }
-
-        .btn-filter {
-            background: #f8fafc;
-            color: #16315b;
-        }
-
-        .divider {
-            height: 1px;
-            background: #dbe3ec;
-            margin: 8px 0 28px;
-        }
-
-        .job-list {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .job-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 24px;
-            background: #fff;
-            border: 1px solid #d9e2ec;
-            border-radius: 16px;
-            padding: 28px 28px;
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
-        }
-
-        .job-main h2 {
-            margin: 0 0 14px;
-            font-size: 24px;
-            font-weight: 800;
-            color: #1e293b;
-        }
-
-        .job-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            color: var(--muted);
-            font-size: 18px;
-        }
-
-        .job-actions {
-            display: flex;
-            gap: 14px;
-            flex-shrink: 0;
-        }
-
-        .action-btn {
-            min-width: 132px;
-            height: 52px;
-            border-radius: 12px;
-            border: 1px solid #c2d6ff;
-            background: rgba(255, 255, 255, 0.9);
-            color: #16315b;
-            font-size: .95rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(31, 41, 55, 0.08);
-        }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
-            color: #fff;
-            border: none;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            margin-top: 26px;
-        }
-
-        .page-btn {
-            width: 46px;
-            height: 42px;
-            border: 1px solid #d0d9e4;
-            background: #fff;
-            color: var(--muted);
-            font-size: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-
-        .page-btn:first-child {
-            border-radius: 10px 0 0 10px;
-        }
-
-        .page-btn:last-child {
-            border-radius: 0 10px 10px 0;
-        }
-
-        .page-btn.active {
-            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
-            color: #fff;
-        }
-
-        .empty-tip {
-            display: none;
-            text-align: center;
-            padding: 36px 0 12px;
-            color: var(--muted);
-            font-size: 18px;
-        }
-
-        .job-check {
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-
-        .job-check input {
-            width: 20px;
-            height: 20px;
-            accent-color: #1575ff;
-            cursor: pointer;
-        }
-
-        .selection-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            border: 1px solid #d6e4ff;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(12px);
-        }
-
-        .selection-count {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #16315b;
-        }
-
-        .selection-msg {
-            display: none;
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            background: #fef3c7;
-            border: 1px solid #fcd34d;
-            color: #92400e;
-            font-size: .9rem;
-            font-weight: 600;
-        }
-
-        @media (max-width: 1024px) {
-            .toolbar {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .job-card {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .job-actions {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 720px) {
-            .page {
-                padding: 0 14px;
-                margin: 20px auto;
-            }
-
-            .topbar {
-                flex-direction: column;
-                height: auto;
-                gap: 10px;
-                padding: 18px;
-            }
-
-            .nav {
-                gap: 16px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .content {
-                padding: 24px 18px 30px;
-            }
-
-            .page-title {
-                font-size: 34px;
-            }
-
-            .toolbar {
-                grid-template-columns: 1fr;
-            }
-
-            .job-actions {
-                flex-direction: column;
-            }
-
-            .action-btn {
-                width: 100%;
-            }
-        }
+        .job-card{display:flex;align-items:center;gap:1rem;border:1px solid #d6e4ff;border-radius:12px;padding:1rem;background:rgba(255,255,255,0.72);backdrop-filter:blur(12px);box-shadow:0 4px 12px rgba(15,23,42,0.03);}
+        .job-card:hover{border-color:#b0cbff;}
+        .job-check{display:flex;align-items:center;flex-shrink:0;cursor:pointer;}
+        .job-check input{width:18px;height:18px;accent-color:#1575ff;cursor:pointer;}
+        .job-main{flex:1;}
+        .job-main h4{margin:0 0 .3rem;font-size:1.05rem;font-weight:700;color:#1e293b;}
+        .job-info{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.82rem;color:var(--muted);}
+        .job-info span{white-space:nowrap;}
+        .job-actions{display:flex;gap:.5rem;flex-shrink:0;}
+        .empty-tip{display:none;text-align:center;padding:2rem;color:var(--muted);font-size:1rem;}
+        @media(max-width:720px){.page-title{font-size:1.5rem;}.job-card{flex-direction:column;align-items:flex-start;}.toolbar{flex-direction:column;}.toolbar input{min-width:auto;}}
     </style>
 </head>
 <body>
-<div class="bg-orb orb-a"></div>
-<div class="bg-orb orb-b"></div>
-<div class="page">
-    <a class="link" href="index.jsp">&larr; Exit</a>
-    <div class="shell">
-        <header class="topbar">
-            <div class="brand">TA Recruitment System</div>
-            <nav class="nav">
-                <a href="jobs.jsp" class="active">Job List</a>
-                <a href="applications.jsp">My Applications</a>
-                <a href="profile.jsp">Profile</a>
-            </nav>
-        </header>
+<div class="shell">
+    <header class="topbar">
+        <div class="brand">TA Recruitment</div>
+        <nav class="nav">
+            <a href="index.jsp">Home</a>
+            <a href="jobs.jsp" class="active">Job List</a>
+            <a href="applications.jsp">My Applications</a>
+            <a href="profile.jsp">Profile</a>
+        </nav>
+    </header>
 
-        <main class="content">
-            <h1 class="page-title">Available Jobs</h1>
+    <h1 class="page-title">Available TA Positions</h1>
 
-            <div class="toolbar">
-                <input id="searchInput" class="input" type="text" placeholder="Search jobs...">
-                <select id="typeFilter" class="select">
-                    <option value="">All</option>
-                    <option value="programming">Programming</option>
-                    <option value="database">Database</option>
-                    <option value="web">Web</option>
-                </select>
-                <select id="skillFilter" class="select">
-                    <option value="">Skills</option>
-                    <option value="java">Java</option>
-                    <option value="sql">SQL</option>
-                    <option value="html">HTML/CSS</option>
-                </select>
-                <select id="semesterFilter" class="select">
-                    <option value="">Semester</option>
-                    <option value="spring">Spring</option>
-                    <option value="autumn">Autumn</option>
-                </select>
-                <button class="btn btn-filter" onclick="filterJobs()">Filter</button>
-            </div>
-
-            <div class="divider"></div>
-
-            <div id="selectionBar" class="selection-bar" style="display:none;">
-                <span id="selectionCount" class="selection-count">0 jobs selected</span>
-                <button id="batchApplyBtn" class="action-btn primary">Apply to Selected Jobs</button>
-            </div>
-
-            <section id="jobList" class="job-list">
-                <article class="job-card"
-                         data-job-id="1"
-                         data-title="programming ta"
-                         data-type="programming"
-                         data-skill="java"
-                         data-semester="spring">
-                    <label class="job-check">
-                        <input type="checkbox" class="job-checkbox" data-job-id="1" onchange="updateSelection()"/>
-                    </label>
-                    <div class="job-main">
-                        <h2>Programming TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Java Programming</div>
-                            <div>Deadline: Jan 25, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=1">View Details</a>
-                    </div>
-                </article>
-
-                <article class="job-card"
-                         data-job-id="2"
-                         data-title="database ta"
-                         data-type="database"
-                         data-skill="sql"
-                         data-semester="spring">
-                    <label class="job-check">
-                        <input type="checkbox" class="job-checkbox" data-job-id="2" onchange="updateSelection()"/>
-                    </label>
-                    <div class="job-main">
-                        <h2>Database TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Database Systems</div>
-                            <div>Deadline: Jan 30, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=2">View Details</a>
-                    </div>
-                </article>
-
-                <article class="job-card"
-                         data-job-id="3"
-                         data-title="web development ta"
-                         data-type="web"
-                         data-skill="html"
-                         data-semester="spring">
-                    <label class="job-check">
-                        <input type="checkbox" class="job-checkbox" data-job-id="3" onchange="updateSelection()"/>
-                    </label>
-                    <div class="job-main">
-                        <h2>Web Development TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Web Technologies</div>
-                            <div>Deadline: Feb 5, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=3">View Details</a>
-                    </div>
-                </article>
-            </section>
-
-            <div id="emptyTip" class="empty-tip">No jobs match your current filters.</div>
-
-            <div class="pagination">
-                <a class="page-btn active" href="#">1</a>
-                <a class="page-btn" href="#">2</a>
-                <a class="page-btn" href="#">3</a>
-                <a class="page-btn" href="#">›</a>
-            </div>
-        </main>
+    <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="Search by title, module, or skills..."/>
+        <select id="statusFilter"><option value="OPEN">Open</option><option value="">All Status</option></select>
+        <button class="signin-btn ghost" onclick="loadJobs()">Refresh</button>
     </div>
+
+    <div id="selectionBar" class="selection-bar" style="display:none;">
+        <span id="selCount" class="sel-count">0 jobs selected</span>
+        <button id="batchApplyBtn" class="signin-btn">Apply to Selected Jobs</button>
+    </div>
+
+    <section id="jobArea"></section>
+    <div id="emptyTip" class="empty-tip">No open positions at this time.</div>
 </div>
 
-<div id="selectionMsg" class="selection-msg">Please select at least one job to apply.</div>
-
 <script>
-    function updateSelection() {
-        var checkboxes = document.querySelectorAll(".job-checkbox:checked");
-        var count = checkboxes.length;
-        var bar = document.getElementById("selectionBar");
-        var countEl = document.getElementById("selectionCount");
-        var msg = document.getElementById("selectionMsg");
+    var state = { jobs: [], collapsed: {} };
 
-        if (count === 0) {
-            bar.style.display = "none";
-            msg.style.display = "none";
-        } else {
-            bar.style.display = "flex";
-            countEl.textContent = count + (count === 1 ? " job selected" : " jobs selected");
-        }
+    async function loadJobs() {
+        var q = document.getElementById("searchInput").value.trim();
+        var st = document.getElementById("statusFilter").value;
+        var data = await api("/jobs?status=" + (st||"OPEN") + "&page=1&size=200&q=" + encodeURIComponent(q));
+        state.jobs = data.items || [];
+        render();
     }
 
-    document.getElementById("batchApplyBtn").addEventListener("click", function() {
-        var checkboxes = document.querySelectorAll(".job-checkbox:checked");
-        var jobIds = [];
-        checkboxes.forEach(function(cb) { jobIds.push(cb.getAttribute("data-job-id")); });
+    function render() {
+        var area = document.getElementById("jobArea");
+        var empty = document.getElementById("emptyTip");
+        area.innerHTML = "";
 
-        if (jobIds.length === 0) {
-            var msg = document.getElementById("selectionMsg");
-            msg.style.display = "block";
-            return;
-        }
-        window.location.href = "apply.jsp?jobIds=" + jobIds.join(",");
+        var kw = document.getElementById("searchInput").value.trim().toLowerCase();
+        var filtered = state.jobs;
+        if (kw) filtered = state.jobs.filter(function(j){return (j.title||"").toLowerCase().indexOf(kw)>=0||(j.moduleCode||"").toLowerCase().indexOf(kw)>=0||(j.requiredSkills||"").toLowerCase().indexOf(kw)>=0;});
+        if (!filtered.length) { empty.style.display = "block"; return; }
+        empty.style.display = "none";
+
+        var groups = {};
+        filtered.forEach(function(j){var m=j.moduleCode||"Other";if(!groups[m])groups[m]=[];groups[m].push(j);});
+
+        Object.keys(groups).sort().forEach(function(mod){
+            var jobs = groups[mod];
+            var cid = "grp_"+mod.replace(/[^A-Za-z0-9]/g,"_");
+            if (state.collapsed[cid]===undefined) state.collapsed[cid]=false;
+            var isCollapsed = state.collapsed[cid];
+
+            var g = document.createElement("div");
+            g.className = "job-group" + (isCollapsed?" collapsed":"");
+            g.innerHTML = '<div class="group-head" onclick="toggleGroup(\''+cid+'\')"><div><h3>'+esc(mod)+' <span class="group-meta">('+jobs.length+' position'+(jobs.length>1?'s':'')+')</span></h3></div><span class="group-arrow">&#9660;</span></div><div class="group-body" id="'+cid+'"></div>';
+            area.appendChild(g);
+
+            var body = document.getElementById(cid);
+            jobs.forEach(function(j){
+                var card = document.createElement("div");
+                card.className="job-card";
+                card.innerHTML = '<label class="job-check"><input type="checkbox" class="job-checkbox" data-job-id="'+esc(j.jobId)+'" onchange="updateSelection()"/></label><div class="job-main"><h4>'+esc(j.title)+'</h4><div class="job-info"><span>ID: '+esc(j.jobId)+'</span><span>Module: '+esc(j.moduleCode)+'</span><span>Skills: '+esc(j.requiredSkills||"-")+'</span><span>Slots: '+j.slots+'</span>'+(j.hoursPerWeek?'<span>'+j.hoursPerWeek+'h/wk</span>':'')+(j.applicationDeadline?'<span>Deadline: '+j.applicationDeadline+'</span>':'')+'</div></div><div class="job-actions"><a class="signin-btn ghost" href="job-detail.jsp?id='+esc(j.jobId)+'">Details</a></div>';
+                body.appendChild(card);
+            });
+        });
+        updateSelection();
+    }
+
+    function toggleGroup(cid){state.collapsed[cid]=!state.collapsed[cid];var el=document.getElementById(cid);if(el)el.parentElement.classList.toggle("collapsed");}
+
+    function updateSelection(){
+        var cbs=document.querySelectorAll(".job-checkbox:checked");
+        var bar=document.getElementById("selectionBar");
+        if(cbs.length===0){bar.style.display="none";}
+        else{bar.style.display="flex";document.getElementById("selCount").textContent=cbs.length+(cbs.length===1?" job selected":" jobs selected");}
+    }
+
+    document.getElementById("batchApplyBtn").addEventListener("click",function(){
+        var ids=[];document.querySelectorAll(".job-checkbox:checked").forEach(function(cb){ids.push(cb.getAttribute("data-job-id"));});
+        if(!ids.length){alert("Please select at least one job");return;}
+        window.location.href="apply.jsp?jobIds="+ids.join(",");
     });
 
-    function filterJobs() {
-        var keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-        var type = document.getElementById("typeFilter").value;
-        var skill = document.getElementById("skillFilter").value;
-        var semester = document.getElementById("semesterFilter").value;
-        var cards = document.querySelectorAll(".job-card");
-        var emptyTip = document.getElementById("emptyTip");
-        var visibleCount = 0;
+    function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+    async function api(u){var r=await fetch(u,{headers:{"Content-Type":"application/json"}});var t=await r.text();var b={};try{b=t?JSON.parse(t):{};}catch(_){b={error:t||("HTTP "+r.status)};}if(!r.ok)throw new Error(b.error||("HTTP "+r.status));return b;}
 
-        cards.forEach(function(card) {
-            var title = card.dataset.title;
-            var cardType = card.dataset.type;
-            var cardSkill = card.dataset.skill;
-            var cardSemester = card.dataset.semester;
-            var matchKeyword = !keyword || title.includes(keyword);
-            var matchType = !type || cardType === type;
-            var matchSkill = !skill || cardSkill === skill;
-            var matchSemester = !semester || cardSemester === semester;
-            if (matchKeyword && matchType && matchSkill && matchSemester) {
-                card.style.display = "flex";
-                visibleCount++;
-            } else {
-                card.style.display = "none";
-            }
-        });
-        emptyTip.style.display = visibleCount === 0 ? "block" : "none";
-    }
+    document.getElementById("searchInput").addEventListener("keydown",function(e){if(e.key==="Enter")loadJobs();});
+    loadJobs();
 </script>
 </body>
 </html>
