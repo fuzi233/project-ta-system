@@ -330,10 +330,10 @@
                 <section class="panel">
                     <div class="panel-header">Job Info</div>
                     <div class="panel-body">
-                        <h2 class="job-name"><%= jobTitle %></h2>
-                        <div class="info-item">Course: <%= course %></div>
-                        <div class="info-item">Teacher: <%= teacher %></div>
-                        <div class="info-item">Deadline: <%= deadline %></div>
+                        <h2 id="jobName" class="job-name"><%= jobTitle %></h2>
+                        <div id="jobCourse" class="info-item">Course: <%= course %></div>
+                        <div id="jobTeacher" class="info-item">Teacher: <%= teacher %></div>
+                        <div id="jobDeadline" class="info-item">Deadline: <%= deadline %></div>
                     </div>
                 </section>
 
@@ -342,29 +342,29 @@
                     <div class="panel-body">
                         <div class="detail-section">
                             <h3 class="section-title">Responsibilities:</h3>
-                            <ul><%= responsibilities %></ul>
+                            <ul id="jobResponsibilities"><%= responsibilities %></ul>
                         </div>
 
                         <div class="detail-section">
                             <h3 class="section-title">Required Skills:</h3>
-                            <ul><%= requiredSkills %></ul>
+                            <ul id="jobSkills"><%= requiredSkills %></ul>
                         </div>
 
                         <div class="detail-section">
                             <h3 class="section-title">Preferred Experience:</h3>
-                            <ul><%= preferredExperience %></ul>
+                            <ul id="jobExperience"><%= preferredExperience %></ul>
                         </div>
 
                         <div class="detail-section">
                             <h3 class="section-title">Weekly Workload</h3>
-                            <div class="workload"><%= workload %></div>
+                            <div id="jobWorkload" class="workload"><%= workload %></div>
                         </div>
                     </div>
                 </section>
 
                 <section class="panel">
                     <div class="action-col">
-                        <a class="action-btn primary" href="apply.jsp?id=<%= id == null ? "1" : id %>">Apply Now</a>
+                        <a id="applyLink" class="action-btn primary" href="apply.jsp?id=<%= id == null ? "1" : id %>">Apply Now</a>
                         <a class="action-btn" href="#">Save</a>
                         <a class="action-btn" href="jobs.jsp">Back</a>
                     </div>
@@ -373,5 +373,92 @@
         </main>
     </div>
 </div>
+<script>
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
+    function fmtDate(value) {
+        const time = Date.parse(value || "");
+        if (Number.isNaN(time)) {
+            return value || "Not set";
+        }
+        return new Date(time).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
+    }
+
+    function legacyJobId(raw) {
+        const value = String(raw || "").trim();
+        if (/^job-\d+$/i.test(value)) {
+            return value.toLowerCase();
+        }
+        if (/^\d+$/.test(value)) {
+            return "job-" + value.padStart(3, "0");
+        }
+        return "";
+    }
+
+    function listItems(values, fallback) {
+        const items = values
+            .split(",")
+            .map(item => item.trim())
+            .filter(Boolean);
+        if (items.length === 0) {
+            return "<li>" + escapeHtml(fallback) + "</li>";
+        }
+        return items.map(item => "<li>" + escapeHtml(item) + "</li>").join("");
+    }
+
+    async function loadJobDetail() {
+        const params = new URLSearchParams(window.location.search);
+        const rawJobId = params.get("jobId") || params.get("id") || "";
+        if (!rawJobId) {
+            return;
+        }
+
+        const response = await fetch("/jobs?status=OPEN&page=1&size=500");
+        if (!response.ok) {
+            return;
+        }
+        const data = await response.json();
+        const jobs = data.items || [];
+        const exact = jobs.find(job => job.jobId === rawJobId);
+        const mappedId = legacyJobId(rawJobId);
+        const job = exact || jobs.find(item => item.jobId === mappedId);
+        if (!job) {
+            return;
+        }
+
+        document.title = job.title + " - Job Detail";
+        document.getElementById("jobName").textContent = job.title;
+        document.getElementById("jobCourse").textContent = "Module: " + (job.moduleCode || "-");
+        document.getElementById("jobTeacher").textContent = "Job ID: " + job.jobId;
+        document.getElementById("jobDeadline").textContent = job.applicationDeadline
+            ? "Deadline: " + fmtDate(job.applicationDeadline)
+            : "Created: " + fmtDate(job.createdAt);
+        document.getElementById("jobResponsibilities").innerHTML =
+            "<li>Support module teaching, tutorials, and coursework follow-up.</li>"
+            + "<li>Assist with student questions and learning activities.</li>"
+            + "<li>Coordinate with the module organizer on grading support.</li>";
+        document.getElementById("jobSkills").innerHTML = listItems(job.requiredSkills || "", "No specific skills listed");
+        document.getElementById("jobExperience").innerHTML =
+            "<li>Relevant coursework or project experience is preferred.</li>"
+            + "<li>Clear communication and reliable availability are preferred.</li>";
+        document.getElementById("jobWorkload").textContent = job.hoursPerWeek
+            ? job.hoursPerWeek + " hours per week"
+            : "Workload to be confirmed";
+        document.getElementById("applyLink").href = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+    }
+
+    loadJobDetail();
+</script>
 </body>
 </html>

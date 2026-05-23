@@ -598,7 +598,7 @@ function buildCandidateRow(job, candidate, isLatest) {
     detailLink.href = "mo-candidate-detail.jsp?jobId=" + encodeURIComponent(job.jobId)
         + "&candidateUserId=" + encodeURIComponent(candidate.applicantId)
         + "&applicationId=" + encodeURIComponent(candidate.applicationId || "");
-    detailLink.textContent = "Detail + AI";
+    detailLink.textContent = "Detail";
     actions.appendChild(detailLink);
 
     row.appendChild(actions);

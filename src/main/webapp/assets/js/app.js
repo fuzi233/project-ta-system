@@ -229,6 +229,25 @@ if (statusForm) {
     });
 }
 
+let candidateNameMapPromise = null;
+
+async function loadCandidateNameMap() {
+    if (!candidateNameMapPromise) {
+        candidateNameMapPromise = api("/hr/candidates")
+            .then((data) => {
+                const map = {};
+                (data.items || []).forEach((item) => {
+                    if (item.candidateUserId && item.displayName) {
+                        map[item.candidateUserId] = item.displayName;
+                    }
+                });
+                return map;
+            })
+            .catch(() => ({}));
+    }
+    return candidateNameMapPromise;
+}
+
 const adminForm = document.getElementById("admin-form");
 if (adminForm) {
     const thresholdInput = document.getElementById("threshold");
@@ -274,7 +293,7 @@ if (adminForm) {
         return chips;
     }
 
-    function renderRows(entries) {
+    function renderRows(entries, candidateNameMap = {}) {
         tableBody.innerHTML = "";
         if (!entries || entries.length === 0) {
             renderEmpty("No applicants match current filter.");
@@ -285,7 +304,13 @@ if (adminForm) {
             const row = document.createElement("tr");
 
             const applicantCell = document.createElement("td");
-            applicantCell.textContent = entry.applicantId;
+            applicantCell.textContent = entry.applicantName
+                || entry.displayName
+                || candidateNameMap[entry.applicantId]
+                || entry.applicantId;
+            if (entry.applicantId && applicantCell.textContent !== entry.applicantId) {
+                applicantCell.title = entry.applicantId;
+            }
             row.appendChild(applicantCell);
 
             const activeCell = document.createElement("td");
@@ -324,12 +349,15 @@ if (adminForm) {
         }
         const suffix = params.toString() ? `?${params.toString()}` : "";
         try {
-            const data = await api(`/admin/workload${suffix}`);
+            const [data, candidateNameMap] = await Promise.all([
+                api(`/admin/workload${suffix}`),
+                loadCandidateNameMap()
+            ]);
             statTotalApplications.textContent = String(data.totalApplications ?? "-");
             statTotalApplicants.textContent = String(data.totalApplicants ?? "-");
             statOverloaded.textContent = String(data.overloadedCount ?? "-");
             hint.textContent = `Threshold: ${data.threshold}. Showing ${data.onlyOverloaded ? "overloaded only" : "all applicants"}.`;
-            renderRows(data.entries || []);
+            renderRows(data.entries || [], candidateNameMap);
         } catch (error) {
             hint.textContent = error.message;
             statTotalApplications.textContent = "-";

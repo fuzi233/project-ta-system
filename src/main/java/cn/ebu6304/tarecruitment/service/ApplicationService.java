@@ -30,6 +30,12 @@ public class ApplicationService {
             throw new ApiException(404, "Open job not found for jobId=" + normalizedJobId);
         }
 
+        Optional<ApplicationRecord> existingApplication =
+                applicationRepository.findLatestByApplicantIdAndJobId(normalizedApplicant, normalizedJobId);
+        if (existingApplication.isPresent()) {
+            return new SubmitResponse(false, existingApplication.get());
+        }
+
         if (!explicitApplicationId.isBlank()) {
             ApplicationRecord record = new ApplicationRecord(
                     explicitApplicationId,

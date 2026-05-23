@@ -217,34 +217,44 @@
         .pagination {
             display: flex;
             justify-content: center;
-            gap: 0;
+            gap: 12px;
             margin-top: 26px;
+            flex-wrap: wrap;
         }
 
         .page-btn {
-            width: 46px;
-            height: 42px;
-            border: 1px solid #d0d9e4;
-            background: #fff;
-            color: var(--muted);
+            min-width: 48px;
+            height: 44px;
+            border: 1px solid #c2d6ff;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #16315b;
             font-size: 16px;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(31, 41, 55, 0.06);
+            transition: all 0.2s ease;
         }
 
-        .page-btn:first-child {
-            border-radius: 10px 0 0 10px;
-        }
-
-        .page-btn:last-child {
-            border-radius: 0 10px 10px 0;
+        .page-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(21, 117, 255, 0.14);
         }
 
         .page-btn.active {
             background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
             color: #fff;
+            border-color: transparent;
+        }
+
+        .page-btn:disabled {
+            color: #9aa8bd;
+            background: #edf2f7;
+            cursor: not-allowed;
         }
 
         .empty-tip {
@@ -354,106 +364,196 @@
             <div class="divider"></div>
 
             <section id="jobList" class="job-list">
-                <article class="job-card"
-                         data-title="programming ta"
-                         data-type="programming"
-                         data-skill="java"
-                         data-semester="spring">
+                <article class="job-card">
                     <div class="job-main">
-                        <h2>Programming TA</h2>
+                        <h2>Loading jobs...</h2>
                         <div class="job-meta">
-                            <div>Course: Java Programming</div>
-                            <div>Deadline: Jan 25, 2024</div>
+                            <div>Please wait while the latest MO postings are loaded.</div>
                         </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=1">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=1">Apply</a>
-                    </div>
-                </article>
-
-                <article class="job-card"
-                         data-title="database ta"
-                         data-type="database"
-                         data-skill="sql"
-                         data-semester="spring">
-                    <div class="job-main">
-                        <h2>Database TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Database Systems</div>
-                            <div>Deadline: Jan 30, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=2">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=2">Apply</a>
-                    </div>
-                </article>
-
-                <article class="job-card"
-                         data-title="web development ta"
-                         data-type="web"
-                         data-skill="html"
-                         data-semester="spring">
-                    <div class="job-main">
-                        <h2>Web Development TA</h2>
-                        <div class="job-meta">
-                            <div>Course: Web Technologies</div>
-                            <div>Deadline: Feb 5, 2024</div>
-                        </div>
-                    </div>
-                    <div class="job-actions">
-                        <a class="action-btn" href="job-detail.jsp?id=3">View Details</a>
-                        <a class="action-btn primary" href="apply.jsp?id=3">Apply</a>
                     </div>
                 </article>
             </section>
 
             <div id="emptyTip" class="empty-tip">No jobs match your current filters.</div>
 
-            <div class="pagination">
-                <a class="page-btn active" href="#">1</a>
-                <a class="page-btn" href="#">2</a>
-                <a class="page-btn" href="#">3</a>
-                <a class="page-btn" href="#">›</a>
-            </div>
+            <div id="pagination" class="pagination"></div>
         </main>
     </div>
 </div>
 
 <script>
+    const state = {
+        jobs: [],
+        filteredJobs: [],
+        page: 1,
+        pageSize: 5
+    };
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
+    async function api(url) {
+        const response = await fetch(url, {headers: {"Content-Type": "application/json"}});
+        const text = await response.text();
+        let body = {};
+        try {
+            body = text ? JSON.parse(text) : {};
+        } catch (_) {
+            body = {error: text || ("HTTP " + response.status)};
+        }
+        if (!response.ok) {
+            throw new Error(body.error || ("HTTP " + response.status));
+        }
+        return body;
+    }
+
+    function parseTime(value) {
+        const time = Date.parse(value || "");
+        return Number.isNaN(time) ? 0 : time;
+    }
+
+    function fmtDate(value) {
+        const time = Date.parse(value || "");
+        if (Number.isNaN(time)) {
+            return value || "Not set";
+        }
+        return new Date(time).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
+    }
+
+    function matchesText(value, keyword) {
+        return String(value || "").toLowerCase().includes(keyword);
+    }
+
     function filterJobs() {
         const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
         const type = document.getElementById("typeFilter").value;
         const skill = document.getElementById("skillFilter").value;
         const semester = document.getElementById("semesterFilter").value;
 
-        const cards = document.querySelectorAll(".job-card");
+        state.filteredJobs = state.jobs.filter((job) => {
+            const haystack = [
+                job.title,
+                job.moduleCode,
+                job.requiredSkills,
+                job.jobId
+            ].join(" ").toLowerCase();
+            const matchKeyword = !keyword || haystack.includes(keyword);
+            const matchType = !type || matchesText(job.title, type) || matchesText(job.requiredSkills, type);
+            const matchSkill = !skill || matchesText(job.requiredSkills, skill);
+            const deadline = String(job.applicationDeadline || job.createdAt || "").toLowerCase();
+            const matchSemester = !semester || deadline.includes(semester);
+            return matchKeyword && matchType && matchSkill && matchSemester;
+        });
+        state.page = 1;
+        renderJobs();
+    }
+
+    function renderJobs() {
+        const jobList = document.getElementById("jobList");
         const emptyTip = document.getElementById("emptyTip");
+        const start = (state.page - 1) * state.pageSize;
+        const jobs = state.filteredJobs.slice(start, start + state.pageSize);
 
-        let visibleCount = 0;
+        jobList.innerHTML = "";
+        if (jobs.length === 0) {
+            emptyTip.style.display = "block";
+            renderPagination();
+            return;
+        }
 
-        cards.forEach(card => {
-            const title = card.dataset.title;
-            const cardType = card.dataset.type;
-            const cardSkill = card.dataset.skill;
-            const cardSemester = card.dataset.semester;
+        emptyTip.style.display = "none";
+        jobs.forEach((job) => {
+            const card = document.createElement("article");
+            card.className = "job-card";
+            const deadline = job.applicationDeadline
+                ? "Deadline: " + fmtDate(job.applicationDeadline)
+                : "Created: " + fmtDate(job.createdAt);
+            card.innerHTML = ""
+                + "<div class=\"job-main\">"
+                + "<h2>" + escapeHtml(job.title) + "</h2>"
+                + "<div class=\"job-meta\">"
+                + "<div>Module: " + escapeHtml(job.moduleCode || "-") + " | Slots: " + escapeHtml(job.slots ?? "-") + "</div>"
+                + "<div>Skills: " + escapeHtml(job.requiredSkills || "-") + "</div>"
+                + "<div>" + escapeHtml(deadline) + "</div>"
+                + "</div>"
+                + "</div>"
+                + "<div class=\"job-actions\">"
+                + "<a class=\"action-btn\" href=\"job-detail.jsp?jobId=" + encodeURIComponent(job.jobId) + "\">View Details</a>"
+                + "<a class=\"action-btn primary\" href=\"apply.jsp?jobId=" + encodeURIComponent(job.jobId) + "\">Apply</a>"
+                + "</div>";
+            jobList.appendChild(card);
+        });
+        renderPagination();
+    }
 
-            const matchKeyword = !keyword || title.includes(keyword);
-            const matchType = !type || cardType === type;
-            const matchSkill = !skill || cardSkill === skill;
-            const matchSemester = !semester || cardSemester === semester;
+    function renderPagination() {
+        const pagination = document.getElementById("pagination");
+        const totalPages = Math.max(1, Math.ceil(state.filteredJobs.length / state.pageSize));
+        pagination.innerHTML = "";
+        if (totalPages <= 1) {
+            return;
+        }
 
-            if (matchKeyword && matchType && matchSkill && matchSemester) {
-                card.style.display = "flex";
-                visibleCount++;
-            } else {
-                card.style.display = "none";
+        for (let page = 1; page <= totalPages; page++) {
+            const button = document.createElement("button");
+            button.className = "page-btn" + (page === state.page ? " active" : "");
+            button.type = "button";
+            button.textContent = String(page);
+            button.addEventListener("click", () => {
+                state.page = page;
+                renderJobs();
+            });
+            pagination.appendChild(button);
+        }
+
+        const nextButton = document.createElement("button");
+        nextButton.className = "page-btn";
+        nextButton.type = "button";
+        nextButton.textContent = "›";
+        nextButton.disabled = state.page >= totalPages;
+        nextButton.addEventListener("click", () => {
+            if (state.page < totalPages) {
+                state.page++;
+                renderJobs();
             }
         });
-
-        emptyTip.style.display = visibleCount === 0 ? "block" : "none";
+        pagination.appendChild(nextButton);
     }
+
+    async function loadJobs() {
+        try {
+            const data = await api("/jobs?status=OPEN&page=1&size=500");
+            state.jobs = (data.items || []).sort((a, b) => parseTime(b.createdAt) - parseTime(a.createdAt));
+            state.filteredJobs = state.jobs;
+            renderJobs();
+        } catch (error) {
+            document.getElementById("jobList").innerHTML = ""
+                + "<article class=\"job-card\">"
+                + "<div class=\"job-main\">"
+                + "<h2>Failed to load jobs</h2>"
+                + "<div class=\"job-meta\"><div>" + escapeHtml(error.message) + "</div></div>"
+                + "</div>"
+                + "</article>";
+            document.getElementById("emptyTip").style.display = "none";
+            document.getElementById("pagination").innerHTML = "";
+        }
+    }
+
+    document.getElementById("searchInput").addEventListener("input", filterJobs);
+    document.getElementById("typeFilter").addEventListener("change", filterJobs);
+    document.getElementById("skillFilter").addEventListener("change", filterJobs);
+    document.getElementById("semesterFilter").addEventListener("change", filterJobs);
+    loadJobs();
 </script>
 </body>
 </html>

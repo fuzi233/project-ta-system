@@ -468,6 +468,6 @@
         </div>
     </section>
 </main>
-<script src="assets/js/mo-page.js?v=8"></script>
+<script src="assets/js/mo-page.js?v=10"></script>
 </body>
 </html>
