@@ -6,8 +6,8 @@ import cn.ebu6304.tarecruitment.storage.JsonlFileStore;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,17 +48,24 @@ public class ApplicationRepository {
     }
 
     public List<ApplicationRecord> findByApplicantId(String applicantId, int page, int size) {
-        return fileStore.readPage(page, size, item -> item.applicantId().equals(applicantId));
+        List<ApplicationRecord> filtered = listLatestApplications().stream()
+                .filter(item -> item.applicantId().equals(applicantId))
+                .toList();
+        return paginate(filtered, page, size);
     }
 
     public List<ApplicationRecord> findByJobId(String jobId, int page, int size) {
-        return fileStore.readPage(page, size, item -> item.jobId().equals(jobId));
+        List<ApplicationRecord> filtered = listLatestApplications().stream()
+                .filter(item -> item.jobId().equals(jobId))
+                .toList();
+        return paginate(filtered, page, size);
     }
 
     public List<ApplicationRecord> findByJobIdAndStatus(String jobId, String status, int page, int size) {
-        return fileStore.readPage(page, size, item -> 
-            item.jobId().equals(jobId) && item.status().equalsIgnoreCase(status)
-        );
+        List<ApplicationRecord> filtered = listLatestApplications().stream()
+                .filter(item -> item.jobId().equals(jobId) && item.status().equalsIgnoreCase(status))
+                .toList();
+        return paginate(filtered, page, size);
     }
 
     public synchronized Map<String, Long> workloadByApplicant() {
@@ -81,17 +88,19 @@ public class ApplicationRepository {
 
     public synchronized Map<String, Long> countByJob() {
         Map<String, Long> result = new HashMap<>();
-        fileStore.forEach(record -> result.merge(record.jobId(), 1L, Long::sum));
+        for (ApplicationRecord record : listLatestApplications()) {
+            result.merge(record.jobId(), 1L, Long::sum);
+        }
         return result;
     }
 
     public synchronized Map<String, Long> countByJobAndStatus(String jobId) {
         Map<String, Long> result = new HashMap<>();
-        fileStore.forEach(record -> {
+        for (ApplicationRecord record : listLatestApplications()) {
             if (record.jobId().equals(jobId)) {
                 result.merge(record.status(), 1L, Long::sum);
             }
-        });
+        }
         return result;
     }
 
@@ -104,7 +113,7 @@ public class ApplicationRepository {
     }
 
     public synchronized long totalCount() {
-        return lineCounter.get();
+        return idIndex.size();
     }
 
     public synchronized boolean updateStatus(String applicationId, String newStatus) {
@@ -112,17 +121,17 @@ public class ApplicationRepository {
         if (line == null) {
             return false;
         }
-        
+
         Optional<ApplicationRecord> existing = fileStore.readAtLine(line);
         if (existing.isEmpty()) {
             return false;
         }
-        
+
         ApplicationRecord oldRecord = existing.get();
         if (oldRecord.status().equalsIgnoreCase(newStatus)) {
-            return true;
+            return false;
         }
-        
+
         ApplicationRecord updatedRecord = new ApplicationRecord(
                 oldRecord.applicationId(),
                 oldRecord.applicantId(),
@@ -130,15 +139,20 @@ public class ApplicationRepository {
                 newStatus,
                 oldRecord.submittedAt()
         );
-        
+
         fileStore.append(updatedRecord);
         long nextLine = lineCounter.incrementAndGet();
         idIndex.put(applicationId, nextLine);
-        
-        // Update status index
-        statusIndex.computeIfAbsent(oldRecord.status(), k -> new LongAdder()).decrement();
+
+        LongAdder oldStatusCounter = statusIndex.get(oldRecord.status());
+        if (oldStatusCounter != null) {
+            oldStatusCounter.decrement();
+            if (oldStatusCounter.longValue() <= 0) {
+                statusIndex.remove(oldRecord.status(), oldStatusCounter);
+            }
+        }
         statusIndex.computeIfAbsent(newStatus, k -> new LongAdder()).increment();
-        
+
         return true;
     }
 
@@ -156,11 +170,28 @@ public class ApplicationRepository {
         statusIndex.clear();
         lineCounter.set(0);
 
+        Map<String, Long> latestLineById = new HashMap<>();
+        Map<String, ApplicationRecord> latestRecordById = new HashMap<>();
         fileStore.forEach(record -> {
             long line = lineCounter.incrementAndGet();
-            idIndex.put(record.applicationId(), line);
-            statusIndex.computeIfAbsent(record.status(), key -> new LongAdder()).increment();
+            latestLineById.put(record.applicationId(), line);
+            latestRecordById.put(record.applicationId(), record);
         });
+        idIndex.putAll(latestLineById);
+        latestRecordById.values()
+                .forEach(record -> statusIndex.computeIfAbsent(record.status(), key -> new LongAdder()).increment());
+    }
+
+    private static List<ApplicationRecord> paginate(List<ApplicationRecord> source, int page, int size) {
+        if (page < 1 || size < 1 || source.isEmpty()) {
+            return List.of();
+        }
+        int start = (page - 1) * size;
+        if (start >= source.size()) {
+            return List.of();
+        }
+        int end = Math.min(start + size, source.size());
+        return source.subList(start, end);
     }
 
     public record SubmitResult(boolean created, ApplicationRecord record) {

@@ -14,6 +14,7 @@ public class AiWorkloadSuggestionServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            requireAnyRole(request, AuthSession.ROLE_MO, AuthSession.ROLE_ADMIN);
             String jobId = Validators.requireNonBlank(request.getParameter("jobId"), "jobId");
             int limit = readIntParameter(request, "limit", 5);
             AiService.WorkloadSuggestion suggestion = appContext.aiService().workloadSuggestion(jobId, limit);

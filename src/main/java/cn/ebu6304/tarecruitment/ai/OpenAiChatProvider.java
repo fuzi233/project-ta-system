@@ -25,7 +25,7 @@ public class OpenAiChatProvider implements AiProvider {
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
         this.model = model;
-        this.endpoint = URI.create(endpoint);
+        this.endpoint = URI.create(normalizeEndpoint(endpoint));
     }
 
     @Override
@@ -86,5 +86,26 @@ public class OpenAiChatProvider implements AiProvider {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to parse OpenAI response", e);
         }
+    }
+
+    static String normalizeEndpoint(String rawEndpoint) {
+        if (rawEndpoint == null || rawEndpoint.isBlank()) {
+            return "https://api.openai.com/v1/chat/completions";
+        }
+        String endpoint = rawEndpoint.trim();
+        String lower = endpoint.toLowerCase();
+        if (lower.endsWith("/chat/completions") || lower.endsWith("/responses")) {
+            return endpoint;
+        }
+        if (lower.endsWith("/v1/")) {
+            return endpoint + "chat/completions";
+        }
+        if (lower.endsWith("/v1")) {
+            return endpoint + "/chat/completions";
+        }
+        if (lower.endsWith("/")) {
+            return endpoint + "chat/completions";
+        }
+        return endpoint + "/chat/completions";
     }
 }
