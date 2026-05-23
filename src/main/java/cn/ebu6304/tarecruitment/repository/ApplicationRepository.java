@@ -48,6 +48,16 @@ public class ApplicationRepository {
         return filterAndPaginateCurrentRecords(page, size, item -> item.applicantId().equals(applicantId));
     }
 
+    public List<ApplicationRecord> listLatestApplications() {
+        return List.copyOf(currentRecordsSortedByLine());
+    }
+
+    public Optional<ApplicationRecord> findLatestByApplicantIdAndJobId(String applicantId, String jobId) {
+        return currentRecordsSortedByLine().stream()
+                .filter(item -> item.applicantId().equals(applicantId) && item.jobId().equals(jobId))
+                .reduce((first, second) -> second);
+    }
+
     public List<ApplicationRecord> findByJobId(String jobId, int page, int size) {
         return filterAndPaginateCurrentRecords(page, size, item -> item.jobId().equals(jobId));
     }

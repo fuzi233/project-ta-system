@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,23 @@ public class AdminWorkloadServlet extends BaseServlet {
             List<WorkloadService.WorkloadEntry> entries = onlyOverloaded
                     ? snapshot.entries().stream().filter(WorkloadService.WorkloadEntry::overloaded).toList()
                     : snapshot.entries();
+            List<Map<String, Object>> displayEntries = entries.stream()
+                    .map(entry -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("applicantId", entry.applicantId());
+                        row.put("applicantName", appContext.userRepository()
+                                .findById(entry.applicantId())
+                                .map(user -> user.displayName())
+                                .filter(name -> name != null && !name.isBlank())
+                                .orElse(entry.applicantId()));
+                        row.put("totalApplications", entry.totalApplications());
+                        row.put("activeApplications", entry.activeApplications());
+                        row.put("overloaded", entry.overloaded());
+                        row.put("overloadBy", entry.overloadBy());
+                        row.put("statusBreakdown", entry.statusBreakdown());
+                        return row;
+                    })
+                    .toList();
 
             writeJson(response, 200, Map.of(
                     "totalApplications", snapshot.totalApplications(),
@@ -35,7 +53,7 @@ public class AdminWorkloadServlet extends BaseServlet {
                     "overloadedCount", snapshot.overloaded().size(),
                     "threshold", snapshot.threshold(),
                     "onlyOverloaded", onlyOverloaded,
-                    "entries", entries
+                    "entries", displayEntries
             ));
         } catch (Exception e) {
             handleError(response, e);

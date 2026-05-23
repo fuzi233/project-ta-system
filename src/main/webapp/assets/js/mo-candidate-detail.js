@@ -117,23 +117,62 @@ function renderAttachments(attachments) {
         return;
     }
     ui.detailAttachments.innerHTML = "";
+    ui.detailAttachments.classList.add("attachment-list");
     attachments.forEach((item) => {
         const line = document.createElement("div");
+        line.className = "attachment-item";
+
         const name = item.originalFilename || "Unnamed file";
         const type = item.attachmentType || "-";
         const size = item.sizeBytes != null ? (item.sizeBytes + " bytes") : "-";
-        const extracted = item.hasExtractedText ? "text extracted" : "no text extracted";
-        const text = document.createElement("span");
-        text.textContent = "[" + type + "] " + name + " | " + size + " | " + extracted + " | ";
-        line.appendChild(text);
+        const extracted = item.hasExtractedText ? "Text extracted" : "No extracted text";
+
+        const main = document.createElement("div");
+        main.className = "attachment-main";
+
+        const meta = document.createElement("div");
+        meta.className = "attachment-meta";
+
+        const typePill = document.createElement("span");
+        typePill.className = "attachment-pill";
+        typePill.textContent = type;
+        meta.appendChild(typePill);
+
+        const sizePill = document.createElement("span");
+        sizePill.className = "attachment-pill";
+        sizePill.textContent = size;
+        meta.appendChild(sizePill);
+
+        const extractedPill = document.createElement("span");
+        extractedPill.className = "attachment-pill" + (item.hasExtractedText ? " ready" : "");
+        extractedPill.textContent = extracted;
+        meta.appendChild(extractedPill);
+
         if (item.attachmentId) {
             const link = document.createElement("a");
             link.href = "attachments/download?attachmentId=" + encodeURIComponent(item.attachmentId);
             link.target = "_blank";
             link.rel = "noopener noreferrer";
-            link.textContent = "Open";
-            link.className = "link";
-            line.appendChild(link);
+            link.textContent = name;
+            link.className = "attachment-link";
+            main.appendChild(link);
+
+            const actionLink = document.createElement("a");
+            actionLink.href = link.href;
+            actionLink.target = "_blank";
+            actionLink.rel = "noopener noreferrer";
+            actionLink.textContent = "Open";
+            actionLink.className = "btn ghost attachment-open";
+            line.appendChild(main);
+            main.appendChild(meta);
+            line.appendChild(actionLink);
+        } else {
+            const text = document.createElement("div");
+            text.className = "attachment-link";
+            text.textContent = name;
+            main.appendChild(text);
+            main.appendChild(meta);
+            line.appendChild(main);
         }
         ui.detailAttachments.appendChild(line);
     });

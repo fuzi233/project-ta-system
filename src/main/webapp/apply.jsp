@@ -508,10 +508,10 @@
             <div class="breadcrumb">
                 <a href="index.jsp">Home</a> &nbsp;›&nbsp;
                 <a href="jobs.jsp">Job List</a> &nbsp;›&nbsp;
-                Apply for <%= jobTitle %>
+                <span id="applyBreadcrumbTitle">Apply for <%= jobTitle %></span>
             </div>
 
-            <h1 class="title"><%= jobTitle %> Application Form</h1>
+            <h1 id="applyPageTitle" class="title"><%= jobTitle %> Application Form</h1>
             <div class="divider"></div>
 
             <form id="applyForm" onsubmit="submitApplication(event)">
@@ -601,7 +601,6 @@
 
                     <section class="panel">
                         <div class="action-col">
-                            <button class="action-btn primary" type="submit"><span class="btn-text">Apply Now</span></button>
                             <a class="action-btn" href="jobs.jsp"><span class="btn-text">Back</span></a>
                         </div>
                     </section>
@@ -613,6 +612,8 @@
 
 <script>
     const acceptedFileExtensions = [".pdf", ".doc", ".docx"];
+    let applicationSubmitted = false;
+    let applicationSubmitting = false;
 
     function updateFileStatus(inputId, nameId, errorId, buttonId) {
         const input = document.getElementById(inputId);
@@ -746,10 +747,33 @@
         return "";
     }
 
+    async function loadJobHeader() {
+        const params = new URLSearchParams(window.location.search);
+        const candidate = String(params.get("jobId") || params.get("id") || "").trim();
+        if (!candidate) {
+            return;
+        }
+        try {
+            const jobsData = await api("/jobs?status=OPEN&page=1&size=500");
+            const jobs = jobsData.items || [];
+            const exact = jobs.find((job) => job.jobId === candidate);
+            const mapped = mapLegacyIdToJobId(candidate);
+            const job = exact || jobs.find((item) => item.jobId === mapped);
+            if (!job) {
+                return;
+            }
+            document.title = "Apply - " + job.title;
+            document.getElementById("applyBreadcrumbTitle").textContent = "Apply for " + job.title;
+            document.getElementById("applyPageTitle").textContent = job.title + " Application Form";
+        } catch (_) {
+            // Keep the server-rendered fallback title if the job list cannot be loaded.
+        }
+    }
+
     async function resolveJobId() {
         const params = new URLSearchParams(window.location.search);
         const candidate = params.get("jobId") || params.get("id") || "";
-        const mapped = mapLegacyIdToJobId(candidate);
+        const trimmedCandidate = String(candidate || "").trim();
         const jobsData = await api("/jobs?status=OPEN&page=1&size=200");
         const jobs = jobsData.items || [];
 
@@ -757,6 +781,11 @@
             throw new Error("No open jobs available now.");
         }
 
+        if (trimmedCandidate && jobs.some((job) => job.jobId === trimmedCandidate)) {
+            return trimmedCandidate;
+        }
+
+        const mapped = mapLegacyIdToJobId(trimmedCandidate);
         if (mapped && jobs.some((job) => job.jobId === mapped)) {
             return mapped;
         }
@@ -773,6 +802,9 @@
 
     async function submitApplication(event) {
         event.preventDefault();
+        if (applicationSubmitted || applicationSubmitting) {
+            return;
+        }
 
         const form = document.getElementById("applyForm");
         const fullName = document.getElementById("fullName").value.trim();
@@ -830,14 +862,6 @@
             hasBlockingError = true;
         }
 
-        submitButtons.forEach(button => {
-            button.disabled = true;
-            if (button.classList.contains("primary")) {
-                button.dataset.originalText = button.textContent;
-                button.textContent = "Submitting...";
-            }
-        });
-
         const resultBox = document.getElementById("resultBox");
         const viewApplicationsBtn = document.getElementById("viewApplicationsBtn");
         resultBox.style.display = "block";
@@ -847,14 +871,22 @@
             addResultItem("Application", "Application not submitted. Please fix the file errors below and try again.", "error");
             addResultItem("CV", cvValidation.ok ? "File selected and ready: " + cvValidation.message : cvValidation.message, cvValidation.ok ? "info" : "error");
             addResultItem("Transcript", transcriptValidation.ok ? "File selected and ready: " + transcriptValidation.message : transcriptValidation.message, transcriptValidation.ok ? "info" : "error");
-            submitButtons.forEach(button => {
-                button.disabled = false;
-                if (button.dataset.originalText) {
-                    button.textContent = button.dataset.originalText;
-                }
-            });
             return;
         }
+
+        if (!window.confirm("Submit this application now? You cannot submit it again after it is sent.")) {
+            hideResultBox();
+            return;
+        }
+
+        applicationSubmitting = true;
+        submitButtons.forEach(button => {
+            button.disabled = true;
+            if (button.classList.contains("primary")) {
+                button.dataset.originalText = button.textContent;
+                button.textContent = "Submitting...";
+            }
+        });
 
         try {
             const jobId = await resolveJobId();
@@ -916,20 +948,24 @@
             );
 
             viewApplicationsBtn.style.display = "inline-flex";
+            applicationSubmitted = true;
         } catch (error) {
             resultBox.className = "result-box error";
             addResultItem("Application", error.message, "error");
             addResultItem("CV", "Upload not completed.", "error");
             addResultItem("Transcript", "Upload not completed.", "error");
+            applicationSubmitting = false;
         } finally {
             submitButtons.forEach(button => {
-                button.disabled = false;
+                button.disabled = applicationSubmitted;
                 if (button.dataset.originalText) {
-                    button.textContent = button.dataset.originalText;
+                    button.textContent = applicationSubmitted ? "Submitted" : button.dataset.originalText;
                 }
             });
         }
     }
+
+    loadJobHeader();
 </script>
 </body>
 </html>

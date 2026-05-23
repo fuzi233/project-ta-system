@@ -1274,7 +1274,7 @@
                         <span class="spinner" aria-hidden="true"></span>
                         <span>Sign in</span>
                     </button>
-                    <div class="bottom-note">
+                    <div class="bottom-note" id="registerPrompt">
                         Need an account? <button id="toRegisterLink" type="button">Create account</button>
                     </div>
                 </form>
@@ -1284,12 +1284,6 @@
                 <form id="registerForm" novalidate>
                     <%-- Form submits to RegisterServlet --%>
                     <input type="hidden" id="registerRole" name="role" value="TA"/>
-
-                    <div class="role-pill-group" aria-label="Register role">
-                        <button class="role-pill active" type="button" data-role-register="TA">TA</button>
-                        <button class="role-pill" type="button" data-role-register="MO">MO</button>
-                        <button class="role-pill" type="button" data-role-register="ADMIN">Admin / HR</button>
-                    </div>
 
                     <div class="field" id="nameField">
                         <span class="field-icon" aria-hidden="true">
@@ -1303,8 +1297,8 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 2v2.2l-7 4.38-7-4.38V6h14Zm0 12H5V10.56l6.47 4.03a1 1 0 0 0 1.06 0L19 10.56V18Z"/></svg>
                         </span>
-                        <input id="registerIdentifier" name="identifier" type="text" placeholder="Student ID / Staff ID / Admin username" required/>
-                        <div class="hint-msg" id="registerIdentifierHint">Enter the identifier for your selected role.</div>
+                        <input id="registerIdentifier" name="identifier" type="text" placeholder="Student ID or email" required/>
+                        <div class="hint-msg" id="registerIdentifierHint">TA registration only. MO and HR accounts are created internally.</div>
                         <div class="error-msg" id="registerIdentifierError"></div>
                     </div>
 
@@ -1313,7 +1307,7 @@
                             <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2l-9 5.63a1.9 1.9 0 0 1-2 0L3 7.2V6Zm0 3.56V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.56l-7.94 4.97a3.9 3.9 0 0 1-4.12 0L3 9.56Z"/></svg>
                         </span>
                         <input id="registerEmail" name="email" type="email" placeholder="Email address" required/>
-                        <div class="hint-msg" id="registerEmailHint">Use a valid email format, e.g. name@example.com</div>
+                        <div class="hint-msg" id="registerEmailHint">TA registration email must end with @bupt.edu.cn</div>
                         <div class="error-msg" id="registerEmailError"></div>
                     </div>
 
@@ -1365,6 +1359,7 @@
         var formTitle = document.getElementById("formTitle");
         var toRegisterLink = document.getElementById("toRegisterLink");
         var toLoginLink = document.getElementById("toLoginLink");
+        var registerPrompt = document.getElementById("registerPrompt");
         var toast = document.getElementById("toast");
 
         var loginForm = document.getElementById("loginForm");
@@ -1392,7 +1387,10 @@
         }
 
         if (toRegisterLink) {
-            toRegisterLink.addEventListener("click", function () { switchView("register"); });
+            toRegisterLink.addEventListener("click", function () {
+                setActiveRole("TA");
+                switchView("register");
+            });
         }
         toLoginLink.addEventListener("click", function () { switchView("login"); });
 
@@ -1416,11 +1414,18 @@
             setRoleButtonState("[data-entry-role]", "data-entry-role", role);
             setRoleButtonState("[data-role-register]", "data-role-register", role);
             loginRole.value = role;
-            registerRole.value = role;
+            registerRole.value = "TA";
             updateLoginIdentifierUi(role);
-            updateRegisterIdentifierUi(role);
+            updateRegisterIdentifierUi("TA");
+            updateAccountLinkVisibility(role);
             validateLogin();
             validateRegister();
+        }
+
+        function updateAccountLinkVisibility(role) {
+            if (registerPrompt) {
+                registerPrompt.style.display = role === "TA" ? "" : "none";
+            }
         }
 
         entryButtons.forEach(function (btn) {
@@ -1487,14 +1492,10 @@
                 input.placeholder = "Student ID or email";
                 hint.textContent = "Example: ta001 or ta001@bupt.edu.cn";
                 emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
-            } else if (role === "MO") {
-                input.placeholder = "Staff ID or email";
-                hint.textContent = "Example: TCH1001 or mo001@bupt.edu.cn";
-                emailHint.textContent = "MO registration email must end with @bupt.edu.cn";
             } else {
-                input.placeholder = "Admin username";
-                hint.textContent = "Example: hradmin";
-                emailHint.textContent = "Use a valid email format, e.g. name@example.com";
+                input.placeholder = "Student ID or email";
+                hint.textContent = "TA registration only. MO and HR accounts are created internally.";
+                emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
             }
         }
 
@@ -1601,8 +1602,8 @@
             if (!isEmailValid(email)) {
                 setFieldError("registerEmailField", "registerEmailError", "Please enter a valid email address.");
                 ok = false;
-            } else if ((role === "TA" || role === "MO") && !isBuptEmail(email)) {
-                setFieldError("registerEmailField", "registerEmailError", "TA/MO registration email must end with @bupt.edu.cn.");
+            } else if (!isBuptEmail(email)) {
+                setFieldError("registerEmailField", "registerEmailError", "TA registration email must end with @bupt.edu.cn.");
                 ok = false;
             } else {
                 setFieldError("registerEmailField", "registerEmailError", "");

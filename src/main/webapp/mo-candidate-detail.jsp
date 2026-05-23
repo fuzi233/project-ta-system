@@ -78,10 +78,74 @@
             margin: 0 .35rem .35rem 0;
         }
 
+        .attachment-list {
+            display: grid;
+            gap: .75rem;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .9rem;
+            border: 1px solid #d6e4ff;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .82);
+            padding: .85rem .95rem;
+        }
+
+        .attachment-main {
+            min-width: 0;
+            display: grid;
+            gap: .35rem;
+        }
+
+        .attachment-link {
+            color: #0f4da1;
+            font-weight: 700;
+            text-decoration: none;
+            word-break: break-word;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
+        .attachment-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+        }
+
+        .attachment-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: .2rem .55rem;
+            font-size: .75rem;
+            font-weight: 700;
+            background: #eef5ff;
+            color: #315886;
+        }
+
+        .attachment-pill.ready {
+            background: #e8f7ef;
+            color: #23724d;
+        }
+
+        .attachment-open {
+            flex-shrink: 0;
+        }
+
         @media (max-width: 900px) {
             .detail-grid,
             .ai-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .attachment-item {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -143,6 +207,6 @@
         </div>
     </section>
 </main>
-<script src="assets/js/mo-candidate-detail.js?v=5"></script>
+<script src="assets/js/mo-candidate-detail.js?v=6"></script>
 </body>
 </html>
