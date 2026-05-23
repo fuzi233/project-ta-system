@@ -33,9 +33,9 @@
     <style>
         body {
             margin: 0;
-            background: linear-gradient(180deg, #edf2f7 0%, #e9eef5 100%);
-            font-family: "Segoe UI", Arial, sans-serif;
-            color: #1f2937;
+            background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
+            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: #102039;
         }
 
         .page {
@@ -46,16 +46,16 @@
 
         .card {
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #dbe3ec;
+            border: 1px solid #d6e4ff;
             border-radius: 20px;
-            box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+            box-shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
             padding: 28px;
         }
 
         .title {
             margin: 0 0 18px;
-            font-size: 34px;
-            color: #10213f;
+            font-size: clamp(1.9rem, 2.8vw, 2.5rem);
+            color: #0e3369;
         }
 
         .grid {
@@ -65,22 +65,22 @@
         }
 
         .item {
-            background: #f8fbff;
-            border: 1px solid #dde6f1;
+            background: rgba(248, 251, 255, 0.92);
+            border: 1px solid #d6e4ff;
             border-radius: 14px;
             padding: 14px 16px;
         }
 
         .item-label {
-            font-size: 13px;
-            color: #64748b;
+            font-size: .82rem;
+            color: #4c5e7a;
             margin-bottom: 6px;
         }
 
         .item-value {
-            font-size: 16px;
+            font-size: .98rem;
             font-weight: 600;
-            color: #1e293b;
+            color: #16315b;
             word-break: break-all;
         }
 
@@ -99,16 +99,16 @@
             min-height: 42px;
             padding: 0 16px;
             border-radius: 10px;
-            border: 1px solid #cbd5e1;
-            color: #334155;
-            background: #fff;
+            border: 1px solid #c2d6ff;
+            color: #16315b;
+            background: rgba(255, 255, 255, 0.9);
             font-weight: 600;
         }
 
         .btn-link.primary {
             border: none;
             color: #fff;
-            background: linear-gradient(135deg, #4c74dd 0%, #47b7ba 100%);
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
         }
 
         @media (max-width: 700px) {
@@ -119,6 +119,8 @@
     </style>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <div class="page">
     <section class="card">
         <h1 class="title">My Profile</h1>
@@ -142,7 +144,7 @@
         </div>
         <div class="actions">
             <a class="btn-link primary" href="<%= workspaceLink %>"><%= workspaceLabel %></a>
-            <a class="btn-link" href="index.jsp">Back to Login</a>
+            <a class="btn-link" href="index.jsp">Exit</a>
         </div>
     </section>
 </div>

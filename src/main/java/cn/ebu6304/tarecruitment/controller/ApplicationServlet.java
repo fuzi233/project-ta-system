@@ -1,6 +1,5 @@
 package cn.ebu6304.tarecruitment.controller;
 
-import cn.ebu6304.tarecruitment.common.AuthValidators;
 import cn.ebu6304.tarecruitment.model.AttachmentRecord;
 import cn.ebu6304.tarecruitment.model.UserProfile;
 import cn.ebu6304.tarecruitment.model.ApplicationRecord;
@@ -65,18 +64,10 @@ public class ApplicationServlet extends BaseServlet {
 
     private void syncApplicantProfile(String userId, SubmitApplicationRequest payload) {
         appContext.userRepository().findById(userId).ifPresent(existing -> {
-            String nextName = normalize(payload.fullName(), existing.displayName());
-            String nextEmail = normalize(payload.email(), existing.email());
             String nextSkills = normalize(payload.skills(), existing.skills());
             String nextResume = normalize(payload.experience(), existing.resumeText());
 
-            if (payload.email() != null && !payload.email().isBlank() && !AuthValidators.isEmail(nextEmail)) {
-                return;
-            }
-
-            boolean changed = !nextName.equals(existing.displayName())
-                    || !nextEmail.equals(existing.email())
-                    || !nextSkills.equals(existing.skills())
+            boolean changed = !nextSkills.equals(existing.skills())
                     || !nextResume.equals(existing.resumeText());
             if (!changed) {
                 return;
@@ -84,10 +75,10 @@ public class ApplicationServlet extends BaseServlet {
 
             UserProfile updated = new UserProfile(
                     existing.userId(),
-                    nextName,
+                    existing.displayName(),
                     existing.role(),
                     existing.identifier(),
-                    nextEmail,
+                    existing.email(),
                     existing.passwordHash(),
                     nextSkills,
                     nextResume,

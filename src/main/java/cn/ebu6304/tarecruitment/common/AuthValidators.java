@@ -34,4 +34,8 @@ public final class AuthValidators {
     public static boolean isEmail(String email) {
         return email != null && email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     }
+
+    public static boolean isBuptEmail(String email) {
+        return isEmail(email) && email.toLowerCase(Locale.ROOT).endsWith("@bupt.edu.cn");
+    }
 }

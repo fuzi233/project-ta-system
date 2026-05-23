@@ -1,26 +1,5 @@
 # TA Recruitment System (Servlet/JSP Prototype)
-
 EBU6304 group project implementation branch.
-
-## Project Goal
-
-Build a Java Servlet/JSP web prototype that supports TA recruitment with:
-- efficient memory management
-- stable file-based persistence
-- clear data structures and boundaries
-- a high-recognition, design-driven frontend
-
-## Branch Strategy
-
-- `main`: documentation and assessment submissions only
-- `project-ta-system`: integration branch for software implementation
-- personal branches (for example `YuhangFu`): member development branches
-
-## Core Roles and Features
-
-- TA: create profile, browse jobs, apply, check status
-- MO: post jobs, shortlist candidates
-- Admin: monitor workload distribution
 
 ## Architecture
 
@@ -49,11 +28,8 @@ Build a Java Servlet/JSP web prototype that supports TA recruitment with:
 - Stability: input validation, explicit error response, append-only writes, atomic compaction
 - Frontend: iPhone-inspired glass style, mobile-first layout, distinct visual hierarchy
 
-## Data Files (No Database)
+## Data Files
 
-Each line is one JSON object for append-friendly persistence and deterministic parsing.
-
-Expected runtime files:
 - `data/jobs.jsonl`
 - `data/applications.jsonl`
 - `data/users.jsonl`
@@ -66,7 +42,7 @@ mvn jetty:run
 ```
 
 Then open:
-- `http://localhost:8080/`
+- `http://localhost:8080/
 - `http://localhost:8080/jobs.jsp`
 - `http://localhost:8080/mo.jsp`
 - `http://localhost:8080/admin.jsp`
@@ -91,9 +67,9 @@ openai.api.endpoint=https://api.openai.com/v1/chat/completions
 You can also override by environment variables:
 
 ```bash
-export OPENAI_API_KEY="<your_api_key>"
-export OPENAI_MODEL="gpt-4.1"
-export OPENAI_API_ENDPOINT="https://api.openai.com/v1/chat/completions"
+export OPENAI_API_KEY=\"<your_api_key>\"
+export OPENAI_MODEL=\"gpt-4.1\"
+export OPENAI_API_ENDPOINT=\"https://api.openai.com/v1/chat/completions\"
 ```
 
 If `OPENAI_API_KEY` is not set, the system automatically falls back to deterministic rule-based reasoning so demos remain stable.
@@ -109,27 +85,13 @@ bash scripts/acceptance/run_acceptance.sh
 ```
 
 Details:
+
 - `docs/TESTING_AND_ACCEPTANCE.md`
 - `docs/USER_MANUAL.md`
 - `docs/screenshots/README.md`
 - `TEST_DOCS_DELIVERY_SUMMARY.md`
 
-## First Assessment Mapping (Due: 22 March 2026)
-
-Materials are in `docs/assessment1/`:
-- `Product_Backlog.xlsx`
-- `Prototype_v1.pdf`
-- `Brief_Report_v1.pdf`
-- `submission-checklist.md`
-
-## Delivery Milestones
-
-- 22 March 2026: First assessment
-- 12 April 2026: Intermediate assessment
-- 24 May 2026: Final assessment
-
-## Quick Collaboration Rules
-
-- No direct code push to `main`
-- Feature work goes to personal branch -> PR to `project-ta-system`
-- Documentation for staged submission is maintained on `main`
+## Branch Workflow
+`
+- personal branch -> PR -> `project-ta-system`
+- no direct push to `main` for code

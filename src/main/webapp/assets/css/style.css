@@ -3,12 +3,25 @@
     --text: #102039;
     --muted: #4c5e7a;
     --primary: #1575ff;
+    --primary-strong: #0094ff;
     --accent: #00b7a5;
+    --surface: rgba(255, 255, 255, 0.92);
+    --surface-soft: rgba(255, 255, 255, 0.78);
+    --surface-muted: #f8fbff;
+    --line-strong: #d6e4ff;
     --glass: rgba(255, 255, 255, 0.72);
     --line: rgba(255, 255, 255, 0.55);
     --radius-xl: 28px;
     --radius-md: 18px;
     --shadow: 0 24px 50px rgba(16, 32, 57, 0.15);
+    --pending-bg: #f6edd8;
+    --pending-text: #8a6d1d;
+    --interviewed-bg: #e3eef9;
+    --interviewed-text: #2f5588;
+    --accepted-bg: #dfeedd;
+    --accepted-text: #3f6c45;
+    --rejected-bg: #f5dddd;
+    --rejected-text: #9a4a4a;
 }
 
 * {
@@ -17,7 +30,7 @@
 
 body {
     margin: 0;
-    font-family: "SF Pro Text", "Segoe UI", sans-serif;
+    font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     background: radial-gradient(circle at 20% 15%, #ffffff 0%, #eef3ff 45%, #d9e8ff 100%);
     color: var(--text);
     min-height: 100vh;
@@ -120,6 +133,7 @@ h1 {
 }
 
 input,
+select,
 button {
     border: 1px solid #c2d6ff;
     border-radius: 12px;
@@ -127,9 +141,14 @@ button {
     font-size: .95rem;
 }
 
-input {
+input,
+select {
     background: rgba(255, 255, 255, .85);
     color: #16315b;
+}
+
+select {
+    appearance: none;
 }
 
 .btn {
@@ -147,6 +166,26 @@ input {
 .btn:hover {
     transform: translateY(-1px);
     filter: brightness(1.05);
+}
+
+.btn:disabled,
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled,
+.submit-btn:disabled,
+.action-btn:disabled,
+.footer-btn:disabled,
+.btn-link.disabled {
+    background: #d8e1ef !important;
+    border-color: #d8e1ef !important;
+    color: #7a8aa3 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    pointer-events: none;
 }
 
 .btn.ghost {
@@ -321,5 +360,174 @@ input {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* ---------- Shared status tags & MO screening ---------- */
+
+.status-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: .28rem .72rem;
+    border-radius: 9999px;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+.status-tag.pending {
+    background: var(--pending-bg);
+    color: var(--pending-text);
+}
+
+.status-tag.interviewed {
+    background: var(--interviewed-bg);
+    color: var(--interviewed-text);
+}
+
+.status-tag.accepted {
+    background: var(--accepted-bg);
+    color: var(--accepted-text);
+}
+
+.status-tag.rejected {
+    background: var(--rejected-bg);
+    color: var(--rejected-text);
+}
+
+.filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid #c2d6ff;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .88);
+}
+
+.filter-btn {
+    flex: 1 1 auto;
+    min-width: 108px;
+    border: none;
+    border-right: 1px solid #c2d6ff;
+    background: transparent;
+    color: #486287;
+    font-size: .88rem;
+    font-weight: 600;
+    padding: .72rem .85rem;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+}
+
+.filter-btn:last-child {
+    border-right: none;
+}
+
+.filter-btn:hover {
+    background: rgba(21, 117, 255, 0.08);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+    color: #fff;
+}
+
+.badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding: 0 .35rem;
+    margin-left: .35rem;
+    border-radius: 9999px;
+    font-size: .72rem;
+    background: rgba(16, 32, 57, 0.1);
+}
+
+.filter-btn.active .badge-count {
+    background: rgba(255, 255, 255, 0.28);
+    color: #fff;
+}
+
+.review-status-filters {
+    margin: .25rem 0 .85rem;
+}
+
+.job-stat.interviewed {
+    color: var(--interviewed-text);
+    background: rgba(227, 238, 249, .95);
+    border-color: #bfd3ee;
+}
+
+.candidate-status {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.candidate-label {
+    font-weight: 700;
+    color: #173c6b;
+}
+
+.candidate-status-meta,
+.candidate-date {
+    color: #4a6486;
+    font-size: .86rem;
+}
+
+.btn.btn-review-interview,
+.btn.btn-review-detail {
+    background: rgba(255, 255, 255, .9);
+    color: #143a69;
+    border: 1px solid #c2d6ff;
+}
+
+.btn.btn-review-approve {
+    background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+    color: #fff;
+}
+
+.btn.btn-review-reject {
+    background: rgba(255, 241, 243, .96);
+    color: #92233b;
+    border: 1px solid #ffbec9;
+}
+
+.btn.btn-review-interview:disabled,
+.btn.btn-review-approve:disabled,
+.btn.btn-review-reject:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+}
+
+.mo-review-toast {
+    position: fixed;
+    top: 1.2rem;
+    left: 50%;
+    transform: translate(-50%, -140%);
+    z-index: 20;
+    border-radius: 999px;
+    padding: .75rem 1.1rem;
+    background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+    color: #fff;
+    box-shadow: 0 16px 34px rgba(21, 117, 255, .24);
+    transition: transform 180ms ease, opacity 180ms ease;
+    opacity: 0;
+    pointer-events: none;
+    font-weight: 700;
+    font-size: .88rem;
+}
+
+.mo-review-toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+@media (max-width: 720px) {
+    .filter-btn {
+        min-width: 48%;
     }
 }

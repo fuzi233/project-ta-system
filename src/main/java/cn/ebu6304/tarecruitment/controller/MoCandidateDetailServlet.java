@@ -71,6 +71,9 @@ public class MoCandidateDetailServlet extends BaseServlet {
             jobMap.put("moduleCode", job.moduleCode());
             jobMap.put("requiredSkills", job.requiredSkills());
             jobMap.put("slots", job.slots());
+            jobMap.put("hoursPerWeek", job.hoursPerWeek());
+            jobMap.put("applicationDeadline", job.applicationDeadline());
+            jobMap.put("monthlyStipend", job.monthlyStipend());
             jobMap.put("status", job.status());
 
             writeJson(response, 200, Map.of(

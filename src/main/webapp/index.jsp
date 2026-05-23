@@ -4,17 +4,17 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>TA Recruit - Login / Register</title>
+    <title>TA Recruitment - Sign In</title>
     <style>
         :root {
-            --bg-start: #EEF2FF;
-            --bg-end: #E0E7FF;
-            --ink: #1E293B;
-            --muted: #64748B;
-            --line: #CBD5E1;
+            --bg-start: #ffffff;
+            --bg-end: #d9e8ff;
+            --ink: #102039;
+            --muted: #4c5e7a;
+            --line: #c2d6ff;
             --white: #FFFFFF;
-            --blue: #3B82F6;
-            --cyan: #06B6D4;
+            --blue: #1575ff;
+            --cyan: #00b7a5;
             --error: #EF4444;
             --success: #10B981;
             --weak: #F97316;
@@ -32,9 +32,9 @@
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: "SF Pro Text", "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
             color: var(--ink);
-            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            background: radial-gradient(circle at 20% 15%, var(--bg-start) 0%, #eef3ff 45%, var(--bg-end) 100%);
             overflow-x: hidden;
         }
 
@@ -137,7 +137,7 @@
 
         .brand .desc {
             margin: 2px 0 0;
-            color: #334155;
+            color: #16315b;
             max-width: 420px;
             line-height: 1.7;
             font-size: 16px;
@@ -191,7 +191,7 @@
             padding: 10px 14px;
             font-size: 14px;
             font-weight: 700;
-            color: #475569;
+            color: var(--muted);
             background: transparent;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -244,7 +244,7 @@
             text-align: center;
             font-size: 13px;
             font-weight: 700;
-            color: #334155;
+            color: #16315b;
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
@@ -256,7 +256,7 @@
         .role-option svg {
             width: 16px;
             height: 16px;
-            fill: #334155;
+            fill: #16315b;
         }
 
         .role-option.active {
@@ -353,7 +353,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #475569;
+            color: var(--muted);
             font-size: 13px;
         }
 
@@ -373,7 +373,7 @@
         }
 
         .ghost-link:hover {
-            color: #334155;
+            color: #16315b;
         }
 
         .submit-btn {
@@ -398,9 +398,12 @@
         }
 
         .submit-btn:disabled {
-            opacity: 0.75;
+            opacity: 1;
             cursor: not-allowed;
             transform: none;
+            background: #d8e1ef;
+            color: #7a8aa3;
+            box-shadow: none;
         }
 
         .spinner {
@@ -997,34 +1000,108 @@
             line-height: 1.62;
         }
 
-        .left-role-selector {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .entry-grid {
+            margin-top: 4px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
         }
 
-        .left-role-btn {
+        .entry-btn {
             width: 100%;
             border: 1px solid rgba(152, 179, 221, 0.7);
-            border-radius: 12px;
+            border-radius: 14px;
             background: rgba(255, 255, 255, 0.72);
             color: #2a4675;
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 12px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: grid;
+            gap: 6px;
+        }
+
+        .entry-btn span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #51668a;
+        }
+
+        .entry-btn:hover {
+            border-color: rgba(57, 119, 255, 0.8);
+        }
+
+        .entry-btn.active {
+            border-color: rgba(57, 119, 255, 0.88);
+            color: #0f2e5e;
+            background: linear-gradient(138deg, rgba(229, 240, 255, 0.95), rgba(210, 229, 255, 0.82));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.86),
+                0 8px 18px rgba(56, 118, 214, 0.2);
+        }
+
+        .demo-strip {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .demo-label {
+            font-size: 12px;
             font-weight: 700;
-            padding: 12px 10px;
+            color: #5b6c89;
+        }
+
+        .demo-btn {
+            border: 1px dashed rgba(57, 119, 255, 0.45);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.68);
+            color: #1a3f7a;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 12px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .left-role-btn:hover {
-            border-color: rgba(57, 119, 255, 0.8);
+        .demo-btn:hover {
+            border-color: rgba(57, 119, 255, 0.85);
         }
 
-        .left-role-btn.active {
-            border-color: rgba(57, 119, 255, 0.88);
+        .form-title {
+            margin: 0 0 16px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #203a69;
+        }
+
+        .role-pill-group {
+            margin: 10px 0 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .role-pill {
+            border: 1px solid rgba(57, 119, 255, 0.35);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.74);
+            color: #1a396c;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .role-pill.active {
+            border-color: rgba(57, 119, 255, 0.85);
             color: #0f2e5e;
-            background: linear-gradient(138deg, rgba(229, 240, 255, 0.95), rgba(210, 229, 255, 0.82));
+            background: rgba(255, 255, 255, 0.96);
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.86),
                 0 8px 18px rgba(56, 118, 214, 0.2);
@@ -1065,6 +1142,10 @@
         }
 
         @media (max-width: 768px) {
+            .entry-grid {
+                grid-template-columns: 1fr;
+            }
+
             .site-logo {
                 left: 10px;
                 top: 8px;
@@ -1122,11 +1203,11 @@
     </span>
     <div class="site-logo-text">
         <strong>BUPT International School</strong>
-        <span>BUPT International School</span>
+        <span>Teaching Assistant Recruitment</span>
     </div>
 </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite">Ready</div>
+<div id="toast" class="toast" role="status" aria-live="polite">Action completed</div>
 
 <main class="page">
     <section class="auth-wrap">
@@ -1134,36 +1215,43 @@
             <aside class="brand-pane">
                 <p class="kicker">BUPT International School</p>
                 <p class="brand-title">TA Recruitment</p>
-                <p class="brand-sub">Select your role and login or register to get started.</p>
-                <div class="left-role-selector" aria-label="Role selection">
-                    <button type="button" class="left-role-btn active" data-left-role="TA">TA</button>
-                    <button type="button" class="left-role-btn" data-left-role="MO">MO</button>
-                    <button type="button" class="left-role-btn" data-left-role="ADMIN">Admin</button>
-                </div>
+                <p class="brand-sub">Choose a workspace entry and sign in to continue.</p>
+                <p class="brand-sub">Demos are ready to use without registration.</p>
             </aside>
             <div class="form-pane">
-            <div class="switcher" role="tablist" aria-label="LoginRegister切换">
-                <button id="tabLogin" class="active" type="button" role="tab" aria-selected="true">Login</button>
-                <button id="tabRegister" type="button" role="tab" aria-selected="false">Register</button>
-            </div>
+            <h2 id="formTitle" class="form-title">Sign in</h2>
 
             <div id="loginView" class="view active">
+                <div class="entry-grid" aria-label="Workspace entry">
+                    <button type="button" class="entry-btn active" data-entry-role="TA">
+                        TA Login
+                        <span>Apply and track your applications</span>
+                    </button>
+                    <button type="button" class="entry-btn" data-entry-role="MO">
+                        MO Login
+                        <span>Post jobs and screen candidates</span>
+                    </button>
+                    <button type="button" class="entry-btn" data-entry-role="ADMIN">
+                        Admin / HR Login
+                        <span>Workload and allocation oversight</span>
+                    </button>
+                </div>
+                <div class="demo-strip" aria-label="Demo quick fill">
+                    <span class="demo-label">Demo quick fill:</span>
+                    <button type="button" class="demo-btn" data-demo-role="TA" data-demo-identifier="ta001@bupt.edu.cn" data-demo-password="TaDemo@123">TA Demo</button>
+                    <button type="button" class="demo-btn" data-demo-role="MO" data-demo-identifier="mo001@bupt.edu.cn" data-demo-password="MoDemo@123">MO Demo</button>
+                    <button type="button" class="demo-btn" data-demo-role="ADMIN" data-demo-identifier="hradmin" data-demo-password="HrDemo@123">Admin / HR Demo</button>
+                </div>
                 <form id="loginForm" novalidate>
-                    <%-- 表单提交至LoginServlet --%>
+                    <%-- Form submits to LoginServlet --%>
                     <input type="hidden" name="role" id="loginRole" value=""/>
-                    <div class="role-grid-login" aria-label="Login role selection">
-                        <button class="role-option" data-role-login="TA" type="button">TA</button>
-                        <button class="role-option" data-role-login="MO" type="button">MO</button>
-                        <button class="role-option" data-role-login="ADMIN" type="button">Admin</button>
-                    </div>
-
-                    <div class="field" id="loginIdentifierField">
+                    <div class="field" id="loginEmailField">
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2l-9 5.63a1.9 1.9 0 0 1-2 0L3 7.2V6Zm0 3.56V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.56l-7.94 4.97a3.9 3.9 0 0 1-4.12 0L3 9.56Z"/></svg>
                         </span>
-                        <input id="loginIdentifier" name="identifier" type="text" placeholder="Select role first" required/>
-                        <div class="hint-msg" id="loginCredentialHint">TA: Student ID, MO: Staff ID or Email, Admin: Username</div>
-                        <div class="error-msg" id="loginIdentifierError"></div>
+                        <input id="loginIdentifier" name="identifier" type="text" placeholder="Select a role first" required/>
+                        <div class="hint-msg" id="loginCredentialHint">TA: student ID/email, MO: staff ID/email, Admin: admin username</div>
+                        <div class="error-msg" id="loginEmailError"></div>
                     </div>
 
                     <div class="field" id="loginPasswordField">
@@ -1184,21 +1272,30 @@
 
                     <button id="loginBtn" class="submit-btn" type="submit">
                         <span class="spinner" aria-hidden="true"></span>
-                        <span>Login</span>
+                        <span>Sign in</span>
                     </button>
+                    <div class="bottom-note">
+                        Need an account? <button id="toRegisterLink" type="button">Create account</button>
+                    </div>
                 </form>
             </div>
 
             <div id="registerView" class="view">
                 <form id="registerForm" novalidate>
-                    <%-- 表单提交至RegisterServlet --%>
+                    <%-- Form submits to RegisterServlet --%>
                     <input type="hidden" id="registerRole" name="role" value="TA"/>
+
+                    <div class="role-pill-group" aria-label="Register role">
+                        <button class="role-pill active" type="button" data-role-register="TA">TA</button>
+                        <button class="role-pill" type="button" data-role-register="MO">MO</button>
+                        <button class="role-pill" type="button" data-role-register="ADMIN">Admin / HR</button>
+                    </div>
 
                     <div class="field" id="nameField">
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.08 0-8 2.04-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.96-3.92-5-8-5Z"/></svg>
                         </span>
-                        <input id="registerName" name="name" type="text" placeholder="Full Name" required/>
+                        <input id="registerName" name="name" type="text" placeholder="Full name" required/>
                         <div class="error-msg" id="nameError"></div>
                     </div>
 
@@ -1206,8 +1303,8 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 2v2.2l-7 4.38-7-4.38V6h14Zm0 12H5V10.56l6.47 4.03a1 1 0 0 0 1.06 0L19 10.56V18Z"/></svg>
                         </span>
-                        <input id="registerIdentifier" name="identifier" type="text" placeholder="Student ID / Staff ID / Admin Username" required/>
-                        <div class="hint-msg" id="registerIdentifierHint">TA: Student ID, MO: Staff ID or Email, Admin: Username</div>
+                        <input id="registerIdentifier" name="identifier" type="text" placeholder="Student ID / Staff ID / Admin username" required/>
+                        <div class="hint-msg" id="registerIdentifierHint">Enter the identifier for your selected role.</div>
                         <div class="error-msg" id="registerIdentifierError"></div>
                     </div>
 
@@ -1215,8 +1312,8 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2l-9 5.63a1.9 1.9 0 0 1-2 0L3 7.2V6Zm0 3.56V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9.56l-7.94 4.97a3.9 3.9 0 0 1-4.12 0L3 9.56Z"/></svg>
                         </span>
-                        <input id="registerEmail" name="email" type="email" placeholder="Email" required/>
-                        <div class="hint-msg" id="registerEmailHint">Valid email format, e.g. name@example.com</div>
+                        <input id="registerEmail" name="email" type="email" placeholder="Email address" required/>
+                        <div class="hint-msg" id="registerEmailHint">Use a valid email format, e.g. name@example.com</div>
                         <div class="error-msg" id="registerEmailError"></div>
                     </div>
 
@@ -1230,7 +1327,7 @@
                         </button>
                         <div class="strength">
                             <div class="strength-track"><div id="strengthFill" class="strength-fill"></div></div>
-                            <div id="strengthText" class="strength-text">Strength: Weak</div>
+                            <div id="strengthText" class="strength-text">Password strength: weak</div>
                         </div>
                         <div class="error-msg" id="registerPasswordError"></div>
                     </div>
@@ -1239,35 +1336,20 @@
                         <span class="field-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24"><path d="M17 9h-1V7a4 4 0 1 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V7Zm3 7.73V17a1 1 0 1 1-2 0v-2.27a2 2 0 1 1 2 0Z"/></svg>
                         </span>
-                        <input id="confirmPassword" class="with-right" name="confirmPassword" type="password" placeholder="Confirm Password" required/>
+                        <input id="confirmPassword" class="with-right" name="confirmPassword" type="password" placeholder="Confirm password" required/>
                         <button class="field-eye" type="button" data-toggle-eye="confirmPassword" aria-label="Show or hide password">
                             <svg viewBox="0 0 24 24"><path d="M12 5c5.6 0 9.5 4.57 10.76 6.24a1.2 1.2 0 0 1 0 1.52C21.5 14.43 17.6 19 12 19S2.5 14.43 1.24 12.76a1.2 1.2 0 0 1 0-1.52C2.5 9.57 6.4 5 12 5Zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
                         </button>
                         <div class="error-msg" id="confirmPasswordError"></div>
                     </div>
 
-                    <div class="role-grid-register" aria-label="Register role selection">
-                        <button class="role-option active" type="button" data-role-register="TA">
-                            <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-4.08 0-8 2.04-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.96-3.92-5-8-5Z"/></svg>
-                            TA
-                        </button>
-                        <button class="role-option" type="button" data-role-register="MO">
-                            <svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 8.2-4.1V15h2V8L12 3Zm-7 9v4l7 4 7-4v-4l-7 3.5L5 12Z"/></svg>
-                            MO
-                        </button>
-                        <button class="role-option" type="button" data-role-register="ADMIN">
-                            <svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V6l-8-4Zm0 2.2 6 3v4.8c0 4-2.6 7.9-6 9-3.4-1.1-6-5-6-9V7.2l6-3Z"/></svg>
-                            Admin
-                        </button>
-                    </div>
-
                     <button id="registerBtn" class="submit-btn" type="submit">
                         <span class="spinner" aria-hidden="true"></span>
-                        <span>Create Account</span>
+                        <span>Create account</span>
                     </button>
 
                     <div class="bottom-note">
-                        Already have an account?<button id="toLoginLink" type="button">Login now</button>
+                        Already have an account? <button id="toLoginLink" type="button">Back to sign in</button>
                     </div>
                 </form>
             </div>
@@ -1278,10 +1360,10 @@
 
 <script>
     (function () {
-        var tabLogin = document.getElementById("tabLogin");
-        var tabRegister = document.getElementById("tabRegister");
         var loginView = document.getElementById("loginView");
         var registerView = document.getElementById("registerView");
+        var formTitle = document.getElementById("formTitle");
+        var toRegisterLink = document.getElementById("toRegisterLink");
         var toLoginLink = document.getElementById("toLoginLink");
         var toast = document.getElementById("toast");
 
@@ -1297,31 +1379,22 @@
         var confirmPassword = document.getElementById("confirmPassword");
         var strengthFill = document.getElementById("strengthFill");
         var strengthText = document.getElementById("strengthText");
-        var leftRoleButtons = document.querySelectorAll("[data-left-role]");
+        var entryButtons = document.querySelectorAll("[data-entry-role]");
+        var demoButtons = document.querySelectorAll("[data-demo-role]");
 
         function switchView(target) {
             var isLogin = target === "login";
-            tabLogin.classList.toggle("active", isLogin);
-            tabRegister.classList.toggle("active", !isLogin);
-            tabLogin.setAttribute("aria-selected", String(isLogin));
-            tabRegister.setAttribute("aria-selected", String(!isLogin));
             loginView.classList.toggle("active", isLogin);
             registerView.classList.toggle("active", !isLogin);
+            if (formTitle) {
+                formTitle.textContent = isLogin ? "Sign in" : "Create account";
+            }
         }
 
-        tabLogin.addEventListener("click", function () { switchView("login"); });
-        tabRegister.addEventListener("click", function () { switchView("register"); });
+        if (toRegisterLink) {
+            toRegisterLink.addEventListener("click", function () { switchView("register"); });
+        }
         toLoginLink.addEventListener("click", function () { switchView("login"); });
-
-        document.querySelectorAll("[data-role-login]").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                document.querySelectorAll("[data-role-login]").forEach(function (el) { el.classList.remove("active"); });
-                btn.classList.add("active");
-                loginRole.value = btn.getAttribute("data-role-login");
-                updateLoginIdentifierUi(loginRole.value);
-                validateLogin();
-            });
-        });
 
         document.querySelectorAll("[data-role-register]").forEach(function (btn) {
             btn.addEventListener("click", function () {
@@ -1329,7 +1402,6 @@
                 btn.classList.add("active");
                 registerRole.value = btn.getAttribute("data-role-register");
                 updateRegisterIdentifierUi(registerRole.value);
-                updateNameFieldVisibility(registerRole.value);
                 validateRegister();
             });
         });
@@ -1340,22 +1412,34 @@
             });
         }
 
-        function setLeftRole(role) {
-            setRoleButtonState("[data-left-role]", "data-left-role", role);
-            setRoleButtonState("[data-role-login]", "data-role-login", role);
+        function setActiveRole(role) {
+            setRoleButtonState("[data-entry-role]", "data-entry-role", role);
             setRoleButtonState("[data-role-register]", "data-role-register", role);
             loginRole.value = role;
             registerRole.value = role;
             updateLoginIdentifierUi(role);
             updateRegisterIdentifierUi(role);
-            updateNameFieldVisibility(role);
             validateLogin();
             validateRegister();
         }
 
-        leftRoleButtons.forEach(function (btn) {
+        entryButtons.forEach(function (btn) {
             btn.addEventListener("click", function () {
-                setLeftRole(btn.getAttribute("data-left-role"));
+                setActiveRole(btn.getAttribute("data-entry-role"));
+                switchView("login");
+            });
+        });
+
+        demoButtons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var role = btn.getAttribute("data-demo-role");
+                var identifier = btn.getAttribute("data-demo-identifier");
+                var password = btn.getAttribute("data-demo-password");
+                setActiveRole(role);
+                document.getElementById("loginIdentifier").value = identifier;
+                document.getElementById("loginPassword").value = password;
+                validateLogin();
+                showToast("Demo credentials filled");
             });
         });
 
@@ -1371,47 +1455,46 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
+        function isBuptEmail(email) {
+            return isEmailValid(email) && /@bupt\.edu\.cn$/i.test(email);
+        }
+
         function updateLoginIdentifierUi(role) {
             var input = document.getElementById("loginIdentifier");
             var hint = document.getElementById("loginCredentialHint");
             if (!role) {
-                input.placeholder = "Select role first";
-                hint.textContent = "TA: Student ID, MO: Staff ID or Email, Admin: Username";
+                input.placeholder = "Select a role first";
+                hint.textContent = "TA: student ID/email, MO: staff ID/email, Admin: admin username";
                 return;
             }
             if (role === "TA") {
-                input.placeholder = "Student ID";
-                hint.textContent = "Example: 2023213149";
+                input.placeholder = "Student ID or email";
+                hint.textContent = "Example: ta001 or ta001@bupt.edu.cn";
             } else if (role === "MO") {
-                input.placeholder = "Staff ID or Email";
+                input.placeholder = "Staff ID or email";
                 hint.textContent = "Example: TCH1001 or mo001@bupt.edu.cn";
             } else {
-                input.placeholder = "Admin Username";
-                hint.textContent = "Example: admin";
+                input.placeholder = "Admin username";
+                hint.textContent = "Example: hradmin";
             }
         }
 
         function updateRegisterIdentifierUi(role) {
             var input = document.getElementById("registerIdentifier");
             var hint = document.getElementById("registerIdentifierHint");
+            var emailHint = document.getElementById("registerEmailHint");
             if (role === "TA") {
-                input.placeholder = "Student ID";
-                hint.textContent = "Example: 2023213149";
+                input.placeholder = "Student ID or email";
+                hint.textContent = "Example: ta001 or ta001@bupt.edu.cn";
+                emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
             } else if (role === "MO") {
-                input.placeholder = "Staff ID or Email";
+                input.placeholder = "Staff ID or email";
                 hint.textContent = "Example: TCH1001 or mo001@bupt.edu.cn";
+                emailHint.textContent = "MO registration email must end with @bupt.edu.cn";
             } else {
-                input.placeholder = "Admin Username";
-                hint.textContent = "Example: admin";
-            }
-        }
-
-        function updateNameFieldVisibility(role) {
-            var nameField = document.getElementById("nameField");
-            if (role === "ADMIN") {
-                nameField.style.display = "none";
-            } else {
-                nameField.style.display = "";
+                input.placeholder = "Admin username";
+                hint.textContent = "Example: hradmin";
+                emailHint.textContent = "Use a valid email format, e.g. name@example.com";
             }
         }
 
@@ -1439,22 +1522,22 @@
         function updateStrength() {
             var score = evaluateStrength(registerPassword.value);
             var width = 25;
-            var text = "Strength: Weak";
+            var text = "Password strength: weak";
             var color = "var(--weak)";
 
             if (score >= 2) {
                 width = 55;
-                text = "Strength: Medium";
+                text = "Password strength: medium";
                 color = "var(--medium)";
             }
             if (score >= 4) {
                 width = 100;
-                text = "Strength: Strong";
+                text = "Password strength: strong";
                 color = "var(--strong)";
             }
             if (!registerPassword.value) {
                 width = 0;
-                text = "Strength: Weak";
+                text = "Password strength: weak";
                 color = "var(--weak)";
             }
 
@@ -1470,7 +1553,7 @@
             var ok = true;
 
             if (!role) {
-                setFieldError("loginIdentifierField", "loginIdentifierError", "Role must be selected before login");
+                setFieldError("loginEmailField", "loginEmailError", "Please select a role before signing in.");
                 ok = false;
             } else {
                 var identifierOk = false;
@@ -1483,15 +1566,15 @@
                 }
 
                 if (!identifierOk) {
-                    setFieldError("loginIdentifierField", "loginIdentifierError", "Credential format does not match selected role");
+                    setFieldError("loginEmailField", "loginEmailError", "Identifier format does not match the selected role.");
                     ok = false;
                 } else {
-                    setFieldError("loginIdentifierField", "loginIdentifierError", "");
+                    setFieldError("loginEmailField", "loginEmailError", "");
                 }
             }
 
             if (!pwd) {
-                setFieldError("loginPasswordField", "loginPasswordError", "Password is required");
+                setFieldError("loginPasswordField", "loginPasswordError", "Please enter your password.");
                 ok = false;
             } else {
                 setFieldError("loginPasswordField", "loginPasswordError", "");
@@ -1508,15 +1591,18 @@
             var confirm = confirmPassword.value;
             var ok = true;
 
-            if (role !== "ADMIN" && name.length < 2) {
-                setFieldError("nameField", "nameError", "Name requires at least 2 characters");
+            if (name.length < 2) {
+                setFieldError("nameField", "nameError", "Name must be at least 2 characters.");
                 ok = false;
             } else {
                 setFieldError("nameField", "nameError", "");
             }
 
             if (!isEmailValid(email)) {
-                setFieldError("registerEmailField", "registerEmailError", "Invalid email format");
+                setFieldError("registerEmailField", "registerEmailError", "Please enter a valid email address.");
+                ok = false;
+            } else if ((role === "TA" || role === "MO") && !isBuptEmail(email)) {
+                setFieldError("registerEmailField", "registerEmailError", "TA/MO registration email must end with @bupt.edu.cn.");
                 ok = false;
             } else {
                 setFieldError("registerEmailField", "registerEmailError", "");
@@ -1524,7 +1610,7 @@
 
             var identifierOk = false;
             if (role === "TA") {
-                identifierOk = /^\d{10}$/.test(identifier);
+                identifierOk = /^\d{10}$/.test(identifier) || isEmailValid(identifier);
             } else if (role === "MO") {
                 identifierOk = /^[A-Za-z]{3}\d{4}$/.test(identifier) || isEmailValid(identifier);
             } else if (role === "ADMIN") {
@@ -1532,21 +1618,21 @@
             }
 
             if (!identifierOk) {
-                setFieldError("registerIdentifierField", "registerIdentifierError", "Credential format does not match role");
+                setFieldError("registerIdentifierField", "registerIdentifierError", "Identifier format does not match the selected role.");
                 ok = false;
             } else {
                 setFieldError("registerIdentifierField", "registerIdentifierError", "");
             }
 
             if (pwd.length < 8) {
-                setFieldError("registerPasswordField", "registerPasswordError", "Password requires at least 8 characters");
+                setFieldError("registerPasswordField", "registerPasswordError", "Password must be at least 8 characters.");
                 ok = false;
             } else {
                 setFieldError("registerPasswordField", "registerPasswordError", "");
             }
 
             if (!confirm || confirm !== pwd) {
-                setFieldError("confirmPasswordField", "confirmPasswordError", "Passwords do not match");
+                setFieldError("confirmPasswordField", "confirmPasswordError", "Passwords do not match.");
                 ok = false;
             } else {
                 setFieldError("confirmPasswordField", "confirmPasswordError", "");
@@ -1571,7 +1657,7 @@
         registerPassword.addEventListener("input", updateStrength);
         confirmPassword.addEventListener("input", function () {
             if (confirmPassword.value && confirmPassword.value !== registerPassword.value) {
-                setFieldError("confirmPasswordField", "confirmPasswordError", "Passwords do not match");
+                setFieldError("confirmPasswordField", "confirmPasswordError", "Passwords do not match.");
             } else {
                 setFieldError("confirmPasswordField", "confirmPasswordError", "");
             }
@@ -1607,15 +1693,15 @@
                 });
                 var loginResult = await loginResponse.json();
                 if (!loginResponse.ok) {
-                    setFieldError("loginPasswordField", "loginPasswordError", loginResult.error || "Login failed");
+                    setFieldError("loginPasswordField", "loginPasswordError", loginResult.error || "Sign-in failed.");
                     return;
                 }
-                showToast("Login successful, redirecting...");
+                showToast("Signed in. Redirecting...");
                 window.setTimeout(function () {
                     window.location.href = loginResult.redirect || "index.jsp";
                 }, 420);
             } catch (_) {
-                setFieldError("loginPasswordField", "loginPasswordError", "Network error, please try again");
+                setFieldError("loginPasswordField", "loginPasswordError", "Network error. Please try again.");
             } finally {
                 setLoading(loginBtn, false);
             }
@@ -1642,19 +1728,24 @@
                 });
                 var registerResult = await registerResponse.json();
                 if (!registerResponse.ok) {
-                    setFieldError("registerIdentifierField", "registerIdentifierError", registerResult.error || "Registration failed");
+                    var errorMessage = registerResult.error || "Registration failed.";
+                    if (/email/i.test(errorMessage)) {
+                        setFieldError("registerEmailField", "registerEmailError", errorMessage);
+                    } else {
+                        setFieldError("registerIdentifierField", "registerIdentifierError", errorMessage);
+                    }
                     return;
                 }
-                showToast("Account created successfully");
+                showToast("Account created.");
                 switchView("login");
             } catch (_) {
-                setFieldError("registerIdentifierField", "registerIdentifierError", "Network error, please try again");
+                setFieldError("registerIdentifierField", "registerIdentifierError", "Network error. Please try again.");
             } finally {
                 setLoading(registerBtn, false);
             }
         });
 
-        setLeftRole("TA");
+        setActiveRole("TA");
     })();
 </script>
 </body>

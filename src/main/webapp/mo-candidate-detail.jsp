@@ -87,8 +87,10 @@
     </style>
 </head>
 <body>
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
 <main class="shell narrow">
-    <a class="link" href="mo.jsp">&larr; Back to MO Workspace</a>
+    <a class="link" href="index.jsp">&larr; Exit</a>
 
     <section class="glass card">
         <h1>Candidate Detail</h1>
