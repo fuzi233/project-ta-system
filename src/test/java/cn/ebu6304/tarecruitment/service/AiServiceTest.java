@@ -1,9 +1,11 @@
 package cn.ebu6304.tarecruitment.service;
 
 import cn.ebu6304.tarecruitment.ai.RuleBasedAiProvider;
+import cn.ebu6304.tarecruitment.model.AttachmentRecord;
 import cn.ebu6304.tarecruitment.model.ApplicationRecord;
 import cn.ebu6304.tarecruitment.model.JobPosting;
 import cn.ebu6304.tarecruitment.model.UserProfile;
+import cn.ebu6304.tarecruitment.repository.AttachmentRepository;
 import cn.ebu6304.tarecruitment.repository.ApplicationRepository;
 import cn.ebu6304.tarecruitment.repository.JobRepository;
 import cn.ebu6304.tarecruitment.repository.UserRepository;
@@ -97,6 +99,7 @@ class AiServiceTest {
         private final JobRepository jobRepository;
         private final UserRepository userRepository;
         private final ApplicationRepository applicationRepository;
+        private final AttachmentService attachmentService;
 
         private Fixture() throws Exception {
             Path tmpDir = Files.createTempDirectory("ai-service-test");
@@ -104,10 +107,14 @@ class AiServiceTest {
             this.jobRepository = new JobRepository(new JsonlFileStore<>(tmpDir.resolve("jobs.jsonl"), JobPosting.class, mapper));
             this.userRepository = new UserRepository(new JsonlFileStore<>(tmpDir.resolve("users.jsonl"), UserProfile.class, mapper));
             this.applicationRepository = new ApplicationRepository(new JsonlFileStore<>(tmpDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper));
+            AttachmentRepository attachmentRepository = new AttachmentRepository(
+                    new JsonlFileStore<>(tmpDir.resolve("attachments.jsonl"), AttachmentRecord.class, mapper)
+            );
+            this.attachmentService = new AttachmentService(attachmentRepository, tmpDir.resolve("uploads"));
         }
 
         private AiService aiService() {
-            return new AiService(jobRepository, userRepository, applicationRepository, new RuleBasedAiProvider());
+            return new AiService(jobRepository, userRepository, applicationRepository, attachmentService, new RuleBasedAiProvider());
         }
     }
 }
