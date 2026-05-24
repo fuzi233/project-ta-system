@@ -15,6 +15,24 @@ public class MoJobServlet extends BaseServlet {
         try {
             SessionUser current = requireRole(request, AuthSession.ROLE_MO);
             CreateJobRequest payload = readJson(request, CreateJobRequest.class);
+            if ("update".equalsIgnoreCase(payload.mode())) {
+                JobService.UpdateJobResponse updateJobResponse = appContext.jobService().updateJob(
+                        payload.jobId(),
+                        payload.title(),
+                        payload.moduleCode(),
+                        payload.requiredSkills(),
+                        payload.slots(),
+                        payload.hoursPerWeek(),
+                        payload.applicationDeadline(),
+                        payload.monthlyStipend(),
+                        current.userId()
+                );
+                writeJson(response, 200, Map.of(
+                        "updated", updateJobResponse.updated(),
+                        "record", updateJobResponse.record()
+                ));
+                return;
+            }
             JobService.CreateJobResponse createJobResponse = appContext.jobService().createJob(
                     payload.jobId(),
                     payload.title(),
@@ -70,7 +88,8 @@ public class MoJobServlet extends BaseServlet {
             Integer hoursPerWeek,
             String applicationDeadline,
             Integer monthlyStipend,
-            String createdBy
+            String createdBy,
+            String mode
     ) {
     }
 }

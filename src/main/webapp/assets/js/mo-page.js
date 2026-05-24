@@ -577,7 +577,7 @@ async function updateApplicationStatus(applicationId, status, triggerBtn) {
     }
 }
 
-function buildCandidateRow(job, candidate, isLatest) {
+function buildCandidateRow(job, candidate, isLatest, isJobFull) {
     const row = document.createElement("div");
     row.className = "candidate-row";
 
@@ -630,8 +630,15 @@ function buildCandidateRow(job, candidate, isLatest) {
     approveBtn.type = "button";
     approveBtn.className = "btn btn-review-approve";
     approveBtn.textContent = "Approve";
-    approveBtn.disabled = currentStatus === "ACCEPTED";
+    approveBtn.disabled = currentStatus === "ACCEPTED" || (isJobFull && currentStatus !== "ACCEPTED");
+    if (isJobFull && currentStatus !== "ACCEPTED") {
+        approveBtn.title = "This job already has enough accepted candidates.";
+    }
     approveBtn.addEventListener("click", async () => {
+        if (isJobFull && currentStatus !== "ACCEPTED") {
+            alert("This job already has enough accepted candidates.");
+            return;
+        }
         if (!confirmReviewAction(candidate, "ACCEPTED")) {
             return;
         }
@@ -775,6 +782,13 @@ function renderReview() {
             actions.appendChild(note);
         }
 
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "btn ghost job-edit";
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", () => startEditJob(job));
+        actions.appendChild(editBtn);
+
         const toggleBtn = document.createElement("button");
         toggleBtn.type = "button";
         toggleBtn.className = "btn ghost job-toggle";
@@ -799,9 +813,10 @@ function renderReview() {
             list.appendChild(emptyLine);
         } else {
             const latestApplicationId = entry.allApplications[0] ? entry.allApplications[0].applicationId : "";
+            const isJobFull = stats.accepted >= Number(job.slots || 0);
             applications.forEach((candidate) => {
                 const isLatest = Boolean(latestApplicationId) && candidate.applicationId === latestApplicationId;
-                list.appendChild(buildCandidateRow(job, candidate, isLatest));
+                list.appendChild(buildCandidateRow(job, candidate, isLatest, isJobFull));
             });
         }
         block.appendChild(list);
@@ -933,29 +948,38 @@ moJobFormEl.addEventListener("submit", async (event) => {
         setMoOutput("Application Deadline must use yyyy/m/d or yyyy/mm/dd, for example 2026/5/24.", "error");
         return;
     }
+    if (isDeadlineInPast(normalizedDeadline)) {
+        setMoOutput("Application Deadline cannot be in the past.", "error");
+        return;
+    }
     payload.applicationDeadline = normalizedDeadline;
     payload.slots = Number(payload.slots);
     payload.hoursPerWeek = Number(payload.hoursPerWeek);
     payload.monthlyStipend = Number(payload.monthlyStipend);
     setMoOutput("", "");
     try {
+        const isEditing = Boolean(createJobState.editingJobId);
+        if (isEditing) {
+            payload.mode = "update";
+        }
         const data = await api("mo/jobs", {
             method: "POST",
             body: JSON.stringify(payload)
         });
-        const createdJob = data.record || {};
+        const savedJob = data.record || {};
         setMoOutput(
-            "Job created successfully: " + (createdJob.title || payload.title)
-            + " (" + (createdJob.jobId || payload.jobId) + ").",
+            "Job " + (isEditing ? "updated" : "created") + " successfully: " + (savedJob.title || payload.title)
+            + " (" + (savedJob.jobId || payload.jobId) + ").",
             "success"
         );
-        moJobFormEl.reset();
-        clearSkillBuilder();
+        resetJobForm();
         await loadReviewData();
-        reviewHintEl.textContent = "Job " + (createdJob.jobId || payload.jobId) + " created successfully.";
+        reviewHintEl.textContent = "Job " + (savedJob.jobId || payload.jobId) + " " + (isEditing ? "updated" : "created") + " successfully.";
     } catch (error) {
         setMoOutput(error.message, "error");
     }
 });
+
+cancelEditJobBtnEl.addEventListener("click", resetJobForm);
 
 loadReviewData();
