@@ -2,10 +2,7 @@
 <%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
 <%
     String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
-    if (role == null || !AuthSession.ROLE_TA.equalsIgnoreCase(role)) {
-        response.sendRedirect("index.jsp");
-        return;
-    }
+    boolean isTa = AuthSession.ROLE_TA.equalsIgnoreCase(role);
 %>
 <%
     String id = request.getParameter("id");
@@ -134,13 +131,13 @@
         }
 
         .content {
-            padding: 30px 34px 40px;
+            padding: 26px 30px 34px;
         }
 
         .breadcrumb {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--muted);
-            margin-bottom: 22px;
+            margin-bottom: 16px;
         }
 
         .breadcrumb a {
@@ -149,8 +146,8 @@
         }
 
         .title {
-            margin: 0 0 22px;
-            font-size: 46px;
+            margin: 0 0 16px;
+            font-size: 34px;
             font-weight: 800;
             color: #10213f;
         }
@@ -158,13 +155,13 @@
         .divider {
             height: 1px;
             background: #dbe3ec;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
         }
 
         .layout {
             display: grid;
-            grid-template-columns: 1fr 2.3fr 0.9fr;
-            gap: 18px;
+            grid-template-columns: 1fr 2fr 0.7fr;
+            gap: 14px;
         }
 
         .panel {
@@ -172,12 +169,11 @@
             border: 1px solid #d9e2ec;
             border-radius: 16px;
             overflow: hidden;
-            min-height: 520px;
         }
 
         .panel-header {
-            padding: 18px 20px;
-            font-size: 18px;
+            padding: 14px 18px;
+            font-size: 16px;
             font-weight: 700;
             color: #16315b;
             border-bottom: 1px solid #e5ebf2;
@@ -185,55 +181,55 @@
         }
 
         .panel-body {
-            padding: 22px 20px 24px;
+            padding: 18px;
         }
 
         .job-name {
-            margin: 0 0 18px;
-            font-size: 24px;
+            margin: 0 0 14px;
+            font-size: 20px;
             font-weight: 800;
             color: #1e293b;
         }
 
         .info-item {
-            margin-bottom: 14px;
-            font-size: 18px;
+            margin-bottom: 10px;
+            font-size: 15px;
             color: var(--muted);
         }
 
         .section-title {
-            margin: 0 0 12px;
-            font-size: 20px;
+            margin: 0 0 8px;
+            font-size: 17px;
             font-weight: 800;
             color: #16315b;
         }
 
         .detail-section {
-            margin-bottom: 28px;
+            margin-bottom: 18px;
         }
 
         .detail-section ul {
             margin: 0;
-            padding-left: 22px;
+            padding-left: 20px;
             color: var(--muted);
-            font-size: 18px;
-            line-height: 1.8;
+            font-size: 15px;
+            line-height: 1.55;
         }
 
         .workload {
-            font-size: 18px;
+            font-size: 15px;
             color: var(--muted);
         }
 
         .action-col {
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            padding: 28px 16px;
+            gap: 12px;
+            padding: 18px 14px;
         }
 
         .action-btn {
-            height: 52px;
+            height: 44px;
             border-radius: 12px;
             border: 1px solid #c2d6ff;
             background: rgba(255, 255, 255, 0.9);
@@ -305,14 +301,18 @@
 <div class="bg-orb orb-a"></div>
 <div class="bg-orb orb-b"></div>
 <div class="page">
-    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
             <nav class="nav">
                 <a href="jobs.jsp" class="active">Job List</a>
+                <% if (isTa) { %>
                 <a href="applications.jsp">My Applications</a>
                 <a href="profile.jsp">Profile</a>
+                <a href="javascript:void(0)" onclick="signOut()">Sign Out</a>
+                <% } else { %>
+                <a href="index.jsp?login=1">Sign In</a>
+                <% } %>
             </nav>
         </header>
 
@@ -365,7 +365,6 @@
                 <section class="panel">
                     <div class="action-col">
                         <a id="applyLink" class="action-btn primary" href="apply.jsp?id=<%= id == null ? "1" : id %>">Apply Now</a>
-                        <a class="action-btn" href="#">Save</a>
                         <a class="action-btn" href="jobs.jsp">Back</a>
                     </div>
                 </section>
@@ -374,6 +373,8 @@
     </div>
 </div>
 <script>
+    const IS_TA = <%= isTa ? "true" : "false" %>;
+
     function escapeHtml(value) {
         return String(value ?? "")
             .replaceAll("&", "&amp;")
@@ -455,10 +456,18 @@
         document.getElementById("jobWorkload").textContent = job.hoursPerWeek
             ? job.hoursPerWeek + " hours per week"
             : "Workload to be confirmed";
-        document.getElementById("applyLink").href = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+        const applyUrl = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+        document.getElementById("applyLink").href = IS_TA
+            ? applyUrl
+            : "index.jsp?login=1&redirect=" + encodeURIComponent(applyUrl);
     }
 
     loadJobDetail();
+
+    async function signOut() {
+        await fetch("auth/logout", {method: "POST"});
+        window.location.href = "index.jsp?login=1";
+    }
 </script>
 </body>
 </html>

@@ -337,6 +337,13 @@
             font-size: .84rem;
         }
 
+        .workspace-actions {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 980px) {
             .candidate-row {
                 grid-template-columns: 1fr;
@@ -354,7 +361,9 @@
 </head>
 <body data-mo-user-id="<%= userId %>">
 <main class="shell">
-    <a class="link" href="index.jsp">&larr; Exit</a>
+    <div class="workspace-actions">
+        <a class="link" href="javascript:void(0)" onclick="signOut()">Sign Out</a>
+    </div>
 
     <section class="glass hero">
         <p class="eyebrow">MO Workspace</p>
@@ -468,6 +477,12 @@
         </div>
     </section>
 </main>
+<script>
+    async function signOut() {
+        await fetch("auth/logout", {method: "POST"});
+        window.location.href = "index.jsp?login=1";
+    }
+</script>
 <script src="assets/js/mo-page.js?v=10"></script>
 </body>
 </html>

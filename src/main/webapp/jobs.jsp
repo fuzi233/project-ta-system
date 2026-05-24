@@ -2,10 +2,7 @@
 <%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
 <%
     String role = (String) session.getAttribute(AuthSession.ATTR_ROLE);
-    if (role == null || !AuthSession.ROLE_TA.equalsIgnoreCase(role)) {
-        response.sendRedirect("index.jsp");
-        return;
-    }
+    boolean isTa = AuthSession.ROLE_TA.equalsIgnoreCase(role);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,6 +72,7 @@
             display: flex;
             gap: 32px;
             align-items: center;
+            position: relative;
         }
 
         .nav a {
@@ -91,28 +89,152 @@
             border-bottom-color: #1575ff;
         }
 
+        .signin-menu {
+            position: relative;
+        }
+
+        .signin-toggle {
+            height: 40px;
+            border: 1px solid #c2d6ff;
+            border-radius: 999px;
+            padding: 0 18px;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(21, 117, 255, 0.18);
+        }
+
+        .login-drop {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 360px;
+            max-width: calc(100vw - 48px);
+            display: none;
+            padding: 18px;
+            border: 1px solid #d6e4ff;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 24px 50px rgba(16, 32, 57, 0.2);
+            z-index: 20;
+        }
+
+        .login-drop.show {
+            display: block;
+            animation: rise 180ms ease;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-drop h3 {
+            margin: 0 0 12px;
+            color: #16315b;
+            font-size: 1rem;
+        }
+
+        .role-row,
+        .demo-strip {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .role-chip,
+        .demo-btn {
+            border: 1px solid #c2d6ff;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .role-chip {
+            flex: 1;
+            padding: 8px 10px;
+        }
+
+        .role-chip.active {
+            border-color: #1575ff;
+            background: #eff6ff;
+            color: #1575ff;
+        }
+
+        .demo-btn {
+            padding: 6px 10px;
+            font-size: 0.78rem;
+        }
+
+        .login-field {
+            width: 100%;
+            height: 42px;
+            margin-bottom: 10px;
+            border: 1px solid #c2d6ff;
+            border-radius: 11px;
+            padding: 0 12px;
+            color: #16315b;
+            font-size: 0.92rem;
+        }
+
+        .login-submit {
+            width: 100%;
+            height: 42px;
+            border: 0;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .login-error {
+            min-height: 18px;
+            color: #EF4444;
+            font-size: 0.78rem;
+            margin-bottom: 8px;
+        }
+
+        .login-note {
+            margin-top: 10px;
+            text-align: center;
+            color: #64748B;
+            font-size: 0.8rem;
+        }
+
+        .login-note a {
+            padding: 0;
+            border: 0;
+            color: #1575ff;
+            font-weight: 800;
+        }
+
         .content {
-            padding: 36px 34px 40px;
+            padding: 30px 32px 36px;
         }
 
         .page-title {
-            margin: 0 0 28px;
-            font-size: 48px;
+            margin: 0 0 22px;
+            font-size: 42px;
             font-weight: 800;
             color: #10213f;
         }
 
         .toolbar {
             display: grid;
-            grid-template-columns: 1.8fr 0.8fr 0.8fr 0.8fr auto;
+            grid-template-columns: 1.8fr 0.9fr 0.9fr auto;
             gap: 12px;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
         }
 
         .input,
         .select,
         .btn {
-            height: 54px;
+            height: 46px;
             border-radius: 12px;
             border: 1px solid #ced8e3;
             background: #fff;
@@ -145,30 +267,30 @@
         .divider {
             height: 1px;
             background: #dbe3ec;
-            margin: 8px 0 28px;
+            margin: 6px 0 20px;
         }
 
         .job-list {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 12px;
         }
 
         .job-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 24px;
+            gap: 18px;
             background: #fff;
             border: 1px solid #d9e2ec;
-            border-radius: 16px;
-            padding: 28px 28px;
+            border-radius: 15px;
+            padding: 18px 22px;
             box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
         }
 
         .job-main h2 {
-            margin: 0 0 14px;
-            font-size: 24px;
+            margin: 0 0 8px;
+            font-size: 21px;
             font-weight: 800;
             color: #1e293b;
         }
@@ -176,9 +298,9 @@
         .job-meta {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
             color: var(--muted);
-            font-size: 18px;
+            font-size: 15px;
         }
 
         .job-actions {
@@ -188,8 +310,8 @@
         }
 
         .action-btn {
-            min-width: 132px;
-            height: 52px;
+            min-width: 118px;
+            height: 44px;
             border-radius: 12px;
             border: 1px solid #c2d6ff;
             background: rgba(255, 255, 255, 0.9);
@@ -318,6 +440,11 @@
             .action-btn {
                 width: 100%;
             }
+
+            .login-drop {
+                right: 50%;
+                transform: translateX(50%);
+            }
         }
     </style>
 </head>
@@ -325,14 +452,39 @@
 <div class="bg-orb orb-a"></div>
 <div class="bg-orb orb-b"></div>
 <div class="page">
-    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
             <nav class="nav">
                 <a href="jobs.jsp" class="active">Job List</a>
+                <% if (isTa) { %>
                 <a href="applications.jsp">My Applications</a>
                 <a href="profile.jsp">Profile</a>
+                <a href="javascript:void(0)" onclick="signOut()">Sign Out</a>
+                <% } else { %>
+                <div class="signin-menu">
+                    <button id="signinToggle" class="signin-toggle" type="button">Sign In</button>
+                    <div id="loginDrop" class="login-drop">
+                        <h3>Sign In</h3>
+                        <div class="role-row">
+                            <button class="role-chip active" type="button" data-login-role="TA">TA</button>
+                            <button class="role-chip" type="button" data-login-role="MO">MO</button>
+                            <button class="role-chip" type="button" data-login-role="ADMIN">Admin</button>
+                        </div>
+                        <input type="hidden" id="loginRole" value="TA">
+                        <input id="loginIdentifier" class="login-field" type="text" placeholder="Student ID or email">
+                        <input id="loginPassword" class="login-field" type="password" placeholder="Password">
+                        <div id="loginError" class="login-error"></div>
+                        <button class="login-submit" type="button" onclick="doLogin()">Sign In</button>
+                        <div class="demo-strip">
+                            <button class="demo-btn" type="button" data-demo-role="TA" data-demo-id="ta001@bupt.edu.cn" data-demo-pw="TaDemo@123">TA Demo</button>
+                            <button class="demo-btn" type="button" data-demo-role="MO" data-demo-id="mo001@bupt.edu.cn" data-demo-pw="MoDemo@123">MO Demo</button>
+                            <button class="demo-btn" type="button" data-demo-role="ADMIN" data-demo-id="hradmin" data-demo-pw="HrDemo@123">Admin Demo</button>
+                        </div>
+                        <div class="login-note">Need an account? <a href="index.jsp?login=1">Create TA account</a></div>
+                    </div>
+                </div>
+                <% } %>
             </nav>
         </header>
 
@@ -342,21 +494,10 @@
             <div class="toolbar">
                 <input id="searchInput" class="input" type="text" placeholder="Search jobs...">
                 <select id="typeFilter" class="select">
-                    <option value="">All</option>
-                    <option value="programming">Programming</option>
-                    <option value="database">Database</option>
-                    <option value="web">Web</option>
+                    <option value="">All Modules</option>
                 </select>
                 <select id="skillFilter" class="select">
-                    <option value="">Skills</option>
-                    <option value="java">Java</option>
-                    <option value="sql">SQL</option>
-                    <option value="html">HTML/CSS</option>
-                </select>
-                <select id="semesterFilter" class="select">
-                    <option value="">Semester</option>
-                    <option value="spring">Spring</option>
-                    <option value="autumn">Autumn</option>
+                    <option value="">All Skills</option>
                 </select>
                 <button class="btn btn-filter" onclick="filterJobs()">Filter</button>
             </div>
@@ -382,6 +523,7 @@
 </div>
 
 <script>
+    const IS_TA = <%= isTa ? "true" : "false" %>;
     const state = {
         jobs: [],
         filteredJobs: [],
@@ -434,11 +576,33 @@
         return String(value || "").toLowerCase().includes(keyword);
     }
 
+    function splitSkills(value) {
+        return String(value || "")
+            .split(/[,;\/|]+/)
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+    function populateDynamicFilters() {
+        const moduleSelect = document.getElementById("typeFilter");
+        const skillSelect = document.getElementById("skillFilter");
+        const currentModule = moduleSelect.value;
+        const currentSkill = skillSelect.value;
+        const modules = [...new Set(state.jobs.map(job => String(job.moduleCode || "").trim()).filter(Boolean))].sort();
+        const skills = [...new Set(state.jobs.flatMap(job => splitSkills(job.requiredSkills)))].sort((a, b) => a.localeCompare(b));
+
+        moduleSelect.innerHTML = "<option value=\"\">All Modules</option>"
+            + modules.map(module => "<option value=\"" + escapeHtml(module) + "\">" + escapeHtml(module) + "</option>").join("");
+        skillSelect.innerHTML = "<option value=\"\">All Skills</option>"
+            + skills.map(skill => "<option value=\"" + escapeHtml(skill) + "\">" + escapeHtml(skill) + "</option>").join("");
+        moduleSelect.value = modules.includes(currentModule) ? currentModule : "";
+        skillSelect.value = skills.includes(currentSkill) ? currentSkill : "";
+    }
+
     function filterJobs() {
         const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-        const type = document.getElementById("typeFilter").value;
+        const moduleCode = document.getElementById("typeFilter").value;
         const skill = document.getElementById("skillFilter").value;
-        const semester = document.getElementById("semesterFilter").value;
 
         state.filteredJobs = state.jobs.filter((job) => {
             const haystack = [
@@ -448,11 +612,9 @@
                 job.jobId
             ].join(" ").toLowerCase();
             const matchKeyword = !keyword || haystack.includes(keyword);
-            const matchType = !type || matchesText(job.title, type) || matchesText(job.requiredSkills, type);
-            const matchSkill = !skill || matchesText(job.requiredSkills, skill);
-            const deadline = String(job.applicationDeadline || job.createdAt || "").toLowerCase();
-            const matchSemester = !semester || deadline.includes(semester);
-            return matchKeyword && matchType && matchSkill && matchSemester;
+            const matchModule = !moduleCode || String(job.moduleCode || "") === moduleCode;
+            const matchSkill = !skill || splitSkills(job.requiredSkills).some(item => item.toLowerCase() === skill.toLowerCase());
+            return matchKeyword && matchModule && matchSkill;
         });
         state.page = 1;
         renderJobs();
@@ -475,6 +637,10 @@
         jobs.forEach((job) => {
             const card = document.createElement("article");
             card.className = "job-card";
+            const detailUrl = "job-detail.jsp?jobId=" + encodeURIComponent(job.jobId);
+            const applyUrl = "apply.jsp?jobId=" + encodeURIComponent(job.jobId);
+            const detailHref = detailUrl;
+            const applyHref = IS_TA ? applyUrl : "index.jsp?login=1&redirect=" + encodeURIComponent(applyUrl);
             const deadline = job.applicationDeadline
                 ? "Deadline: " + fmtDate(job.applicationDeadline)
                 : "Created: " + fmtDate(job.createdAt);
@@ -488,8 +654,8 @@
                 + "</div>"
                 + "</div>"
                 + "<div class=\"job-actions\">"
-                + "<a class=\"action-btn\" href=\"job-detail.jsp?jobId=" + encodeURIComponent(job.jobId) + "\">View Details</a>"
-                + "<a class=\"action-btn primary\" href=\"apply.jsp?jobId=" + encodeURIComponent(job.jobId) + "\">Apply</a>"
+                + "<a class=\"action-btn\" href=\"" + detailHref + "\">View Details</a>"
+                + "<a class=\"action-btn primary\" href=\"" + applyHref + "\">Apply</a>"
                 + "</div>";
             jobList.appendChild(card);
         });
@@ -534,6 +700,7 @@
         try {
             const data = await api("/jobs?status=OPEN&page=1&size=500");
             state.jobs = (data.items || []).sort((a, b) => parseTime(b.createdAt) - parseTime(a.createdAt));
+            populateDynamicFilters();
             state.filteredJobs = state.jobs;
             renderJobs();
         } catch (error) {
@@ -552,8 +719,83 @@
     document.getElementById("searchInput").addEventListener("input", filterJobs);
     document.getElementById("typeFilter").addEventListener("change", filterJobs);
     document.getElementById("skillFilter").addEventListener("change", filterJobs);
-    document.getElementById("semesterFilter").addEventListener("change", filterJobs);
     loadJobs();
+
+    if (!IS_TA) {
+        const loginRole = document.getElementById("loginRole");
+        const loginDrop = document.getElementById("loginDrop");
+        const signinToggle = document.getElementById("signinToggle");
+
+        signinToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            loginDrop.classList.toggle("show");
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!loginDrop.contains(event.target) && event.target !== signinToggle) {
+                loginDrop.classList.remove("show");
+            }
+        });
+
+        document.querySelectorAll("[data-login-role]").forEach((button) => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll("[data-login-role]").forEach((item) => {
+                    item.classList.remove("active");
+                });
+                button.classList.add("active");
+                loginRole.value = button.getAttribute("data-login-role");
+                document.getElementById("loginError").textContent = "";
+            });
+        });
+
+        document.querySelectorAll("[data-demo-role]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const role = button.getAttribute("data-demo-role");
+                document.querySelectorAll("[data-login-role]").forEach((item) => {
+                    item.classList.toggle("active", item.getAttribute("data-login-role") === role);
+                });
+                loginRole.value = role;
+                document.getElementById("loginIdentifier").value = button.getAttribute("data-demo-id");
+                document.getElementById("loginPassword").value = button.getAttribute("data-demo-pw");
+                document.getElementById("loginError").textContent = "";
+            });
+        });
+    }
+
+    async function doLogin() {
+        const role = document.getElementById("loginRole").value;
+        const identifier = document.getElementById("loginIdentifier").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const error = document.getElementById("loginError");
+        if (!identifier) {
+            error.textContent = "Please enter your identifier.";
+            return;
+        }
+        if (!password) {
+            error.textContent = "Please enter your password.";
+            return;
+        }
+        try {
+            const response = await fetch("auth/login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({role, identifier, password})
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                error.textContent = result.error || "Sign-in failed.";
+                return;
+            }
+            window.location.href = result.redirect || "jobs.jsp";
+        } catch (_) {
+            error.textContent = "Network error. Please try again.";
+        }
+    }
+
+    async function signOut() {
+        await fetch("auth/logout", {method: "POST"});
+        window.location.href = "index.jsp?login=1";
+    }
 </script>
 </body>
 </html>

@@ -166,6 +166,36 @@
             margin-bottom: 8px;
         }
 
+        .profile-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .readonly-row {
+            border: 1px solid #d9e2ec;
+            border-radius: 12px;
+            background: #f8fbff;
+            padding: 12px 14px;
+        }
+
+        .readonly-label {
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .readonly-value {
+            color: #16315b;
+            font-size: 16px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
         .input,
         .textarea,
         .select,
@@ -493,7 +523,6 @@
 <div class="bg-orb orb-a"></div>
 <div class="bg-orb orb-b"></div>
 <div class="page">
-    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
@@ -501,6 +530,7 @@
                 <a href="jobs.jsp" class="active">Job List</a>
                 <a href="applications.jsp">My Applications</a>
                 <a href="profile.jsp">Profile</a>
+                <a href="javascript:void(0)" onclick="signOut()">Sign Out</a>
             </nav>
         </header>
 
@@ -519,19 +549,23 @@
                     <section class="panel">
                         <div class="panel-header">Personal Information</div>
                         <div class="panel-body">
-                            <div class="field">
-                                <label for="fullName">Full Name</label>
-                                <input class="input" type="text" id="fullName" name="fullName">
-                            </div>
-
-                            <div class="field">
-                                <label for="studentId">Student ID</label>
-                                <input class="input" type="text" id="studentId" name="studentId">
+                            <input type="hidden" id="fullName" name="fullName">
+                            <input type="hidden" id="studentId" name="studentId">
+                            <div class="profile-summary">
+                                <div class="readonly-row">
+                                    <div class="readonly-label">Full Name</div>
+                                    <div id="fullNameText" class="readonly-value">Loading...</div>
+                                </div>
+                                <div class="readonly-row">
+                                    <div class="readonly-label">Student ID</div>
+                                    <div id="studentIdText" class="readonly-value">Loading...</div>
+                                </div>
                             </div>
 
                             <div class="field">
                                 <label for="email">Email</label>
-                                <input class="input" type="email" id="email" name="email" placeholder="example@student.com">
+                                <input class="input" type="email" id="email" name="email" placeholder="example@bupt.edu.cn" required>
+                                <div id="emailError" class="field-error"></div>
                             </div>
                         </div>
                     </section>
@@ -543,11 +577,6 @@
                                 <label for="skills">Skills</label>
                                 <select class="select" id="skills" name="skills">
                                     <option value="">Select skills...</option>
-                                    <option>Java</option>
-                                    <option>SQL</option>
-                                    <option>HTML/CSS</option>
-                                    <option>JavaScript</option>
-                                    <option>Git</option>
                                 </select>
                             </div>
 
@@ -614,6 +643,16 @@
     const acceptedFileExtensions = [".pdf", ".doc", ".docx"];
     let applicationSubmitted = false;
     let applicationSubmitting = false;
+    let preferredProfileSkill = "";
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#39;");
+    }
 
     function updateFileStatus(inputId, nameId, errorId, buttonId) {
         const input = document.getElementById(inputId);
@@ -703,12 +742,63 @@
         };
     }
 
+    function isEmailValid(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+    }
+
+    function setEmailError(message) {
+        const error = document.getElementById("emailError");
+        error.textContent = message || "";
+        error.style.display = message ? "block" : "none";
+    }
+
+    function splitSkills(value) {
+        return String(value || "")
+            .split(/[,;\/|]+/)
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+    function populateSkillOptions(jobs, preferredSkill) {
+        const select = document.getElementById("skills");
+        const current = preferredSkill || select.value;
+        const skills = [...new Set((jobs || []).flatMap(job => splitSkills(job.requiredSkills)))].sort((a, b) => a.localeCompare(b));
+        select.innerHTML = "<option value=\"\">Select skills...</option>"
+            + skills.map(skill => "<option value=\"" + escapeHtml(skill) + "\">" + escapeHtml(skill) + "</option>").join("");
+        if (skills.includes(current)) {
+            select.value = current;
+        }
+    }
+
+    async function loadApplicantProfile() {
+        try {
+            const profile = await api("/auth/me");
+            document.getElementById("fullName").value = profile.displayName || "";
+            document.getElementById("studentId").value = profile.identifier || "";
+            document.getElementById("email").value = profile.email || "";
+            document.getElementById("fullNameText").textContent = profile.displayName || "-";
+            document.getElementById("studentIdText").textContent = profile.identifier || "-";
+            preferredProfileSkill = profile.skills || "";
+            if (profile.resumeText && !document.getElementById("experience").value.trim()) {
+                document.getElementById("experience").value = profile.resumeText;
+            }
+        } catch (_) {
+            document.getElementById("fullNameText").textContent = "-";
+            document.getElementById("studentIdText").textContent = "-";
+        }
+    }
+
     document.getElementById("cvFile").addEventListener("change", function () {
         updateFileStatus("cvFile", "cvFileName", "cvFileError", "cvUploadBtn");
     });
 
     document.getElementById("transcriptFile").addEventListener("change", function () {
         updateFileStatus("transcriptFile", "transcriptFileName", "transcriptFileError", "transcriptUploadBtn");
+    });
+
+    document.getElementById("email").addEventListener("input", function () {
+        const email = document.getElementById("email").value.trim();
+        setEmailError(!email || isEmailValid(email) ? "" : "Please enter a valid email address.");
     });
 
     document.getElementById("applyForm").addEventListener("reset", function () {
@@ -756,6 +846,7 @@
         try {
             const jobsData = await api("/jobs?status=OPEN&page=1&size=500");
             const jobs = jobsData.items || [];
+            populateSkillOptions(jobs, preferredProfileSkill);
             const exact = jobs.find((job) => job.jobId === candidate);
             const mapped = mapLegacyIdToJobId(candidate);
             const job = exact || jobs.find((item) => item.jobId === mapped);
@@ -824,6 +915,7 @@
         document.getElementById("cvFileError").style.display = "none";
         document.getElementById("transcriptFileError").textContent = "";
         document.getElementById("transcriptFileError").style.display = "none";
+        setEmailError("");
 
         if (!fullName) {
             alert("Please enter your full name.");
@@ -836,7 +928,12 @@
         }
 
         if (!email) {
-            alert("Please enter your email.");
+            setEmailError("Email is required.");
+            return;
+        }
+
+        if (!isEmailValid(email)) {
+            setEmailError("Please enter a valid email address.");
             return;
         }
 
@@ -965,7 +1062,12 @@
         }
     }
 
-    loadJobHeader();
+    loadApplicantProfile().finally(loadJobHeader);
+
+    async function signOut() {
+        await fetch("auth/logout", {method: "POST"});
+        window.location.href = "index.jsp?login=1";
+    }
 </script>
 </body>
 </html>

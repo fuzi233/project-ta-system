@@ -44,6 +44,7 @@ public class MoScreeningServlet extends BaseServlet {
             }
 
             List<Map<String, Object>> detailedCandidates = candidates.stream()
+                    .filter(MoScreeningServlet::isVisibleToMo)
                     .map(item -> {
                         Map<String, Object> row = new LinkedHashMap<>();
                         row.put("applicationId", item.applicationId());
@@ -90,5 +91,9 @@ public class MoScreeningServlet extends BaseServlet {
         } catch (Exception e) {
             handleError(response, e);
         }
+    }
+
+    private static boolean isVisibleToMo(ApplicationRecord record) {
+        return record != null && !"WITHDRAWN".equalsIgnoreCase(record.status());
     }
 }

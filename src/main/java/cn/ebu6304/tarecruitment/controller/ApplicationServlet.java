@@ -25,6 +25,9 @@ public class ApplicationServlet extends BaseServlet {
         try {
             SessionUser current = requireRole(request, AuthSession.ROLE_TA);
             SubmitApplicationRequest payload = readSubmitRequest(request);
+            if (payload.email() != null && !payload.email().isBlank() && !cn.ebu6304.tarecruitment.common.AuthValidators.isEmail(payload.email().trim())) {
+                throw new cn.ebu6304.tarecruitment.common.ValidationException("Email format is invalid");
+            }
             syncApplicantProfile(current.userId(), payload);
             ApplicationService.SubmitResponse submitResponse = appContext.applicationService().submitApplication(
                     payload.applicationId(),
@@ -55,7 +58,24 @@ public class ApplicationServlet extends BaseServlet {
                     "page", page,
                     "size", size,
                     "count", items.size(),
-                    "items", items
+                    "items", items.stream().map(this::toApplicationResponse).toList()
+            ));
+        } catch (Exception e) {
+            handleError(response, e);
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            SessionUser current = requireRole(request, AuthSession.ROLE_TA);
+            String applicationId = request.getParameter("applicationId");
+            ApplicationService.UpdateStatusResponse result =
+                    appContext.applicationService().withdrawOwnApplication(applicationId, current.userId());
+            writeJson(response, 200, Map.of(
+                    "message", "Application withdrawn",
+                    "updated", result.updated(),
+                    "record", toApplicationResponse(result.record())
             ));
         } catch (Exception e) {
             handleError(response, e);
@@ -136,6 +156,21 @@ public class ApplicationServlet extends BaseServlet {
         item.put("sizeBytes", record.sizeBytes());
         item.put("uploadedAt", record.uploadedAt());
         item.put("hasExtractedText", record.extractedText() != null && !record.extractedText().isBlank());
+        return item;
+    }
+
+    private Map<String, Object> toApplicationResponse(ApplicationRecord record) {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("applicationId", record.applicationId());
+        item.put("applicantId", record.applicantId());
+        item.put("jobId", record.jobId());
+        item.put("status", record.status());
+        item.put("submittedAt", record.submittedAt());
+        item.put("attachments", appContext.attachmentService()
+                .listByApplicationId(record.applicationId())
+                .stream()
+                .map(this::toAttachmentResponse)
+                .toList());
         return item;
     }
 

@@ -133,7 +133,7 @@
 <div class="bg-orb orb-a"></div>
 <div class="bg-orb orb-b"></div>
 <main class="shell">
-    <a class="link" href="index.jsp">&larr; Exit</a>
+    <a class="link" href="javascript:void(0)" onclick="signOut()">Sign Out</a>
 
     <section class="glass card">
         <h1>HR Candidate Review Workspace</h1>
@@ -207,6 +207,12 @@
         </div>
     </section>
 </main>
+<script>
+    async function signOut() {
+        await fetch("auth/logout", {method: "POST"});
+        window.location.href = "index.jsp?login=1";
+    }
+</script>
 <script src="assets/js/app.js?v=5"></script>
 </body>
 </html>

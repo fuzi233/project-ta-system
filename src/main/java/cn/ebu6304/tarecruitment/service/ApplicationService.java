@@ -119,6 +119,21 @@ public class ApplicationService {
         return new UpdateStatusResponse(true, updated_record);
     }
 
+    public UpdateStatusResponse withdrawOwnApplication(String applicationId, String applicantId) {
+        String normalizedAppId = Validators.requireNonBlank(applicationId, "applicationId");
+        String normalizedApplicant = Validators.requireNonBlank(applicantId, "applicantId");
+        ApplicationRecord existing = applicationRepository.findByApplicationId(normalizedAppId)
+                .orElseThrow(() -> new ApiException(404, "Application not found for applicationId=" + normalizedAppId));
+        if (!existing.applicantId().equals(normalizedApplicant)) {
+            throw new ApiException(403, "TA can only withdraw own applications");
+        }
+        String status = existing.status() == null ? "" : existing.status().toUpperCase();
+        if ("ACCEPTED".equals(status) || "REJECTED".equals(status) || "WITHDRAWN".equals(status)) {
+            throw new ApiException(400, "Only active pending applications can be withdrawn");
+        }
+        return updateStatus(normalizedAppId, "WITHDRAWN");
+    }
+
     public Optional<ApplicationRecord> findByApplicationId(String applicationId) {
         String normalizedAppId = Validators.requireNonBlank(applicationId, "applicationId");
         return applicationRepository.findByApplicationId(normalizedAppId);

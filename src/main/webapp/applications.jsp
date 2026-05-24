@@ -280,6 +280,7 @@
             display: flex;
             gap: 12px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -305,9 +306,78 @@
         }
 
         .action-btn.withdraw {
-            background: linear-gradient(135deg, #1575ff, #0094ff 55%, #00b7a5);
-            color: #fff;
-            border: none;
+            background: #fff7f7;
+            color: #9a4a4a;
+            border-color: #e8c4c4;
+        }
+
+        .action-btn:disabled {
+            background: #d8e1ef;
+            border-color: #d8e1ef;
+            color: #7a8aa3;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .application-detail {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            border: 1px solid #d6e4ff;
+            border-radius: 14px;
+            background: #f8fbff;
+            color: #16315b;
+        }
+
+        .application-detail.show {
+            display: block;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .detail-item {
+            padding: 10px 12px;
+            border: 1px solid #dbe8ff;
+            border-radius: 11px;
+            background: #fff;
+        }
+
+        .detail-label {
+            margin-bottom: 4px;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            color: #16315b;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .attachment-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            padding: 10px 12px;
+            border: 1px solid #dbe8ff;
+            border-radius: 11px;
+            background: #fff;
+            margin-top: 8px;
+        }
+
+        .attachment-row a {
+            color: #1575ff;
+            font-weight: 800;
+            text-decoration: none;
         }
 
         .pagination {
@@ -423,7 +493,6 @@
 <div class="bg-orb orb-a"></div>
 <div class="bg-orb orb-b"></div>
 <div class="page">
-    <a class="link" href="index.jsp">&larr; Exit</a>
     <div class="shell">
         <header class="topbar">
             <div class="brand">TA Recruitment System</div>
@@ -431,6 +500,7 @@
                 <a href="jobs.jsp">Job List</a>
                 <a href="applications.jsp" class="active">My Applications</a>
                 <a href="profile.jsp">Profile</a>
+                <a href="javascript:void(0)" onclick="signOut()">Sign Out</a>
             </nav>
         </header>
 
@@ -455,6 +525,9 @@
                     </button>
                     <button id="filterRejected" class="filter-btn" type="button">
                         Rejected <span id="countRejected" class="badge-count">0</span>
+                    </button>
+                    <button id="filterWithdrawn" class="filter-btn" type="button">
+                        Withdrawn <span id="countWithdrawn" class="badge-count">0</span>
                     </button>
                 </div>
 
@@ -493,17 +566,20 @@
         SUBMITTED: "pending",
         INTERVIEWED: "pending",
         ACCEPTED: "accepted",
-        REJECTED: "rejected"
+        REJECTED: "rejected",
+        WITHDRAWN: "rejected"
     };
     const statusLabelMap = {
         SUBMITTED: "Pending",
         INTERVIEWED: "Interviewed",
         ACCEPTED: "Accepted",
-        REJECTED: "Rejected"
+        REJECTED: "Rejected",
+        WITHDRAWN: "Withdrawn"
     };
     const statusNoteMap = {
         SUBMITTED: "Waiting for review",
-        INTERVIEWED: "Interview completed"
+        INTERVIEWED: "Interview completed",
+        WITHDRAWN: "Withdrawn by applicant"
     };
 
     const applicationListEl = document.getElementById("applicationList");
@@ -514,12 +590,14 @@
         pending: document.getElementById("countPending"),
         accepted: document.getElementById("countAccepted"),
         rejected: document.getElementById("countRejected")
+        ,withdrawn: document.getElementById("countWithdrawn")
     };
     const filterButtons = {
         all: document.getElementById("filterAll"),
         pending: document.getElementById("filterPending"),
         accepted: document.getElementById("filterAccepted"),
-        rejected: document.getElementById("filterRejected")
+        rejected: document.getElementById("filterRejected"),
+        withdrawn: document.getElementById("filterWithdrawn")
     };
 
     let applications = [];
@@ -561,6 +639,9 @@
         if (status === "REJECTED") {
             return "rejected";
         }
+        if (status === "WITHDRAWN") {
+            return "withdrawn";
+        }
         return "pending";
     }
 
@@ -568,6 +649,7 @@
         let pending = 0;
         let accepted = 0;
         let rejected = 0;
+        let withdrawn = 0;
         for (const item of applications) {
             const status = normalizeStatus(item.status);
             const bucket = toFilterBucket(status);
@@ -577,12 +659,15 @@
                 accepted++;
             } else if (bucket === "rejected") {
                 rejected++;
+            } else if (bucket === "withdrawn") {
+                withdrawn++;
             }
         }
         countEls.all.textContent = String(applications.length);
         countEls.pending.textContent = String(pending);
         countEls.accepted.textContent = String(accepted);
         countEls.rejected.textContent = String(rejected);
+        countEls.withdrawn.textContent = String(withdrawn);
     }
 
     function getVisibleApplications() {
@@ -658,14 +743,68 @@
             actions.className = "application-actions";
             const viewBtn = document.createElement("a");
             viewBtn.className = "action-btn";
-            viewBtn.href = "jobs.jsp";
-            viewBtn.textContent = "View Jobs";
+            viewBtn.href = "javascript:void(0)";
+            viewBtn.textContent = "View Detail";
             actions.appendChild(viewBtn);
+
+            const withdrawBtn = document.createElement("button");
+            withdrawBtn.className = "action-btn withdraw";
+            withdrawBtn.type = "button";
+            withdrawBtn.textContent = "Withdraw";
+            withdrawBtn.disabled = !["SUBMITTED", "INTERVIEWED"].includes(status);
+            withdrawBtn.addEventListener("click", () => withdrawApplication(item.applicationId));
+            actions.appendChild(withdrawBtn);
+
+            const detail = document.createElement("div");
+            detail.className = "application-detail";
+            const attachments = Array.isArray(item.attachments) ? item.attachments : [];
+            detail.innerHTML = ""
+                + "<div class=\"detail-grid\">"
+                + "<div class=\"detail-item\"><div class=\"detail-label\">Job ID</div><div class=\"detail-value\">" + escapeHtml(item.jobId) + "</div></div>"
+                + "<div class=\"detail-item\"><div class=\"detail-label\">Module</div><div class=\"detail-value\">" + escapeHtml(job.moduleCode || "-") + "</div></div>"
+                + "<div class=\"detail-item\"><div class=\"detail-label\">Skills</div><div class=\"detail-value\">" + escapeHtml(job.requiredSkills || "-") + "</div></div>"
+                + "<div class=\"detail-item\"><div class=\"detail-label\">Deadline</div><div class=\"detail-value\">" + escapeHtml(formatDate(job.applicationDeadline || job.createdAt)) + "</div></div>"
+                + "</div>"
+                + "<div class=\"detail-label\">Submitted Attachments</div>"
+                + (attachments.length ? attachments.map(renderAttachment).join("") : "<div class=\"attachment-row\">No attachment uploaded.</div>");
+
+            viewBtn.addEventListener("click", () => {
+                detail.classList.toggle("show");
+                viewBtn.textContent = detail.classList.contains("show") ? "Hide Detail" : "View Detail";
+            });
 
             card.appendChild(main);
             card.appendChild(actions);
+            main.appendChild(detail);
             applicationListEl.appendChild(card);
         }
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
+    function renderAttachment(attachment) {
+        const type = escapeHtml(attachment.attachmentType || "FILE");
+        const filename = escapeHtml(attachment.originalFilename || "Attachment");
+        const id = encodeURIComponent(attachment.attachmentId || "");
+        return "<div class=\"attachment-row\">"
+            + "<span><strong>" + type + "</strong> · " + filename + "</span>"
+            + "<a href=\"attachments/download?attachmentId=" + id + "\" target=\"_blank\">Open</a>"
+            + "</div>";
+    }
+
+    async function withdrawApplication(applicationId) {
+        if (!window.confirm("Withdraw this application? This action will remove it from active review.")) {
+            return;
+        }
+        await api("/applications?applicationId=" + encodeURIComponent(applicationId), {method: "DELETE"});
+        await boot();
     }
 
     function setActiveFilter(nextFilter) {
@@ -712,7 +851,13 @@
     filterButtons.pending.addEventListener("click", () => setActiveFilter("pending"));
     filterButtons.accepted.addEventListener("click", () => setActiveFilter("accepted"));
     filterButtons.rejected.addEventListener("click", () => setActiveFilter("rejected"));
+    filterButtons.withdrawn.addEventListener("click", () => setActiveFilter("withdrawn"));
     sortSelectEl.addEventListener("change", renderApplications);
+
+    async function signOut() {
+        await fetch("auth/logout", {method: "POST"});
+        window.location.href = "index.jsp?login=1";
+    }
 
     boot();
 </script>

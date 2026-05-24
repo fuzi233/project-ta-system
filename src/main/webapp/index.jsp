@@ -1,4 +1,31 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="cn.ebu6304.tarecruitment.controller.AuthSession" %>
+<%
+    String currentRole = (String) session.getAttribute(AuthSession.ATTR_ROLE);
+    String requestedRedirect = request.getParameter("redirect");
+    boolean showLogin = "1".equals(request.getParameter("login")) || requestedRedirect != null;
+    boolean hasSafeRedirect = requestedRedirect != null
+            && !requestedRedirect.startsWith("http://")
+            && !requestedRedirect.startsWith("https://")
+            && !requestedRedirect.startsWith("//")
+            && !requestedRedirect.contains("\\");
+    if (AuthSession.ROLE_TA.equalsIgnoreCase(currentRole)) {
+        response.sendRedirect(hasSafeRedirect ? requestedRedirect : "jobs.jsp");
+        return;
+    }
+    if (AuthSession.ROLE_MO.equalsIgnoreCase(currentRole)) {
+        response.sendRedirect("mo.jsp");
+        return;
+    }
+    if (AuthSession.ROLE_ADMIN.equalsIgnoreCase(currentRole)) {
+        response.sendRedirect("admin.jsp");
+        return;
+    }
+    if (!showLogin) {
+        response.sendRedirect("jobs.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1394,16 +1421,6 @@
         }
         toLoginLink.addEventListener("click", function () { switchView("login"); });
 
-        document.querySelectorAll("[data-role-register]").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                document.querySelectorAll("[data-role-register]").forEach(function (el) { el.classList.remove("active"); });
-                btn.classList.add("active");
-                registerRole.value = btn.getAttribute("data-role-register");
-                updateRegisterIdentifierUi(registerRole.value);
-                validateRegister();
-            });
-        });
-
         function setRoleButtonState(selector, attrName, role) {
             document.querySelectorAll(selector).forEach(function (btn) {
                 btn.classList.toggle("active", btn.getAttribute(attrName) === role);
@@ -1412,11 +1429,10 @@
 
         function setActiveRole(role) {
             setRoleButtonState("[data-entry-role]", "data-entry-role", role);
-            setRoleButtonState("[data-role-register]", "data-role-register", role);
             loginRole.value = role;
             registerRole.value = "TA";
             updateLoginIdentifierUi(role);
-            updateRegisterIdentifierUi("TA");
+            updateRegisterIdentifierUi();
             updateAccountLinkVisibility(role);
             validateLogin();
             validateRegister();
@@ -1484,19 +1500,14 @@
             }
         }
 
-        function updateRegisterIdentifierUi(role) {
+        function updateRegisterIdentifierUi() {
             var input = document.getElementById("registerIdentifier");
             var hint = document.getElementById("registerIdentifierHint");
             var emailHint = document.getElementById("registerEmailHint");
-            if (role === "TA") {
-                input.placeholder = "Student ID or email";
-                hint.textContent = "Example: ta001 or ta001@bupt.edu.cn";
-                emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
-            } else {
-                input.placeholder = "Student ID or email";
-                hint.textContent = "TA registration only. MO and HR accounts are created internally.";
-                emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
-            }
+            registerRole.value = "TA";
+            input.placeholder = "Student ID or email";
+            hint.textContent = "Example: ta001 or ta001@bupt.edu.cn. MO and HR accounts are created internally.";
+            emailHint.textContent = "TA registration email must end with @bupt.edu.cn";
         }
 
         function setFieldError(fieldId, errorId, message) {
@@ -1587,7 +1598,8 @@
             var name = document.getElementById("registerName").value.trim();
             var email = document.getElementById("registerEmail").value.trim();
             var identifier = document.getElementById("registerIdentifier").value.trim();
-            var role = registerRole.value;
+            var role = "TA";
+            registerRole.value = role;
             var pwd = registerPassword.value;
             var confirm = confirmPassword.value;
             var ok = true;
@@ -1610,13 +1622,7 @@
             }
 
             var identifierOk = false;
-            if (role === "TA") {
-                identifierOk = /^\d{10}$/.test(identifier) || isEmailValid(identifier);
-            } else if (role === "MO") {
-                identifierOk = /^[A-Za-z]{3}\d{4}$/.test(identifier) || isEmailValid(identifier);
-            } else if (role === "ADMIN") {
-                identifierOk = /^[A-Za-z][A-Za-z0-9_]{2,}$/.test(identifier);
-            }
+            identifierOk = /^\d{10}$/.test(identifier) || isEmailValid(identifier);
 
             if (!identifierOk) {
                 setFieldError("registerIdentifierField", "registerIdentifierError", "Identifier format does not match the selected role.");
@@ -1699,7 +1705,8 @@
                 }
                 showToast("Signed in. Redirecting...");
                 window.setTimeout(function () {
-                    window.location.href = loginResult.redirect || "index.jsp";
+                    var redirect = new URLSearchParams(window.location.search).get("redirect");
+                    window.location.href = redirect || loginResult.redirect || "index.jsp";
                 }, 420);
             } catch (_) {
                 setFieldError("loginPasswordField", "loginPasswordError", "Network error. Please try again.");
@@ -1715,7 +1722,7 @@
 
             var payload = {
                 name: document.getElementById("registerName").value.trim(),
-                role: registerRole.value,
+                role: "TA",
                 identifier: document.getElementById("registerIdentifier").value.trim(),
                 email: document.getElementById("registerEmail").value.trim(),
                 password: registerPassword.value

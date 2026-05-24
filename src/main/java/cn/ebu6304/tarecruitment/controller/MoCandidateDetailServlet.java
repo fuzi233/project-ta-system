@@ -96,14 +96,22 @@ public class MoCandidateDetailServlet extends BaseServlet {
             if (!record.jobId().equals(jobId) || !record.applicantId().equals(candidateUserId)) {
                 throw new ApiException(404, "Application does not match candidate/job");
             }
+            if (isWithdrawn(record)) {
+                throw new ApiException(404, "Candidate has withdrawn this application");
+            }
             return record;
         }
 
         List<ApplicationRecord> candidates = appContext.applicationService().listCandidatesByJob(jobId, 1, 5000);
         return candidates.stream()
                 .filter(item -> candidateUserId.equals(item.applicantId()))
+                .filter(item -> !isWithdrawn(item))
                 .max((a, b) -> Long.compare(parseEpoch(a.submittedAt()), parseEpoch(b.submittedAt())))
                 .orElseThrow(() -> new ApiException(404, "Candidate has not applied to this job"));
+    }
+
+    private static boolean isWithdrawn(ApplicationRecord record) {
+        return record != null && "WITHDRAWN".equalsIgnoreCase(record.status());
     }
 
     private static long parseEpoch(String value) {

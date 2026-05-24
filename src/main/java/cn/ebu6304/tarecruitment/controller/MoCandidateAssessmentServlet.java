@@ -29,7 +29,8 @@ public class MoCandidateAssessmentServlet extends BaseServlet {
             boolean applied = appContext.applicationService()
                     .listCandidatesByJob(jobId, 1, 5000)
                     .stream()
-                    .anyMatch(item -> candidateUserId.equals(item.applicantId()));
+                    .anyMatch(item -> candidateUserId.equals(item.applicantId())
+                            && !"WITHDRAWN".equalsIgnoreCase(item.status()));
             if (!applied) {
                 throw new ApiException(404, "Candidate has not applied to this job");
             }

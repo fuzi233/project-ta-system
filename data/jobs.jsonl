@@ -5,3 +5,5 @@
 {"jobId": "job-005", "title": "Data Analysis TA", "moduleCode": "EBU6005", "requiredSkills": "Data Analysis,Python,Excel,Statistics", "slots": 3, "status": "OPEN", "createdBy": "mo-001", "createdAt": "2026-04-10T00:00:00+00:00"}
 {"jobId":"11","title":"11","moduleCode":"111","requiredSkills":"111","slots":1111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:17.119025500+08:00"}
 {"jobId":"1","title":"11","moduleCode":"111","requiredSkills":"1111","slots":11111,"status":"OPEN","createdBy":"mo-c66e0a58","createdAt":"2026-05-22T16:40:34.234573+08:00"}
+{"jobId":"job-008","title":"HR","moduleCode":"EBU89979","requiredSkills":"C++,Java,Algorithms,communicate","slots":4,"hoursPerWeek":9,"applicationDeadline":"2026/09/29","monthlyStipend":40000000,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-05-24T07:00:26.689991+08:00"}
+{"jobId":"002","title":"111","moduleCode":"ebu6036","requiredSkills":"SQL,Python,222","slots":2,"hoursPerWeek":5,"applicationDeadline":"2026/05/21","monthlyStipend":4,"status":"OPEN","createdBy":"mo-001","createdAt":"2026-05-24T08:19:38.221427+08:00"}

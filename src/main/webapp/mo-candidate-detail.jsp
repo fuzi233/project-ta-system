@@ -154,8 +154,6 @@
 <div class="bg-orb orb-a"></div>
 <div class="bg-orb orb-b"></div>
 <main class="shell narrow">
-    <a class="link" href="index.jsp">&larr; Exit</a>
-
     <section class="glass card">
         <h1>Candidate Detail</h1>
         <p class="subtitle">View profile and trigger AI one-click summary for this job application.</p>
