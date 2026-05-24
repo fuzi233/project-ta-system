@@ -1,197 +1,141 @@
-# MO 端功能实现指南
+# MO Feature Guide
 
-## 📦 交付成果
+This guide describes the Module Organiser workspace in the current system.
 
-### 1. **API 接口** 
+## 1. Job Management
 
-#### POST /mo/jobs - 发布岗位
-```json
-Request:
-{
-  "jobId": "JOB001",
-  "title": "Teaching Assistant",
-  "moduleCode": "EBU6304",
-  "requiredSkills": "Java, Spring Boot",
-  "slots": 3,
-  "createdBy": "mo_admin"
-}
+MO users can create and edit jobs from `mo.jsp`.
 
-Response:
-{
-  "created": true,
-  "record": {
-    "jobId": "JOB001",
-    "title": "Teaching Assistant",
-    "status": "OPEN",
-    ...
-  }
-}
-```
+Fields:
 
-#### GET /mo/candidates - 筛选候选人
-```
-Query Parameters:
-- jobId (必需): 岗位ID
-- status (可选): SUBMITTED|INTERVIEWED|ACCEPTED|REJECTED
-- page (可选): 分页页码，默认1
-- size (可选): 分页大小，默认20
+- Job ID
+- Job title
+- Module code
+- Open slots
+- Required skills
+- Hours per week
+- Application deadline
+- Monthly stipend
 
-Response:
-{
-  "jobId": "JOB001",
-  "status": "SUBMITTED",
-  "page": 1,
-  "size": 20,
-  "count": 15,
-  "candidates": [
-    {
-      "applicationId": "user1-JOB001",
-      "applicantId": "user1",
-      "jobId": "JOB001",
-      "status": "SUBMITTED",
-      "submittedAt": "2026-04-07T00:00:00Z"
-    },
-    ...
-  ]
-}
-```
+Validation:
 
-#### PUT /mo/applications - 更新候选人状态
-```json
-Request:
-{
-  "applicationId": "user1-JOB001",
-  "status": "INTERVIEWED"
-}
+- Required skills cannot be empty.
+- Open slots must be positive.
+- Hours per week must not exceed `40`.
+- Application deadline cannot be in the past.
+- Monthly stipend must be positive.
 
-Response:
-{
-  "updated": true,
-  "record": {
-    "applicationId": "user1-JOB001",
-    "status": "INTERVIEWED",
-    ...
-  }
-}
-```
+Editing behavior:
 
----
+- Click `Edit` on a job card.
+- The form switches to Edit Job mode.
+- The Job ID becomes read-only.
+- Saving uses `POST /mo/jobs` with `mode: "update"`.
+- Existing applications remain attached to the same job.
 
-## 🎨 前端页面 (mo.jsp)
+## 2. Candidate Review
 
-### 功能模块
+MO users can review applications for jobs they created.
 
-1. **发布新岗位** - 创建新的招聘岗位
-   - 输入：岗位ID、标题、模块代码、所需技能、岗位数量、创建者
-   - 输出：创建结果及岗位详情
+Available filters:
 
-2. **筛选候选人** - 查看和筛选岗位的申请者
-   - 输入：岗位ID、申请状态（可选）、分页参数
-   - 输出：符合条件的候选人列表
+- All
+- Pending
+- Interviewed
+- Accepted
+- Rejected
 
-3. **更新申请状态** - 对候选人进行状态更新
-   - 输入：申请ID、新状态
-   - 输出：更新后的申请记录
+Candidate actions:
 
----
+- `Mark Interviewed`
+- `Approve`
+- `Reject`
+- `Detail`
 
-## 🔧 后端实现
+Each review action asks for confirmation before updating the application status.
 
-### 新增 Servlet
+## 3. Status Rules
 
-1. **MoScreeningServlet** (`/mo/candidates`)
-   - GET 方法：查询指定岗位的候选人
-   - 支持按状态筛选
-   - 支持分页查询
+Supported statuses:
 
-2. **MoStatusUpdateServlet** (`/mo/applications`)  
-   - PUT 方法：更新申请状态
-   - 验证申请ID和新状态
-   - 返回更新后的记录
+- `SUBMITTED`
+- `INTERVIEWED`
+- `ACCEPTED`
+- `REJECTED`
+- `WITHDRAWN`
 
-### Service 层增强
+MO-visible statuses:
 
-**ApplicationService** 新增方法：
-- `listCandidatesByJob(jobId, page, size)` - 按岗位查询候选人
-- `listCandidatesByJobAndStatus(jobId, status, page, size)` - 按岗位和状态查询
-- `getJobStats()` - 获取各岗位的申请统计
-- `getJobStatusStats(jobId)` - 获取特定岗位的状态统计
-- `updateStatus(applicationId, newStatus)` - 更新申请状态
+- `SUBMITTED`
+- `INTERVIEWED`
+- `ACCEPTED`
+- `REJECTED`
 
-### Repository 层增强
+Withdrawn applications are hidden from MO review because they are no longer active candidate records for selection.
 
-**ApplicationRepository** 新增方法：
-- `findByJobId(jobId, page, size)` - 按岗位查询申请
-- `findByJobIdAndStatus(jobId, status, page, size)` - 按岗位和状态查询
-- `countByJob()` - 统计各岗位申请数
-- `countByJobAndStatus(jobId)` - 统计特定岗位各状态数
-- `updateStatus(applicationId, newStatus)` - 更新申请状态
+## 4. Approval Limit
 
----
+The system prevents over-accepting candidates:
 
-## 📋 候选人申请状态流转
+- If `accepted count >= job slots`, additional `Approve` buttons are disabled in the UI.
+- The backend also rejects additional `ACCEPTED` updates.
 
-支持的状态值：
-- **SUBMITTED** - 已提交申请（初始状态）
-- **INTERVIEWED** - 已面试
-- **ACCEPTED** - 已录用
-- **REJECTED** - 已拒绝
+This protects data integrity even if a user bypasses the frontend.
 
----
+## 5. Candidate Detail and AI Assessment
 
-## 🧪 测试
+The `Detail` button opens a candidate detail page.
 
-运行测试套件：
+The detail page shows:
+
+- Candidate profile
+- Application status
+- Submitted time
+- Job metadata
+- Skills
+- Resume text
+- Attachments with open links
+- AI assessment area
+
+AI assessment provides:
+
+- Match overview
+- Matched skills
+- Missing skills
+- Explanation and suggestions
+
+If no OpenAI key is configured, the system uses deterministic rule-based fallback output.
+
+## 6. Main Files
+
+| Purpose | File |
+|---|---|
+| MO page | `src/main/webapp/mo.jsp` |
+| MO frontend logic | `src/main/webapp/assets/js/mo-page.js` |
+| Job create/update API | `src/main/java/cn/ebu6304/tarecruitment/controller/MoJobServlet.java` |
+| Candidate list API | `src/main/java/cn/ebu6304/tarecruitment/controller/MoScreeningServlet.java` |
+| Status update API | `src/main/java/cn/ebu6304/tarecruitment/controller/MoStatusUpdateServlet.java` |
+| Candidate detail API | `src/main/java/cn/ebu6304/tarecruitment/controller/MoCandidateDetailServlet.java` |
+| AI assessment API | `src/main/java/cn/ebu6304/tarecruitment/controller/MoCandidateAssessmentServlet.java` |
+| Job business rules | `src/main/java/cn/ebu6304/tarecruitment/service/JobService.java` |
+| Application business rules | `src/main/java/cn/ebu6304/tarecruitment/service/ApplicationService.java` |
+
+## 7. Verification
+
+Recommended commands:
+
 ```bash
-mvn test
+mvn -Dmaven.test.skip=true package
+mvn test -Dtest=JobServiceTest,ApplicationServiceTest
+node --check src/main/webapp/assets/js/mo-page.js
 ```
 
-已创建的测试类：
-- `MoScreeningServiceTest` - 覆盖MO筛选功能的单元测试
+Manual checks:
 
----
-
-## 📝 使用示例
-
-### 1. 创建岗位
-```javascript
-POST /mo/jobs
-{
-  "jobId": "TA-2026-001",
-  "title": "TA for Advanced Java",
-  "moduleCode": "CS301",
-  "requiredSkills": "Java 17+",
-  "slots": 2,
-  "createdBy": "recruiter@bupt.edu.cn"
-}
-```
-
-### 2. 查看岗位的所有申请者
-```javascript
-GET /mo/candidates?jobId=TA-2026-001
-```
-
-### 3. 查看岗位的已面试申请者
-```javascript
-GET /mo/candidates?jobId=TA-2026-001&status=INTERVIEWED
-```
-
-### 4. 更新申请状态
-```javascript
-PUT /mo/applications
-{
-  "applicationId": "user123-TA-2026-001",
-  "status": "ACCEPTED"
-}
-```
-
----
-
-## 🎯 关键特性
-
-✅ **岗位发布** - MO可快速创建新岗位  
-✅ **候选人筛选** - 支持按状态和岗位多维度筛选  
-✅ **状态管理** - 完整的申请状态生命周期管理  
-✅ **分页支持** - 高效处理大量申请记录  
-✅ **前后端一体化** - JSP前端与Servlet后端无缝集成  
-
+- Create a valid job.
+- Confirm invalid hours and past deadline are rejected.
+- Edit a job and confirm changes are saved.
+- Mark a candidate as interviewed.
+- Approve up to the slot limit.
+- Confirm further approval is blocked.
+- Withdraw an application as TA and confirm MO no longer sees it.

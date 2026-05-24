@@ -1,339 +1,103 @@
-# MO 端快速命令参考
+# Quick Start Guide
 
-## 🚀 启动应用
+This guide explains how to start the TA Recruitment System locally and verify the main TA, MO, and HR/Admin flows.
 
-```bash
-# 进入项目目录
-cd project-ta-system
+## 1. Prerequisites
 
-# 启动开发服务器（Jetty）
-mvn jetty:run
+- Java 17 or newer
+- Maven
+- A browser
+- Optional: Node.js for JavaScript syntax checking
 
-# 开浏览器访问 MO 页面
-# http://localhost:8080/mo.jsp
-```
-
----
-
-## 📡 API 调用示例
-
-### cURL 命令
-
-#### 1️⃣ 发布岗位
-```bash
-curl -X POST http://localhost:8080/mo/jobs \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jobId": "JOB001",
-    "title": "Teaching Assistant",
-    "moduleCode": "EBU6304",
-    "requiredSkills": "Java, Spring Boot",
-    "slots": 2,
-    "createdBy": "recruiter@bupt.edu.cn"
-  }'
-```
-
-#### 2️⃣ 查看岗位的所有候选人
-```bash
-curl "http://localhost:8080/mo/candidates?jobId=JOB001"
-```
-
-#### 3️⃣ 查看岗位的已面试候选人
-```bash
-curl "http://localhost:8080/mo/candidates?jobId=JOB001&status=INTERVIEWED"
-```
-
-#### 4️⃣ 使用分页查询
-```bash
-# 查询第2页，每页10条
-curl "http://localhost:8080/mo/candidates?jobId=JOB001&page=2&size=10"
-```
-
-#### 5️⃣ 更新候选人状态
-```bash
-curl -X PUT http://localhost:8080/mo/applications \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicationId": "user1-JOB001",
-    "status": "ACCEPTED"
-  }'
-```
-
----
-
-## 🧪 测试命令
+## 2. Start the Server
 
 ```bash
-# 运行所有单元测试
-mvn test
-
-# 只运行 MO 相关测试
-mvn test -Dtest=MoScreeningServiceTest
-
-# 编译检查
-mvn clean compile
-
-# 打包 WAR 文件
-mvn clean package -DskipTests
+cd /Users/ns/Documents/GRQ/project-ta-system
+mvn -Dmaven.test.skip=true jetty:run
 ```
 
----
+Open:
 
-## 📋 关键文件位置
-
-| 文件 | 路径 | 说明 |
-|------|------|------|
-| MO 页面 | `src/main/webapp/mo.jsp` | 前端界面 |
-| JavaScript | `src/main/webapp/assets/js/app.js` | 前端逻辑 |
-| 候选人筛选 Servlet | `src/main/java/.../MoScreeningServlet.java` | /mo/candidates |
-| 状态更新 Servlet | `src/main/java/.../MoStatusUpdateServlet.java` | /mo/applications |
-| 服务类 | `src/main/java/.../ApplicationService.java` | 业务逻辑 |
-| 数据层 | `src/main/java/.../ApplicationRepository.java` | 数据访问 |
-| 单元测试 | `src/test/java/.../MoScreeningServiceTest.java` | 测试用例 |
-
----
-
-## 📚 文档导航
-
-```
-项目根目录
-├── 01_MO_DELIVERY_SUMMARY.md     ← 完整交付总结
-├── DELIVERY_CHECKLIST.md         ← 交付检查清单
-├── MO_IMPLEMENTATION_SUMMARY.md  ← 实现细节
-├── docs/
-│   ├── MO_FEATURES.md           ← 功能说明
-│   └── MO_API_REFERENCE.md      ← API快速参考
-└── QUICKSTART.md                ← 本文件
+```text
+http://localhost:8080/jobs.jsp
 ```
 
----
-
-## 🔗 API 端点速查
-
-### GET /mo/candidates
-```
-参数列表：
-  ?jobId=JOB001                              (必需)
-  &status=SUBMITTED|INTERVIEWED|...         (可选)
-  &page=1                                   (可选，默认1)
-  &size=20                                  (可选，默认20)
-
-示例：
-  /mo/candidates?jobId=JOB001
-  /mo/candidates?jobId=JOB001&status=INTERVIEWED&page=1&size=10
-```
-
-### PUT /mo/applications
-```
-请求体：
-{
-  "applicationId": "string",  // 必需
-  "status": "string"          // 必需
-}
-
-示例：
-{
-  "applicationId": "user1-JOB001",
-  "status": "ACCEPTED"
-}
-```
-
-### POST /mo/jobs
-```
-请求体：
-{
-  "jobId": "string",           // 必需
-  "title": "string",           // 必需
-  "moduleCode": "string",      // 必需
-  "requiredSkills": "string",  // 必需
-  "slots": int,                // 必需
-  "createdBy": "string"        // 必需
-}
-```
-
----
-
-## 🎯 常见场景
-
-### 场景1：为新课程创建 TA 岗位并接收申请
+If port `8080` is occupied:
 
 ```bash
-# 步骤1: MO 发布岗位
-curl -X POST http://localhost:8080/mo/jobs \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jobId": "CS301-TA-2026",
-    "title": "TA for Advanced Java",
-    "moduleCode": "CS301",
-    "requiredSkills": "Java 17+, Spring Boot",
-    "slots": 3,
-    "createdBy": "mo_admin"
-  }'
-
-# 步骤2: 学生提交申请（使用 /applications 端点）
-curl -X POST http://localhost:8080/applications \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicantId": "student001",
-    "jobId": "CS301-TA-2026"
-  }'
-
-# 步骤3: MO 查看有多少申请
-curl "http://localhost:8080/mo/candidates?jobId=CS301-TA-2026"
-
-# 步骤4: MO 选出候选人进行面试
-curl -X PUT http://localhost:8080/mo/applications \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicationId": "student001-CS301-TA-2026",
-    "status": "INTERVIEWED"
-  }'
-
-# 步骤5: 查看已面试的候选人
-curl "http://localhost:8080/mo/candidates?jobId=CS301-TA-2026&status=INTERVIEWED"
-
-# 步骤6: 录用最终候选人
-curl -X PUT http://localhost:8080/mo/applications \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicationId": "student001-CS301-TA-2026",
-    "status": "ACCEPTED"
-  }'
+lsof -nP -iTCP:8080 -sTCP:LISTEN
+kill <PID>
 ```
 
----
+Then rerun the Jetty command.
 
-## 🛠️ 构建和部署
+## 3. Login Accounts
+
+| Role | Identifier | Password | Page |
+|---|---|---|---|
+| TA | `ta001` | `TaDemo@123` | `jobs.jsp` |
+| MO | `mo001` | `MoDemo@123` | `mo.jsp` |
+| HR/Admin | `hradmin` | `HrDemo@123` | `admin.jsp` |
+
+Use `http://localhost:8080/index.jsp?login=1` to sign in. Public users can browse jobs and view job detail before login.
+
+## 4. TA Demo Flow
+
+1. Open `jobs.jsp`.
+2. Browse and filter jobs without login.
+3. Click `View Detail` to inspect a job.
+4. Click `Apply`; if not logged in, sign in as TA.
+5. Fill email, skills, experience, CV, and transcript.
+6. Click `Submit Application`.
+7. Confirm the browser confirmation dialog.
+8. Confirm the submit button becomes disabled after submission.
+9. Open `My Applications`.
+10. Expand `View Detail` to view job details and submitted attachment links.
+11. Use `Withdraw` for an active application; it should move into the Withdrawn category.
+
+## 5. MO Demo Flow
+
+1. Sign in as `mo001`.
+2. Open `mo.jsp`.
+3. Create a job with these constraints:
+   - `Hours per Week` must be `1` to `40`.
+   - `Application Deadline` must not be in the past.
+   - `Open Slots` must be at least `1`.
+4. Click `Edit` on any own job card.
+5. Update title, module, slots, skills, hours, deadline, or stipend.
+6. Click `Update Job`; the edited job should refresh in the review list.
+7. Review candidates using filters: All, Pending, Interviewed, Accepted, Rejected.
+8. Use `Mark Interviewed`, `Approve`, or `Reject`.
+9. If accepted candidates already equal job slots, further `Approve` buttons are disabled and backend approval is blocked.
+10. Withdrawn TA applications should not appear in the MO candidate list.
+
+## 6. HR/Admin Demo Flow
+
+1. Sign in as `hradmin`.
+2. Open `admin.jsp`.
+3. Review candidate and job information.
+4. Run AI decision support if candidate/job data is selected.
+5. Scroll to workload dashboard.
+6. Confirm the Applicant column shows display names rather than only internal IDs.
+
+## 7. Useful Commands
 
 ```bash
-# 清理旧构建
-mvn clean
+# Build/package without compiling tests
+mvn -Dmaven.test.skip=true package
 
-# 编译源代码
-mvn compile
+# Focused service tests
+mvn test -Dtest=JobServiceTest,ApplicationServiceTest
 
-# 运行测试
-mvn test
-
-# 构建可部署包
-mvn package
-
-# 一键构建（跳过测试）
-mvn clean package -DskipTests
-
-# 启动开发服务器
-mvn jetty:run
-
-# 终止服务（Ctrl+C）
-# 在终端按 Ctrl+C
+# JavaScript syntax check
+node --check src/main/webapp/assets/js/mo-page.js
 ```
 
----
+## 8. Troubleshooting
 
-## 📊 响应示例
-
-### 成功查询候选人 (200)
-```json
-{
-  "jobId": "JOB001",
-  "status": "INTERVIEWED",
-  "page": 1,
-  "size": 20,
-  "count": 5,
-  "candidates": [
-    {
-      "applicationId": "user1-JOB001",
-      "applicantId": "user1",
-      "jobId": "JOB001",
-      "status": "INTERVIEWED",
-      "submittedAt": "2026-04-07T10:00:00Z"
-    },
-    {
-      "applicationId": "user2-JOB001",
-      "applicantId": "user2",
-      "jobId": "JOB001",
-      "status": "INTERVIEWED",
-      "submittedAt": "2026-04-07T11:00:00Z"
-    }
-  ]
-}
-```
-
-### 成功更新状态 (200)
-```json
-{
-  "updated": true,
-  "record": {
-    "applicationId": "user1-JOB001",
-    "applicantId": "user1",
-    "jobId": "JOB001",
-    "status": "ACCEPTED",
-    "submittedAt": "2026-04-07T10:00:00Z"
-  }
-}
-```
-
-### 错误响应 (400/404)
-```json
-{
-  "error": "jobId is required"
-}
-```
-
----
-
-## 💡 提示
-
-### 浏览器控制台调试
-
-在 `mo.jsp` 页面按 F12 打开开发者工具，在控制台输入：
-
-```javascript
-// 查询所有候选人
-await api('/mo/candidates?jobId=JOB001')
-  .then(d => console.table(d.candidates))
-
-// 输出漂亮的 JSON
-await api('/mo/candidates?jobId=JOB001')
-  .then(d => console.log(JSON.stringify(d, null, 2)))
-
-// 检查错误
-await api('/invalid').catch(e => console.error(e.message))
-```
-
----
-
-## 🆘 常见问题排查
-
-| 问题 | 原因 | 解决方案 |
-|------|------|--------|
-| 404 Not Found | 端点不存在 | 检查 URL 拼写，确认 Servlet 已启动 |
-| 400 Bad Request | 参数错误 | 检查必需参数是否提供，格式是否正确 |
-| 500 Server Error | 服务器异常 | 查看控制台日志，检查 JSON 格式 |
-| 访问空白页 | 页面加载失败 | 刷新浏览器，检查网络连接 |
-| 表单无响应 | JavaScript 错误 | 打开浏览器控制台查看错误信息 |
-
----
-
-## 📞 获取帮助
-
-1. **查阅文档**
-   - [完整交付总结](01_MO_DELIVERY_SUMMARY.md)
-   - [API 快速参考](docs/MO_API_REFERENCE.md)
-   - [功能说明书](docs/MO_FEATURES.md)
-
-2. **查看代码示例**
-   - [单元测试](src/test/java/cn/ebu6304/tarecruitment/service/MoScreeningServiceTest.java)
-   - [前端代码](src/main/webapp/mo.jsp)
-
-3. **运行测试**
-   ```bash
-   mvn test -Dtest=MoScreeningServiceTest
-   ```
-
----
-
-**最后更新:** 2026-04-07  
-**版本:** v0.2.0-SNAPSHOT  
-**状态:** ✅ 就绪使用
-
+- `HTTP 405` after editing a job: restart Jetty and hard-refresh the browser. The current implementation saves edits through `POST /mo/jobs` with `mode: "update"`.
+- `Address already in use`: stop the process occupying port `8080`.
+- Page redirects to login: sign in with the correct role.
+- MO sees no jobs: make sure the job was created by the same MO account.
+- AI output is unavailable: configure `OPENAI_API_KEY`, or use the built-in rule-based fallback.
+- Browser still shows old UI: use `Cmd + Shift + R` on macOS or clear cache.
