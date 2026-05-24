@@ -25,7 +25,8 @@ const state = {
 };
 
 const createJobState = {
-    selectedSkills: []
+    selectedSkills: [],
+    editingJobId: ""
 };
 
 const COMMON_SKILL_CANONICAL_ZH = {
@@ -93,6 +94,10 @@ const customSkillInputEl = document.getElementById("customSkillInput");
 const addSkillBtnEl = document.getElementById("addSkillBtn");
 const requiredSkillsInputEl = document.getElementById("requiredSkillsInput");
 const selectedSkillsEl = document.getElementById("selectedSkills");
+const jobFormTitleEl = document.getElementById("jobFormTitle");
+const jobFormHelpEl = document.getElementById("jobFormHelp");
+const jobSubmitBtnEl = document.getElementById("jobSubmitBtn");
+const cancelEditJobBtnEl = document.getElementById("cancelEditJobBtn");
 
 function switchTab(tabName) {
     const isReview = tabName === "review";
@@ -153,6 +158,17 @@ function normalizeDeadlineInput(value) {
         return "";
     }
     return year + "/" + String(month).padStart(2, "0") + "/" + String(day).padStart(2, "0");
+}
+
+function isDeadlineInPast(normalizedDeadline) {
+    const matched = (normalizedDeadline || "").match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+    if (!matched) {
+        return true;
+    }
+    const deadline = new Date(Number(matched[1]), Number(matched[2]) - 1, Number(matched[3]));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return deadline < today;
 }
 
 function setMoOutput(message, tone) {
@@ -232,6 +248,49 @@ function clearSkillBuilder() {
         customSkillInputEl.value = "";
     }
     renderSelectedSkills();
+}
+
+function setRequiredSkillsFromValue(value) {
+    createJobState.selectedSkills = [];
+    String(value || "")
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean)
+        .forEach((skill) => addRequiredSkill(skill));
+    renderSelectedSkills();
+}
+
+function setJobFormMode(job) {
+    const isEditing = Boolean(job && job.jobId);
+    createJobState.editingJobId = isEditing ? job.jobId : "";
+    jobFormTitleEl.textContent = isEditing ? "Edit Job" : "Create New Job";
+    jobFormHelpEl.textContent = isEditing
+        ? "Update this job posting. Existing applications stay attached to the same Job ID."
+        : "Create a new job posting with structured skills and workload details so the AI matching engine can score candidates more accurately.";
+    jobSubmitBtnEl.textContent = isEditing ? "Update Job" : "Create Job";
+    cancelEditJobBtnEl.style.display = isEditing ? "inline-flex" : "none";
+    document.getElementById("jobIdInput").readOnly = isEditing;
+}
+
+function startEditJob(job) {
+    switchTab("create");
+    setJobFormMode(job);
+    document.getElementById("jobIdInput").value = job.jobId || "";
+    document.getElementById("jobTitleInput").value = job.title || "";
+    document.getElementById("moduleCodeInput").value = job.moduleCode || "";
+    document.getElementById("slotsInput").value = job.slots || "";
+    document.getElementById("hoursPerWeekInput").value = job.hoursPerWeek || "";
+    document.getElementById("applicationDeadlineInput").value = job.applicationDeadline || "";
+    document.getElementById("monthlyStipendInput").value = job.monthlyStipend || "";
+    setRequiredSkillsFromValue(job.requiredSkills || "");
+    setMoOutput("Editing job " + (job.jobId || "") + ".", "");
+}
+
+function resetJobForm() {
+    moJobFormEl.reset();
+    clearSkillBuilder();
+    setJobFormMode(null);
+    setMoOutput("", "");
 }
 
 function populateCommonSkillOptions() {

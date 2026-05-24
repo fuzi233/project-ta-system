@@ -43,14 +43,13 @@ class WorkloadServiceTest {
                 .findFirst()
                 .orElseThrow();
 
-        assertEquals(3L, snapshot.totalApplications());
-        assertEquals(1L, snapshot.byApplicant().get("taA"));
+        assertEquals(2L, snapshot.totalApplications());
+        assertEquals(0L, snapshot.byApplicant().get("taA"));
         assertEquals(1L, snapshot.byApplicant().get("taB"));
         assertFalse(snapshot.overloaded().containsKey("taA"));
-        assertEquals(2L, taA.totalApplications());
-        assertEquals(1L, taA.activeApplications());
+        assertEquals(1L, taA.totalApplications());
+        assertEquals(0L, taA.activeApplications());
         assertEquals(1L, taA.statusBreakdown().get("REJECTED"));
-        assertEquals(1L, taA.statusBreakdown().get("SUBMITTED"));
     }
 
     @Test

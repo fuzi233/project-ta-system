@@ -107,6 +107,16 @@ public class ApplicationService {
             return new UpdateStatusResponse(false, existing);
         }
 
+        if ("ACCEPTED".equalsIgnoreCase(normalizedStatus)) {
+            var job = jobRepository.findByJobId(existing.jobId())
+                    .orElseThrow(() -> new ApiException(404, "Job not found for application jobId=" + existing.jobId()));
+            long acceptedCount = applicationRepository.countByJobAndStatus(existing.jobId())
+                    .getOrDefault("ACCEPTED", 0L);
+            if (acceptedCount >= job.slots()) {
+                throw new ApiException(400, "Accepted applications already reached job slots");
+            }
+        }
+
         boolean updated = applicationRepository.updateStatus(normalizedAppId, normalizedStatus);
         if (!updated) {
             throw new ApiException(500, "Failed to update status for applicationId=" + normalizedAppId);

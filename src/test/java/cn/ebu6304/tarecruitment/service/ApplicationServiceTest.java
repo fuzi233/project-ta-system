@@ -93,7 +93,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void submitWithoutExplicitIdShouldCreateDifferentRecords() throws Exception {
+    void submitWithoutExplicitIdShouldReuseExistingApplicantJobApplication() throws Exception {
         Path tempDir = Files.createTempDirectory("ta-system-auto-id");
         ObjectMapper mapper = new ObjectMapper();
 
@@ -109,9 +109,9 @@ class ApplicationServiceTest {
         ApplicationService.SubmitResponse second = service.submitApplication("", "ta001", "job-1");
 
         assertTrue(first.created());
-        assertTrue(second.created());
-        assertTrue(!first.record().applicationId().equals(second.record().applicationId()));
-        assertEquals(2, service.totalApplications());
+        assertFalse(second.created());
+        assertEquals(first.record().applicationId(), second.record().applicationId());
+        assertEquals(1, service.totalApplications());
     }
 
     @Test
@@ -132,5 +132,25 @@ class ApplicationServiceTest {
         ApplicationService.UpdateStatusResponse response = service.updateStatus("app-1", "SUBMITTED");
         assertFalse(response.updated());
         assertEquals("SUBMITTED", response.record().status());
+    }
+
+    @Test
+    void approveShouldFailWhenAcceptedCountAlreadyMatchesSlots() throws Exception {
+        Path tempDir = Files.createTempDirectory("ta-system-accepted-cap");
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonlFileStore<JobPosting> jobStore = new JsonlFileStore<>(tempDir.resolve("jobs.jsonl"), JobPosting.class, mapper);
+        JsonlFileStore<ApplicationRecord> appStore = new JsonlFileStore<>(tempDir.resolve("applications.jsonl"), ApplicationRecord.class, mapper);
+
+        JobRepository jobRepository = new JobRepository(jobStore);
+        ApplicationRepository applicationRepository = new ApplicationRepository(appStore);
+        jobRepository.createIfAbsent(new JobPosting("job-1", "Algorithms TA", "CS101", "Java", 1, "OPEN", "mo1", "2026-03-12T00:00:00Z"));
+
+        ApplicationService service = new ApplicationService(applicationRepository, jobRepository);
+        service.submitApplication("app-1", "ta001", "job-1");
+        service.submitApplication("app-2", "ta002", "job-1");
+        service.updateStatus("app-1", "ACCEPTED");
+
+        assertThrows(ApiException.class, () -> service.updateStatus("app-2", "ACCEPTED"));
     }
 }

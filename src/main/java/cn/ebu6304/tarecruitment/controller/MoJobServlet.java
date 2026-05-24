@@ -36,6 +36,31 @@ public class MoJobServlet extends BaseServlet {
         }
     }
 
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            SessionUser current = requireRole(request, AuthSession.ROLE_MO);
+            CreateJobRequest payload = readJson(request, CreateJobRequest.class);
+            JobService.UpdateJobResponse updateJobResponse = appContext.jobService().updateJob(
+                    payload.jobId(),
+                    payload.title(),
+                    payload.moduleCode(),
+                    payload.requiredSkills(),
+                    payload.slots(),
+                    payload.hoursPerWeek(),
+                    payload.applicationDeadline(),
+                    payload.monthlyStipend(),
+                    current.userId()
+            );
+            writeJson(response, 200, Map.of(
+                    "updated", updateJobResponse.updated(),
+                    "record", updateJobResponse.record()
+            ));
+        } catch (Exception e) {
+            handleError(response, e);
+        }
+    }
+
     public record CreateJobRequest(
             String jobId,
             String title,

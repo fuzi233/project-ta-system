@@ -39,6 +39,17 @@ public class JobRepository {
         return true;
     }
 
+    public synchronized boolean update(JobPosting jobPosting) {
+        String jobId = jobPosting.jobId();
+        if (findCurrentByJobId(jobId).isEmpty()) {
+            return false;
+        }
+        fileStore.append(jobPosting);
+        long nextLine = physicalLineCounter.incrementAndGet();
+        idIndex.put(jobId, nextLine);
+        return true;
+    }
+
     public synchronized boolean existsOpenJob(String jobId) {
         return findCurrentByJobId(jobId)
                 .map(job -> "OPEN".equalsIgnoreCase(job.status()))

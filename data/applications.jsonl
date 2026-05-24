@@ -59,3 +59,16 @@
 {"applicationId":"app-f021f65e","applicantId":"ta-001","jobId":"002","status":"SUBMITTED","submittedAt":"2026-05-24T18:52:55.403634+08:00"}
 {"applicationId":"app-fd2494ea","applicantId":"ta-001","jobId":"job-008","status":"WITHDRAWN","submittedAt":"2026-05-24T08:10:29.880652+08:00"}
 {"applicationId":"app-f021f65e","applicantId":"ta-001","jobId":"002","status":"WITHDRAWN","submittedAt":"2026-05-24T18:52:55.403634+08:00"}
+{"applicationId":"app-3f64474c","applicantId":"ta-001","jobId":"job-404","status":"SUBMITTED","submittedAt":"2026-05-24T21:27:01.620601+08:00"}
+{"applicationId":"app-3f64474c","applicantId":"ta-001","jobId":"job-404","status":"ACCEPTED","submittedAt":"2026-05-24T21:27:01.620601+08:00"}
+{"applicationId":"app-7d5ed319","applicantId":"ta-c2fb6573","jobId":"job-404","status":"SUBMITTED","submittedAt":"2026-05-24T21:40:35.987345+08:00"}
+{"applicationId":"app-7d5ed319","applicantId":"ta-c2fb6573","jobId":"job-404","status":"INTERVIEWED","submittedAt":"2026-05-24T21:40:35.987345+08:00"}
+{"applicationId":"app-7d5ed319","applicantId":"ta-c2fb6573","jobId":"job-404","status":"REJECTED","submittedAt":"2026-05-24T21:40:35.987345+08:00"}
+{"applicationId":"app-93330b08","applicantId":"ta-c2fb6573","jobId":"job-88","status":"SUBMITTED","submittedAt":"2026-05-24T22:06:30.607234+08:00"}
+{"applicationId":"app-93330b08","applicantId":"ta-c2fb6573","jobId":"job-88","status":"ACCEPTED","submittedAt":"2026-05-24T22:06:30.607234+08:00"}
+{"applicationId":"app-558954f1","applicantId":"ta-001","jobId":"job-88","status":"SUBMITTED","submittedAt":"2026-05-24T22:08:28.862994+08:00"}
+{"applicationId":"app-558954f1","applicantId":"ta-001","jobId":"job-88","status":"ACCEPTED","submittedAt":"2026-05-24T22:08:28.862994+08:00"}
+{"applicationId":"app-cc48d2b9","applicantId":"ta-001","jobId":"job-000","status":"SUBMITTED","submittedAt":"2026-05-24T22:30:45.283954+08:00"}
+{"applicationId":"app-494d7acb","applicantId":"ta-c2fb6573","jobId":"job-000","status":"SUBMITTED","submittedAt":"2026-05-24T22:31:28.110865+08:00"}
+{"applicationId":"app-494d7acb","applicantId":"ta-c2fb6573","jobId":"job-000","status":"ACCEPTED","submittedAt":"2026-05-24T22:31:28.110865+08:00"}
+{"applicationId":"app-cc48d2b9","applicantId":"ta-001","jobId":"job-000","status":"ACCEPTED","submittedAt":"2026-05-24T22:30:45.283954+08:00"}

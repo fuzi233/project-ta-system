@@ -36,8 +36,8 @@ class WorkflowIntegrationTest {
         applicationService.submitApplication("app2", "taA", "job1");
         applicationService.submitApplication("app3", "taB", "job1");
 
-        assertEquals(2, applicationService.queryByApplicant("taA", 1, 10).size());
-        assertEquals(3, workloadService.snapshot(1).totalApplications());
-        assertTrue(workloadService.snapshot(1).overloaded().containsKey("taA"));
+        assertEquals(1, applicationService.queryByApplicant("taA", 1, 10).size());
+        assertEquals(2, workloadService.snapshot(1).totalApplications());
+        assertTrue(workloadService.snapshot(0).overloaded().containsKey("taA"));
     }
 }

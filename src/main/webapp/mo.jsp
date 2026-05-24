@@ -412,8 +412,8 @@
         </div>
 
         <div id="panelCreate" class="mo-panel">
-            <h2>Create New Job</h2>
-            <p class="create-help">Create a new job posting with structured skills and workload details so the AI matching engine can score candidates more accurately.</p>
+            <h2 id="jobFormTitle">Create New Job</h2>
+            <p id="jobFormHelp" class="create-help">Create a new job posting with structured skills and workload details so the AI matching engine can score candidates more accurately.</p>
             <form id="mo-job-form" class="stack-form">
                 <div class="create-form-grid">
                     <div>
@@ -458,7 +458,7 @@
 
                     <div>
                         <label class="field-label" for="hoursPerWeekInput">Hours per Week</label>
-                        <input id="hoursPerWeekInput" type="number" name="hoursPerWeek" placeholder="e.g. 8" min="1" required/>
+                        <input id="hoursPerWeekInput" type="number" name="hoursPerWeek" placeholder="e.g. 8" min="1" max="40" required/>
                     </div>
                     <div>
                         <label class="field-label" for="applicationDeadlineInput">Application Deadline</label>
@@ -469,7 +469,8 @@
                         <input id="monthlyStipendInput" type="number" name="monthlyStipend" placeholder="e.g. 2500" min="1" required/>
                     </div>
                     <div class="full-span">
-                        <button class="btn" type="submit">Create Job</button>
+                        <button id="jobSubmitBtn" class="btn" type="submit">Create Job</button>
+                        <button id="cancelEditJobBtn" class="btn ghost" type="button" style="display:none;">Cancel Edit</button>
                     </div>
                 </div>
             </form>
